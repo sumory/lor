@@ -1,12 +1,10 @@
 #!/usr/bin/env luajit
 
-local FRAMEWORK_PATH = '/data/tmp/lua_framework/lor/?.lua;/data/tmp/lua_framework/lor/?/init.lua'
-package.path = './?.lua;' .. FRAMEWORK_PATH  .. package.path 
-
+package.path = './?.lua;' .. package.path
 local sys_config = require 'lor.scaffold.config'
 local lor = require 'lor.scaffold.lor'
-local utils = require 'lor.lib.utils'
 local generator = require 'lor.scaffold.generator'
+local utils = require 'lor.lib.utils'
 
 -- LOR_CONTEXT should be the only global app variable.
 LOR_CONTEXT = {

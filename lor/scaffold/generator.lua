@@ -106,30 +106,36 @@ body {
     font: 400 14px/1.6 "Open Sans",sans-serif;
     color: #555;
 }
+
+.lor {
+    margin: 100px auto;
+    width: 800px;
+}
+
 .name {
     display: block;
     font: 100 4.5em "Helvetica Neue","Open Sans",sans-serif;
-    color: #353535;
     margin-bottom: 0.25em;
 }
+
 a {
     color: #259DFF;
     text-decoration: none;
 }
 
 .description {
-    position: relative;
-    top: -5px;
-    font: 100 4.2em/0.75 "Helvetica Neue","Open Sans",sans-serif;
-    color: #AEAEAE;
+  position: relative;
+  top: -5px;
+  font: 100 3em "Helvetica Neue","Open Sans",sans-serif;
+  color: #AEAEAE;
 }
 </style>
 <body>
 
-
-<a href="/" class="name">{{name}}</a>
+<div class="lor">
+<a href="https://github.com/sumory/lor" class="name">{{name}}</a>
 <span class="description">{{desc}}</span>
-
+</div>
 </body>
 </html>
 ]]
@@ -210,10 +216,8 @@ return UserService
 
 local application_conf = [[
 local Appconf={}
-Appconf.name = '{{APP_NAME}}'
+Appconf.name = 'test_lor'
 
-Appconf.route='lor.framework.routes.simple'
-Appconf.bootstrap='application.bootstrap'
 Appconf.app={}
 Appconf.app.root='./'
 
@@ -223,7 +227,6 @@ Appconf.controller.path=Appconf.app.root .. 'application/controllers/'
 Appconf.view={}
 Appconf.view.path=Appconf.app.root .. 'application/views/'
 Appconf.view.suffix='.html'
-Appconf.view.auto_render=true
 
 return Appconf
 ]]

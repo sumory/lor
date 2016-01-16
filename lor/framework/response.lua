@@ -1,14 +1,8 @@
 local setmetatable = setmetatable
-local json = require("cjson")
+local lor_conf = require 'lor.config'
+local json = require 'cjson'
 
 local function json_encode( data, empty_table_as_object )
-  --Lua的数据类型里面，array和dict是同一个东西。对应到json encode的时候，就会有不同的判断
-  --对于linux，我们用的是cjson库：A Lua table with only positive integer keys of type number will be encoded as a JSON array. All other tables will be encoded as a JSON object.
-  --cjson对于空的table，就会被处理为object，也就是{}
-  --dkjson默认对空table会处理为array，也就是[]
-  --处理方法：对于cjson，使用encode_empty_table_as_object这个方法。文档里面没有，看源码
-  --对于dkjson，需要设置meta信息。local a= {}；a.s = {};a.b='中文';setmetatable(a.s,  { __jsontype = 'object' });ngx.say(comm.json_encode(a))
-
     local json_value = nil
     if json.encode_empty_table_as_object then
         json.encode_empty_table_as_object(empty_table_as_object or false) -- 空的table默认为array
@@ -24,7 +18,7 @@ end
 local Response = {}
 
 function Response:new()
-    --ngx.header['Content_type'] = 'text/html; charset=UTF-8'
+    ngx.header['X-Powered-By'] = 'lor ' .. lor_conf.version
     ngx.status = ngx.HTTP_OK
     local instance = {
         headers = {},
@@ -36,6 +30,7 @@ function Response:new()
     return instance
 end
 
+-- todo: optimize-compile before used
 function Response:render(view_file, data)
     self:setHeader('Content-Type', 'text/html; charset=UTF-8') 
     local body = self.view:render(view_file, data)

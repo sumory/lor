@@ -21,9 +21,8 @@ function Request:new()
         req_uri = ngx.var.request_uri,
         req_args = ngx.var.args,
 
-        path = { -- path variables
+        path = { -- path variables, init when `route`
             params = {
-
             }
         },
         query = query,
