@@ -27,7 +27,7 @@ echo "if [ \"\$1\" == \"--path\" ] " >> tmp_lor_bin #space should be @ both side
 echo "then " >> tmp_lor_bin
 echo "echo \"\$LOR_PACKAGE_PATH\" " >> tmp_lor_bin
 echo "else" >> tmp_lor_bin
-echo "exec 'luajit' -e 'package.path=\"$PACKAGE_PATH/?.lua;$PACKAGE_PATH/?/init.lua\"; package.cpath=\"$PACKAGE_PATH/lor/?.so\"' '$PACKAGE_PATH/lor/bin/lor' \"\$@\"">>tmp_lor_bin
+echo "exec 'luajit' -e 'package.path=\"$PACKAGE_PATH/?.lua;$PACKAGE_PATH/?/init.lua\"; package.cpath=\"$PACKAGE_PATH/?.so\"' '$PACKAGE_PATH/lor/bin/lor' \"\$@\"">>tmp_lor_bin
 echo "fi ">> tmp_lor_bin
 
 mv tmp_lor_bin $LOR_PATH/lor
