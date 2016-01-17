@@ -4,13 +4,13 @@ local Layer = require("lor.lib.router.layer")
 
 -- table 是否是数组
 local function table_is_array(t)
-  if type(t) ~= "table" then return false end
-  local i = 0
-  for _ in pairs(t) do
-    i = i + 1
-    if t[i] == nil then return false end
-  end
-  return true
+    if type(t) ~= "table" then return false end
+    local i = 0
+    for _ in pairs(t) do
+        i = i + 1
+        if t[i] == nil then return false end
+    end
+    return true
 end
 
 -- get pathname of request
@@ -24,25 +24,25 @@ local function matchLayer(layer, path)
 end
 
 local function mixin(a, b)
-  if a and b then
-    for k,v in pairs(b) do
-      a[k] = b[k]
-  	end  
-  end
+    if a and b then
+        for k,v in pairs(b) do
+        a[k] = b[k]
+        end  
+    end
 
-  return a
+    return a
 end
 
 -- todo: merge params with parent params
 -- a 填充到 b
 local function mergeParams(params, parent)
-	if not parent then
-		return params
-	end
+    if not parent then
+        return params
+    end
 
-	local obj = mixin({}, parent)
+    local obj = mixin({}, parent)
 
-	return mixin(obj, params)
+    return mixin(obj, params)
 end
 
 
@@ -52,20 +52,20 @@ end
 -- restore obj props after function
 -- local done = restore(out, req, 'baseUrl', 'next', 'params')
 local function restore(fn, obj)
-	local vals = {
-		baseUrl = obj['baseUrl'],
-		next = obj['next'],
-		params =  obj['params']
-	}
+    local vals = {
+        baseUrl = obj['baseUrl'],
+        next = obj['next'],
+        params =  obj['params']
+    }
 
-	return function(err)
-		obj['baseUrl'] = vals.baseUrl
-		obj['next'] = vals.next
-		obj['params'] = vals.params
+    return function(err)
+        obj['baseUrl'] = vals.baseUrl
+        obj['next'] = vals.next
+        obj['params'] = vals.params
 
-		fn(err) -- 继续调用fn函数
-		return
-	end
+        fn(err) -- 继续调用fn函数
+        return
+    end
 end
 
 
@@ -73,313 +73,313 @@ local proto = {}
 
 
 function proto:new(options)
-	local opts = options or {}
-	
-	local router = {}
-	router.params = {}
-	router._params = {} --array
-	router.caseSensitive = opts.caseSensitive
-	router.mergeParams = opts.mergeParams
-	router.strict = opts.strict
-	router.stack = {} --array
+    local opts = options or {}
+    
+    local router = {}
+    router.params = {}
+    router._params = {} --array
+    router.caseSensitive = opts.caseSensitive
+    router.mergeParams = opts.mergeParams
+    router.strict = opts.strict
+    router.stack = {} --array
 
-	self:init()
-	setmetatable(router, {__index = self})
+    self:init()
+    setmetatable(router, {__index = self})
 
-	return router
+    return router
 end
 
 -- Dispatch a req, res into the router.
 function proto:handle(req, res, out)
-	local urlIndexOf, tmp = string.find(req.url, "?")
+    local urlIndexOf, tmp = string.find(req.url, "?")
 
-	local pathLength
-	if urlIndexOf then pathLength = urlIndexOf-1 else pathLength = req.url:len()
+    local pathLength
+    if urlIndexOf then pathLength = urlIndexOf-1 else pathLength = req.url:len()
 
-	local fqdn 
-	if string.sub(req.url, 1,1)!='/' then 
-		fqdn = 1 + string.find( string.sub(req.url, 1, pathLength), "://")
-	end
+    local fqdn 
+    if string.sub(req.url, 1,1)!='/' then 
+        fqdn = 1 + string.find( string.sub(req.url, 1, pathLength), "://")
+    end
 
-	local protohost 
-	if fqdn then 
-		local tt = string.find(req.url, "/", 2+fqdn)
-		protohost = string.sub(req.url, 1, tt)
-	else
-		protohost = ""
-	end
+    local protohost 
+    if fqdn then 
+        local tt = string.find(req.url, "/", 2+fqdn)
+        protohost = string.sub(req.url, 1, tt)
+    else
+        protohost = ""
+    end
 
-	local idx = 0
-	local removed = ""
-	local slashAdded = false
-	local paramcalled ={}
+    local idx = 0
+    local removed = ""
+    local slashAdded = false
+    local paramcalled ={}
 
-  	-- middleware and routes
-	local stack = self.stack
+    -- middleware and routes
+    local stack = self.stack
 
-	-- manage inter-router variables
-	local parentParams = req.params
-	local parentUrl = req.baseUrl or ''
-	local done = restore(out, req)
+    -- manage inter-router variables
+    local parentParams = req.params
+    local parentUrl = req.baseUrl or ''
+    local done = restore(out, req)
 
-	-- setup next layer
-	req.next = next
+    -- setup next layer
+    req.next = next
 
-	--setup basic req values
-  	req.baseUrl = parentUrl
-  	req.originalUrl = req.originalUrl or req.url
+    --setup basic req values
+    req.baseUrl = parentUrl
+    req.originalUrl = req.originalUrl or req.url
 
-  	next()
+    next()
 
-  	local next = function(err)
-  		local layerError
-  		if err == 'route' then layerError = nil else layerError = err end
+    local next = function(err)
+        local layerError
+        if err == 'route' then layerError = nil else layerError = err end
 
-  		if slashAdded then
-  			req.url = string.sub(req.url, 2) -- 去除/
-  			slashAdded = false
-  		end
+        if slashAdded then
+            req.url = string.sub(req.url, 2) -- 去除/
+            slashAdded = false
+        end
 
-		-- restore altered req.url
-  		if string.len(removed) != 0 then
-  			req.baseUrl = parentUrl
-  			req.url = protohost .. removed .. string.sub(req.url, string.len(protohost)+1)
-  			removed = ''
-  		end
+        -- restore altered req.url
+        if string.len(removed) != 0 then
+            req.baseUrl = parentUrl
+            req.url = protohost .. removed .. string.sub(req.url, string.len(protohost)+1)
+            removed = ''
+        end
 
-  		-- no more matching layers
-  		if idx >= #stack then
-  			done(layerError)
-  			return
-  		end
+        -- no more matching layers
+        if idx >= #stack then
+            done(layerError)
+            return
+        end
 
-  		-- get pathname of request
-  		local path = getPathname(req)
+        -- get pathname of request
+        local path = getPathname(req)
 
-  		if not path then
-  			done(layerError)
-  			return 
-  		end
+        if not path then
+            done(layerError)
+            return 
+        end
 
 
-  		-- find next matching layer
-  		local layer, match, route
+        -- find next matching layer
+        local layer, match, route
 
-  		while not math and idx < #stack do
-  			idx = idx + 1
-  			layer = stack[idx]
-  			match = mathchLayer(layer, path)
-  			route = layer.route
+        while not math and idx < #stack do
+            idx = idx + 1
+            layer = stack[idx]
+            match = mathchLayer(layer, path)
+            route = layer.route
 
-  			if type(match) != 'boolean' then
-  				layerError = layerError or match
-  			end
+            if type(match) != 'boolean' then
+                layerError = layerError or match
+            end
 
-  			if not match then
-  				-- to continue
-  			else
-  				if not route then
-  					-- to continue
-  				else
-  					if layerError then
-  						match = false
-  						-- to continue
-  					else
+            if not match then
+                -- to continue
+            else
+                if not route then
+                    -- to continue
+                else
+                    if layerError then
+                        match = false
+                        -- to continue
+                    else
 
-  						local method = req.method
-  						local has_method = route._handles_method(method)
+                        local method = req.method
+                        local has_method = route._handles_method(method)
 
-  						-- build up automatic options response
+                        -- build up automatic options response
 
-  						-- don't even bother matching route
-  						if not has_method and method != "HEAD" then
-  							match = false
-  							-- to continue
-  						end
+                        -- don't even bother matching route
+                        if not has_method and method != "HEAD" then
+                            match = false
+                            -- to continue
+                        end
 
-  					end
-  				end
-  			end
-  		end
+                    end
+                end
+            end
+        end
 
-  		-- no match
-  		if not match then
-  			done(layerError)
-  			return
-  		end
+        -- no match
+        if not match then
+            done(layerError)
+            return
+        end
 
-  		-- store route for dispatch on change
-  		if route then
-  			req.route = route
-  		end
+        -- store route for dispatch on change
+        if route then
+            req.route = route
+        end
 
-  		if self.mergeParams then 
-  			req.params = mergeParams(layer.params, parentParams)
-  		else
-  			req.params = layer.params
-  		end
+        if self.mergeParams then 
+            req.params = mergeParams(layer.params, parentParams)
+        else
+            req.params = layer.params
+        end
 
-  		local layerPath = layer.path
+        local layerPath = layer.path
 
-  		self:process_params(layer, paramcalled, req, res, function (err) 
-  			if err then
-  				next(layerError or err)
-  				return
-  			end
+        self:process_params(layer, paramcalled, req, res, function (err) 
+            if err then
+                next(layerError or err)
+                return
+            end
 
-  			if route then
-  				layer.handle_request(req, res, next)
-  			end
+            if route then
+                layer.handle_request(req, res, next)
+            end
 
-  			trim_prefix(layer, layerError, layerPath, path)
-  		end)
-  	end 
-  	-- end of next function
+            trim_prefix(layer, layerError, layerPath, path)
+        end)
+    end 
+    -- end of next function
 
-  	local trim_prefix = function(layer, layerError, layerPath, path)
-  		local c = string.find(path, string.len(layerPath) + 1)
+    local trim_prefix = function(layer, layerError, layerPath, path)
+        local c = string.find(path, string.len(layerPath) + 1)
 
-  		if c and c!='/' and c!='.' then
-  			next(layerError)
-  			return
-  		end
+        if c and c!='/' and c!='.' then
+            next(layerError)
+            return
+        end
 
-  		if string.len(layerPath)!=0 then
-  			print('trim prefix '.. layerPath ..' from url ' .. req.url)
-  			removed = layerPath
-  			req.url = protohost + string.sub(req.url, string.len(protohost)+string.len(removed))
+        if string.len(layerPath)!=0 then
+            print('trim prefix '.. layerPath ..' from url ' .. req.url)
+            removed = layerPath
+            req.url = protohost + string.sub(req.url, string.len(protohost)+string.len(removed))
 
-  			-- Ensure leading slash
-  			if not fqdn && string.sub(req.url,1) != '/' then
-  				req.url = '/' .. req.url
-  				slashAdded = true
-  			end
+            -- Ensure leading slash
+            if not fqdn && string.sub(req.url,1) != '/' then
+                req.url = '/' .. req.url
+                slashAdded = true
+            end
 
-  			-- Setup base URL (no trailing slash)
-  			if string.sub(removed, string.len(removed)) == '/' then
-  				req.baseUrl = parentUrl .. string.sub(removed, 1, string.len(removed))
-  			else
-  				req.baseUrl = parentUrl .. removed
-  			end
-  		end
+            -- Setup base URL (no trailing slash)
+            if string.sub(removed, string.len(removed)) == '/' then
+                req.baseUrl = parentUrl .. string.sub(removed, 1, string.len(removed))
+            else
+                req.baseUrl = parentUrl .. removed
+            end
+        end
 
-  		print(layer.name .. ' ' .. layerPath .. ' :'.. req.originalUrl)
+        print(layer.name .. ' ' .. layerPath .. ' :'.. req.originalUrl)
 
-  		if layerError then
-  			layer.handle_error(layerError, req, res, next)
-  		else
-  			layer.handle_request(req, res, next)
-  		end
-  	end
-  	-- end of trim_prefix function
+        if layerError then
+            layer.handle_error(layerError, req, res, next)
+        else
+            layer.handle_request(req, res, next)
+        end
+    end
+    -- end of trim_prefix function
 
 end
 
 -- Process any parameters for the layer.
 function proto:process_params(layer, called, req, res, done) 
-	local params = self.params
+    local params = self.params
 
-	-- captured parameters from the layer, keys and values
-	local keys = layer.keys
+    -- captured parameters from the layer, keys and values
+    local keys = layer.keys
 
-	-- fast track
-	if not keys or #keys == 0 then
-		done()
-		return
-	end
+    -- fast track
+    if not keys or #keys == 0 then
+        done()
+        return
+    end
 
-	local i = 0
-	local name
-	local paramIndex = 0
-	local key
-	local paramVal
-	local paramCallbacks
-	local paramCalled
+    local i = 0
+    local name
+    local paramIndex = 0
+    local key
+    local paramVal
+    local paramCallbacks
+    local paramCalled
 
-	-- process params in order
-	-- param callbacks can be async
-	local param = function(err)
-		if err then
-			done(err)
-			return
-		end
+    -- process params in order
+    -- param callbacks can be async
+    local param = function(err)
+        if err then
+            done(err)
+            return
+        end
 
-		if i >= #keys then
-			done()
-			return
-		end
+        if i >= #keys then
+            done()
+            return
+        end
 
-		paramIndex = 0
-		i = i + 1
-		key = keys[i]
+        paramIndex = 0
+        i = i + 1
+        key = keys[i]
 
-		if not key then
-			done()
-			return
-		end
+        if not key then
+            done()
+            return
+        end
 
-		name = key.name
-		paramVal = req.params[name]
-		paramCallbacks = params[name]
-		paramCalled = called[name]
+        name = key.name
+        paramVal = req.params[name]
+        paramCallbacks = params[name]
+        paramCalled = called[name]
 
-		if not paramVal or not paramCallbacks then
-			param()
-			return
-		end
+        if not paramVal or not paramCallbacks then
+            param()
+            return
+        end
 
-		-- param previously called with same value or error occurred
-		if paramCalled and (paramCalled.match == paramVal or (paramCalled.error and paramCalled.error != 'route')) then
-			-- restore value
-			req.params[name] = paramCalled.value
-			-- next param
-			param(paramCalled.error)
-			return
-		end
+        -- param previously called with same value or error occurred
+        if paramCalled and (paramCalled.match == paramVal or (paramCalled.error and paramCalled.error != 'route')) then
+            -- restore value
+            req.params[name] = paramCalled.value
+            -- next param
+            param(paramCalled.error)
+            return
+        end
 
 
-		paramCalled = {
-	      error = nil,
-	      match = paramVal,
-	      value =  paramVal
-	    }
+        paramCalled = {
+          error = nil,
+          match = paramVal,
+          value =  paramVal
+        }
 
-	    called[name] = paramCalled
+        called[name] = paramCalled
 
-	end
-	-- end of param function
+    end
+    -- end of param function
 
-	local paramCallback = function(err)
-		paramIndex  = paramIndex + 1
-		local fn = paramCallbacks[paramIndex]
+    local paramCallback = function(err)
+        paramIndex  = paramIndex + 1
+        local fn = paramCallbacks[paramIndex]
 
-		-- store updated value
-		paramCalled.value = req.params[key.name]
+        -- store updated value
+        paramCalled.value = req.params[key.name]
 
-		if err then
-			-- store error
-			paramCalled.error = err
-			param(err)
-			return
-		end
+        if err then
+            -- store error
+            paramCalled.error = err
+            param(err)
+            return
+        end
 
-		if not fn then
-			param()
-			return
-		end
+        if not fn then
+            param()
+            return
+        end
 
-		local ok, e = pcall(function() fn(req, res, paramCallback, paramVal, key.name) end)
+        local ok, e = pcall(function() fn(req, res, paramCallback, paramVal, key.name) end)
 
-		if ok then
-	        --
-	    else
-	        paramCallback(e)
-	    end
+        if ok then
+            --
+        else
+            paramCallback(e)
+        end
 
-	end
-	-- end of paramCallback function
+    end
+    -- end of paramCallback function
 
-	param()
+    param()
 
 end
 
@@ -394,16 +394,16 @@ end
 --  handlers can operate without any code changes regardless of the "prefix"
 --  pathname.
 function proto:use(path, fn)
-	
-	local layer = Layer:new(path, {
-			sensitive = self.caseSensitive,
-			strict = false,
-			is_end = false
-	}, fn)
+    
+    local layer = Layer:new(path, {
+            sensitive = self.caseSensitive,
+            strict = false,
+            is_end = false
+    }, fn)
 
-	table.insert(self.stack, layer)
+    table.insert(self.stack, layer)
 
-	return self
+    return self
 end
 
 
@@ -413,17 +413,17 @@ end
 -- See the Route api documentation for details on adding handlers
 -- and middleware to routes.
 function proto:route(path)
-	local route = Route:new(path)
-	local layer = Layer:new(path, {
-			sensitive = self.caseSensitive,
-			strict = self.strict,
-			is_end = true
-	}, fn)
+    local route = Route:new(path)
+    local layer = Layer:new(path, {
+            sensitive = self.caseSensitive,
+            strict = self.strict,
+            is_end = true
+    }, fn)
 
-	layer.route = route
+    layer.route = route
 
-	table.insert(self.stack, layer) 
-	return route
+    table.insert(self.stack, layer) 
+    return route
 end
 
 
@@ -441,20 +441,18 @@ local supported_http_methods = {
 
 -- create Router#VERB functions
 function proto:init()
-	for http_method, _ in pairs(supported_http_methods) do
-
-
-		-- 生成方法，类似
-		-- proto:get = function(path, fn)
-		--		
-		-- end
+    for http_method, _ in pairs(supported_http_methods) do
+        -- 生成方法，类似
+        -- proto:get = function(path, fn)
+        --      
+        -- end
         self[http_method] = function(self, path, fn) -- 形成
-        	local route = self:route(path)
-        	route[http_method](fn) -- 调用route的get或是set等的方法, fn也可能会是个数组，也可能是一个元素
+            local route = self:route(path)
+            route[http_method](fn) -- 调用route的get或是set等的方法, fn也可能会是个数组，也可能是一个元素
 
-        	return self
+            return self
         end
-	end
+    end
 end
 
 
