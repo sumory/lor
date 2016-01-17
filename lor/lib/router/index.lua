@@ -418,7 +418,7 @@ function proto:route(path)
             sensitive = self.caseSensitive,
             strict = self.strict,
             is_end = true
-    }, fn)
+    }, route.dispatch)
 
     layer.route = route
 
