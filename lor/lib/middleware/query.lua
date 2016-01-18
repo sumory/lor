@@ -1,7 +1,7 @@
 local query = function()
-    return function q(req, res, next)
+    return function(req, res, next)
         req.query = req.query -- parse query strings
-        next()
+       	pcall(next)
     end
 end
 

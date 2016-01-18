@@ -1,7 +1,9 @@
-local _M = {
-    init = function(app)
-      return function Init(req, res, next)
-        if (app.enabled('x-powered-by')) res.setHeader('X-Powered-By', 'Lor Framework')
+
+local init = function(app)
+    return function(req, res, next)
+        --if (app.enabled('x-powered-by')) 
+
+        res.setHeader('X-Powered-By', 'Lor Framework')
         req.res = res
         res.req = req
         req.next = next
@@ -11,9 +13,9 @@ local _M = {
 
         res.locals = res.locals or {}
 
-        next()
-      end
+            pcall(next)
     end
-}
+end
 
-return _M
+
+return init

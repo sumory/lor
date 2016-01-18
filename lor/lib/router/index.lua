@@ -1,6 +1,6 @@
 local Route = require("lor.lib.router.route")
 local Layer = require("lor.lib.router.layer")
-
+local supported_http_methods = require("lor.lib.methods")
 
 -- table 是否是数组
 local function table_is_array(t)
@@ -15,12 +15,12 @@ end
 
 -- get pathname of request
 local function getPathname(req)
-    return req.pathname
+    return req.path
 end
 
 -- match path to a layer
 local function matchLayer(layer, path) 
-    return layer.match(path)
+    return layer:match(path)
 end
 
 local function mixin(a, b)
@@ -94,10 +94,14 @@ function proto:handle(req, res, out)
     local urlIndexOf, tmp = string.find(req.url, "?")
 
     local pathLength
-    if urlIndexOf then pathLength = urlIndexOf-1 else pathLength = req.url:len()
+    if urlIndexOf then 
+        pathLength = urlIndexOf-1 
+    else 
+        pathLength = req.url:len() 
+    end
 
     local fqdn 
-    if string.sub(req.url, 1,1)!='/' then 
+    if string.sub(req.url, 1,1)~='/' then 
         fqdn = 1 + string.find( string.sub(req.url, 1, pathLength), "://")
     end
 
@@ -129,9 +133,9 @@ function proto:handle(req, res, out)
     req.baseUrl = parentUrl
     req.originalUrl = req.originalUrl or req.url
 
-    next()
-
     local next = function(err)
+        print("next...")
+
         local layerError
         if err == 'route' then layerError = nil else layerError = err end
 
@@ -141,11 +145,12 @@ function proto:handle(req, res, out)
         end
 
         -- restore altered req.url
-        if string.len(removed) != 0 then
+        if string.len(removed) ~= 0 then
             req.baseUrl = parentUrl
             req.url = protohost .. removed .. string.sub(req.url, string.len(protohost)+1)
             removed = ''
         end
+
 
         -- no more matching layers
         if idx >= #stack then
@@ -164,16 +169,19 @@ function proto:handle(req, res, out)
 
         -- find next matching layer
         local layer, match, route
-
-        while not math and idx < #stack do
+        
+        while (not match and idx < #stack)
+        do
             idx = idx + 1
             layer = stack[idx]
-            match = mathchLayer(layer, path)
+            match = matchLayer(layer, path)
             route = layer.route
 
-            if type(match) != 'boolean' then
+            if type(match) ~= 'boolean' then
                 layerError = layerError or match
             end
+
+
 
             if not match then
                 -- to continue
@@ -192,7 +200,7 @@ function proto:handle(req, res, out)
                         -- build up automatic options response
 
                         -- don't even bother matching route
-                        if not has_method and method != "HEAD" then
+                        if not has_method and method ~= "HEAD" then
                             match = false
                             -- to continue
                         end
@@ -201,6 +209,8 @@ function proto:handle(req, res, out)
                 end
             end
         end
+
+
 
         -- no match
         if not match then
@@ -221,165 +231,21 @@ function proto:handle(req, res, out)
 
         local layerPath = layer.path
 
-        self:process_params(layer, paramcalled, req, res, function (err) 
-            if err then
-                next(layerError or err)
-                return
-            end
 
-            if route then
-                layer.handle_request(req, res, next)
-            end
+        if route then
+            layer:handle_request(req, res, next)
+        end
 
-            trim_prefix(layer, layerError, layerPath, path)
-        end)
+        if layerError then
+            layer:handle_error(layerError, req, res, next)
+        else
+            layer:handle_request(req, res, next)
+        end
+
     end 
     -- end of next function
 
-    local trim_prefix = function(layer, layerError, layerPath, path)
-        local c = string.find(path, string.len(layerPath) + 1)
-
-        if c and c!='/' and c!='.' then
-            next(layerError)
-            return
-        end
-
-        if string.len(layerPath)!=0 then
-            print('trim prefix '.. layerPath ..' from url ' .. req.url)
-            removed = layerPath
-            req.url = protohost + string.sub(req.url, string.len(protohost)+string.len(removed))
-
-            -- Ensure leading slash
-            if not fqdn && string.sub(req.url,1) != '/' then
-                req.url = '/' .. req.url
-                slashAdded = true
-            end
-
-            -- Setup base URL (no trailing slash)
-            if string.sub(removed, string.len(removed)) == '/' then
-                req.baseUrl = parentUrl .. string.sub(removed, 1, string.len(removed))
-            else
-                req.baseUrl = parentUrl .. removed
-            end
-        end
-
-        print(layer.name .. ' ' .. layerPath .. ' :'.. req.originalUrl)
-
-        if layerError then
-            layer.handle_error(layerError, req, res, next)
-        else
-            layer.handle_request(req, res, next)
-        end
-    end
-    -- end of trim_prefix function
-
-end
-
--- Process any parameters for the layer.
-function proto:process_params(layer, called, req, res, done) 
-    local params = self.params
-
-    -- captured parameters from the layer, keys and values
-    local keys = layer.keys
-
-    -- fast track
-    if not keys or #keys == 0 then
-        done()
-        return
-    end
-
-    local i = 0
-    local name
-    local paramIndex = 0
-    local key
-    local paramVal
-    local paramCallbacks
-    local paramCalled
-
-    -- process params in order
-    -- param callbacks can be async
-    local param = function(err)
-        if err then
-            done(err)
-            return
-        end
-
-        if i >= #keys then
-            done()
-            return
-        end
-
-        paramIndex = 0
-        i = i + 1
-        key = keys[i]
-
-        if not key then
-            done()
-            return
-        end
-
-        name = key.name
-        paramVal = req.params[name]
-        paramCallbacks = params[name]
-        paramCalled = called[name]
-
-        if not paramVal or not paramCallbacks then
-            param()
-            return
-        end
-
-        -- param previously called with same value or error occurred
-        if paramCalled and (paramCalled.match == paramVal or (paramCalled.error and paramCalled.error != 'route')) then
-            -- restore value
-            req.params[name] = paramCalled.value
-            -- next param
-            param(paramCalled.error)
-            return
-        end
-
-
-        paramCalled = {
-          error = nil,
-          match = paramVal,
-          value =  paramVal
-        }
-
-        called[name] = paramCalled
-
-    end
-    -- end of param function
-
-    local paramCallback = function(err)
-        paramIndex  = paramIndex + 1
-        local fn = paramCallbacks[paramIndex]
-
-        -- store updated value
-        paramCalled.value = req.params[key.name]
-
-        if err then
-            -- store error
-            paramCalled.error = err
-            param(err)
-            return
-        end
-
-        if not fn then
-            param()
-            return
-        end
-
-        local ok, e = pcall(function() fn(req, res, paramCallback, paramVal, key.name) end)
-
-        if ok then
-            --
-        else
-            paramCallback(e)
-        end
-
-    end
-    -- end of paramCallback function
-
-    param()
+    next()
 
 end
 
@@ -427,17 +293,6 @@ function proto:route(path)
 end
 
 
-local supported_http_methods = {
-    get = true,
-    post = true,
-    head = true,
-    options = true,
-    put = true,
-    patch = true,
-    delete = true,
-    trace = true,
-    all = true -- appended
-}
 
 -- create Router#VERB functions
 function proto:init()
