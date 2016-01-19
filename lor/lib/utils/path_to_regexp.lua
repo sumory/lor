@@ -27,7 +27,6 @@ function _M.parse_pattern(path, keys, options)
     return all_pattern
 end
 
--- pattern.exec
 function _M.parse_path(uri, pattern, keys)
     uri = remotelast(uri)
 
@@ -36,20 +35,24 @@ function _M.parse_path(uri, pattern, keys)
     local match = { smatch(uri, pattern) } -- param values
     if #match > 0 then -- uri match some route
         for j = 1, #match do
-            local param_name = keys[j]
-            if param_name then
-                params[param_name] = match[j]
-                isEmpty = false
+            if match[j] then
+                local param_name = keys[j]
+                if param_name then
+                    params[param_name] = match[j]
+                end
             end
         end    
+    else
+
     end
     
-    if isEmpty then return nil else return params end
+    return params
 end
 
-function is_match(pattern, uri)
-    local ok = false
-
+function _M.is_match(uri, pattern)
+    print("======",  uri,pattern)
+    local ok = smatch(uri, pattern)
+    return ok
 
 end
 

@@ -2,7 +2,6 @@ local Route = require("lor.lib.router.route")
 local Layer = require("lor.lib.router.layer")
 local supported_http_methods = require("lor.lib.methods")
 
--- table 是否是数组
 local function table_is_array(t)
     if type(t) ~= "table" then return false end
     local i = 0
@@ -13,14 +12,14 @@ local function table_is_array(t)
     return true
 end
 
--- get pathname of request
 local function getPathname(req)
     return req.path
 end
 
--- match path to a layer
 local function matchLayer(layer, path) 
-    return layer:match(path)
+    local is_match = layer:match(path)
+    print("index.lua - is_match:", is_match, "path:", path)
+    return is_match
 end
 
 local function mixin(a, b)
@@ -44,9 +43,6 @@ local function mergeParams(params, parent)
 
     return mixin(obj, params)
 end
-
-
-
 
 
 -- restore obj props after function
@@ -91,7 +87,8 @@ end
 
 -- Dispatch a req, res into the router.
 function proto:handle(req, res, out)
-    local urlIndexOf, tmp = string.find(req.url, "?")
+    print("index.lua#handle")
+    local urlIndexOf = string.find(req.url, "?")
 
     local pathLength
     if urlIndexOf then 
@@ -133,8 +130,12 @@ function proto:handle(req, res, out)
     req.baseUrl = parentUrl
     req.originalUrl = req.originalUrl or req.url
 
-    local next = function(err)
-        print("next...")
+    for k, v in pairs(req) do
+        print("index.lua - req: ", k, v)
+    end
+
+    function next(err)
+        print("index.lua#next...")
 
         local layerError
         if err == 'route' then layerError = nil else layerError = err end
@@ -169,12 +170,13 @@ function proto:handle(req, res, out)
 
         -- find next matching layer
         local layer, match, route
-        
+        print("11111", match, idx, #stack)
         while (not match and idx < #stack)
         do
             idx = idx + 1
             layer = stack[idx]
             match = matchLayer(layer, path)
+            if layer.route then print("+++") else print("000000") end
             route = layer.route
 
             if type(match) ~= 'boolean' then
@@ -195,12 +197,8 @@ function proto:handle(req, res, out)
                     else
 
                         local method = req.method
-                        local has_method = route._handles_method(method)
-
-                        -- build up automatic options response
-
-                        -- don't even bother matching route
-                        if not has_method and method ~= "HEAD" then
+                        local has_method = route:_handles_method(method)
+                        if not has_method then
                             match = false
                             -- to continue
                         end
@@ -233,18 +231,22 @@ function proto:handle(req, res, out)
 
 
         if route then
+            print("index.lua#next has route->handle_request")
             layer:handle_request(req, res, next)
         end
 
         if layerError then
+            print("index.lua#next no route and layerError->handle_error")
             layer:handle_error(layerError, req, res, next)
         else
+            print("index.lua#next no route->handle_request")
             layer:handle_request(req, res, next)
         end
 
     end 
     -- end of next function
 
+    print("index.lua#next", next)
     next()
 
 end
@@ -274,18 +276,15 @@ end
 
 
 -- Create a new Route for the given path.
---
--- Each route contains a separate middleware stack and VERB handlers.
--- See the Route api documentation for details on adding handlers
--- and middleware to routes.
 function proto:route(path)
     local route = Route:new(path)
     local layer = Layer:new(path, {
             sensitive = self.caseSensitive,
             strict = self.strict,
             is_end = true
-    }, route.dispatch)
+    }, route) -- import: a magick to supply route:dispatch
 
+    print("------------add route to layer")
     layer.route = route
 
     table.insert(self.stack, layer) 

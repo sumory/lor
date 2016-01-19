@@ -1,4 +1,3 @@
-
 local init = function(app)
     return function(req, res, next)
         --if (app.enabled('x-powered-by')) 
@@ -12,8 +11,8 @@ local init = function(app)
         setmetatable(res, {__index = app.response})
 
         res.locals = res.locals or {}
-
-            pcall(next)
+        print("init.lua#run")
+        next()
     end
 end
 

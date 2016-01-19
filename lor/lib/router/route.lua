@@ -12,7 +12,10 @@ function Route:new(path)
 	instance.methods = {}
 
 	
-	setmetatable(instance, {__index = self})
+	setmetatable(instance, {
+		__index = self,
+		__call = self.dispatch  -- import: a magick to supply route:dispatch
+	})
 	instance:initMethod()
 	return instance
 end

@@ -1,4 +1,3 @@
--- perf
 local error = error
 local pairs = pairs
 local setmetatable = setmetatable
@@ -10,12 +9,10 @@ function Request:new()
 
     local query = {} -- uri params
     local body = {} -- body params
+    local params = {}
     
     local instance = {
-        controller_name = '',
-        action_name = '',
         uri = "",
-
 
         path = { -- path variables, init when `route`
             params = {

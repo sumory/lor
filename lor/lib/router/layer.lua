@@ -15,102 +15,119 @@ local Layer = {}
 
 
 function Layer:new(path, options, fn)
-	local  opts = options or {}
-	local instance = {}
-	instance.handle = fn
-	instance.name = "default_fn_name" --fn and fn.name and (fn.name or '<anonymous>')
-	instance.params = nil
-	instance.path = nil
-	instance.keys = {}
-	instance.regexp = {
-		pattern = pathRegexp.parse_pattern(path, instance.keys, opts),
-		fast_slash = false
-	}
+    local opts = options or {}
+    local instance = {}
+    instance.handle = fn
+    instance.name = path -- "default_fn_name" --fn and fn.name and (fn.name or '<anonymous>')
+    instance.params = nil
+    instance.path = nil
+    instance.keys = {}
+    instance.regexp = {
+        pattern = pathRegexp.parse_pattern(path, instance.keys, opts),
+        fast_slash = false
+    }
 
-	print("regexp:" .. instance.regexp.pattern)
+    print("layer.lua#new - path:" .. path .. "\tpattern:" .. instance.regexp.pattern)
 
-	if path == '/' and opts.is_end ==false then
-		instance.regexp.fast_slash = true
-	end
+    if path == '/' and opts.is_end == false then
+        instance.regexp.fast_slash = true
+    end
 
-	setmetatable(instance, {__index = self})
-	return instance
+    setmetatable(instance, { __index = self })
+    return instance
 end
 
 
 function Layer:handle_error(error, req, res, next)
-	local fn = self.handle
+    local fn = self.handle
 
-	-- fn should pin a property named 'length' to indicate its args length
-	if fn.length ~=4 then
-		next(error)
-		return
-	end
+    -- fn should pin a property named 'length' to indicate its args length
+    --	if fn.length ~=4 then
+    --		next(error)
+    --		return
+    --	end
 
-	local ok, e =pcall(function() fn(error, req, res, next) end)
-	if not ok then
-		next(e)
-	end
+    local ok, e = pcall(function() fn(error, req, res, next) end)
+    if not ok then
+        next(erorr(e))
+    end
+end
+
+local function doAfterError(err)
+    print("---------------------------------------- TRACK BEGIN ----------------------------------------");
+    print("LUA PCALL ERROR:", err);
+    print("---------------------------------------- TRACK  END  ----------------------------------------");
+    return false;
 end
 
 function Layer:handle_request(req, res, next)
-	local fn = self.handle
-	-- if fn.length > 3 then
-	-- 	next()
-	-- 	return
-	-- end
+    local fn = self.handle
+    -- if fn.length > 3 then
+    -- 	next()
+    -- 	return
+    -- end
 
-	
 
-	local ok, e = pcall(function() fn(req, res, next) end)
+    --  local result = xpcall(function() fn(req, res, next) end, doAfterError);
+    --	if not result then
+    --		next(error(e))
+    --	end
 
-	print("Layer:handle_request", ok, e)
+    local ok, e = pcall(function() fn(req, res, next) end);
 
-	if not ok then
-		next(e)
-	end
+    print("layer.lua - Layer:handle_request", "ok?", ok, "error:", e, "layer.name:", self.name)
+
+    if not ok then
+        next(error(e))
+    end
 end
 
 
-function Layer:match(path) 
-	print("Layer:match before", path, self.regexp.pattern,self.path, self.regexp.fast_slasha)
-	if not path then
-		self.params = nil
-		self.path = nil
-		return false
-	end
+function Layer:match(path)
+    print("layer.lua#match before:", "path:", path, "pattern:", self.regexp.pattern, "self.path:", self.path, "fast_slash:", self.regexp.fast_slash)
+    if not path then
+        self.params = nil
+        self.path = nil
+        print("layer.lua#match 1")
+        return false
+    end
 
-	if self.regexp.fast_slash then
-		self.params = {}
-		self.path = ''
-		return true
-	end
+    if self.regexp.fast_slash then
+        self.params = {}
+        self.path = ''
+        print("layer.lua#match 2")
+        return true
+    end
 
-	local m = pathRegexp.parse_path(path, self.regexp.pattern, self.keys)
-	if not m then
-		self.params = nil
-		self.path = nil
-		return false
-	end
+    if not pathRegexp.is_match(path, self.regexp.pattern) then
+        print("layer.lua#match 3")
+        return false
+    end
 
-	-- store values
-	self.params = {}
-	self.path = path
+    local m = pathRegexp.parse_path(path, self.regexp.pattern, self.keys)
+    if m then
+        print("layer.lua#match 4", path, self.regexp.pattern, self.keys, m)
+    end
 
-	local keys = self.keys
-	local params = self.params
+    -- store values
+    self.params = {}
+    self.path = path
 
-	for j = 1, #keys do
+    local keys = self.keys
+    local params = self.params
+
+    for j = 1, #keys do
         local param_name = keys[j]
         if param_name then
-        	if m[j] then
-            	params[param_name] = m[j] -- todo: 添加和覆盖规则
+            if m[j] then
+                params[param_name] = m[j] -- todo: 添加和覆盖规则
             end
         end
-    end 
+    end
 
-    print("Layer:match after", path, self.path)
+    print("layer.lua#match after", path, self.path)
 
+    print("layer.lua#match 4")
     return true
 end
 
