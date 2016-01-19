@@ -11,7 +11,7 @@ function app:new()
 	instance.cache = {}
 	instance.engines = {}
 	instance.settings = {}
-	
+
 	setmetatable(instance, {
 		__index = self,
 		__call = self.handle
@@ -67,17 +67,17 @@ end
 
 
 function app:use(path, fn)
-    app:inner_use(path, fn, 3)
+    app:inner_use(3, path, fn)
 end
 
 
 function app:erroruse(path, fn)
     print("application.lua#erroruse")
-    app:inner_use(path, fn, 4)
+    app:inner_use(4, path, fn)
 end
 
 -- shoule be private
-function app:inner_use(path, fn, fn_args_length)
+function app:inner_use(fn_args_length, path, fn )
 	self:lazyrouter()
 	local router = self._router
 

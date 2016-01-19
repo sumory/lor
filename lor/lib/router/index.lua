@@ -121,12 +121,7 @@ function proto:handle(req, res, out)
     local parentUrl = req.baseUrl or ''
     local done = restore(out, req)
 
-    -- setup next layer
-    req.next = next
 
-    --setup basic req values
-    req.baseUrl = parentUrl
-    req.originalUrl = req.originalUrl or req.url
 
 
     function next(err)
@@ -210,35 +205,33 @@ function proto:handle(req, res, out)
 
 
         if route then
-            -- print("index.lua#next has route->handle_request")
+            print("111111111111111index.lua#next has route->handle_request",layer.length, match, idx)
             layer:handle_request(req, res, next)
         end
 
         if layerError then
-            -- print("index.lua#next no route and layerError->handle_error", layer.length)
+            print("2222222222222222index.lua#next no route and layerError->handle_error", layer.length, match, idx)
             layer:handle_error(layerError, req, res, next)
         else
-            -- print("index.lua#next no route->handle_request", layer.length)
+            print("333333333333333index.lua#next no route->handle_request", layer.length, match, idx)
             layer:handle_request(req, res, next)
         end
     end
 
     -- end of next function
 
+    -- setup next layer
+    req.next = next
+
+    --setup basic req values
+    req.baseUrl = parentUrl
+    req.originalUrl = req.originalUrl or req.url
+
     -- print("index.lua#next", next)
     next()
 end
 
 --  Use the given middleware function, with optional path, defaulting to "/".
---  
---  Use (like `.all`) will run for any http METHOD, but it will not add
---  handlers for those methods so OPTIONS requests will not consider `.use`
---  functions even if they could respond.
--- 
---  The other difference is that _route_ path is stripped and not visible
---  to the handler function. The main effect of this feature is that mounted
---  handlers can operate without any code changes regardless of the "prefix"
---  pathname.
 function proto:use(path, fn, fn_args_length)
 
     local layer = Layer:new(path, {
@@ -248,6 +241,7 @@ function proto:use(path, fn, fn_args_length)
     }, fn, fn_args_length)
 
     table.insert(self.stack, layer)
+    print("router--->stack length:", #self.stack, fn_args_length)
 
     return self
 end
@@ -265,6 +259,7 @@ function proto:route(path)
     layer.route = route
 
     table.insert(self.stack, layer)
+    print("-router--->stack length:", #self.stack, 3)
     return route
 end
 
@@ -275,7 +270,7 @@ function proto:init()
     for http_method, _ in pairs(supported_http_methods) do
         -- 生成方法，类似
         -- proto:get = function(path, fn)
-        --      
+        --
         -- end
         self[http_method] = function(self, path, fn) -- 形成
         local route = self:route(path)

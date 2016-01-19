@@ -85,7 +85,7 @@ function Layer:handle_request(req, res, next)
 
     if not ok then
         print("handle_request:pcall error", ok, e)
-        next("e")
+        next(e)
     end
 end
 
