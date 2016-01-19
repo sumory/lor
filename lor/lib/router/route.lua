@@ -80,7 +80,7 @@ end
 function Route:initMethod()
     for http_method, _ in pairs(supported_http_methods) do
         self[http_method] = function(self, fn)
-        	local layer = Layer:new("/", {}, fn)
+        	local layer = Layer:new("/", {}, fn, 3)
 			layer.method = http_method
 			self.methods[http_method] = true
 			tinsert(self.stack, layer)
@@ -90,7 +90,7 @@ end
 
 
 function Route:all(fn)
-	local layer = Layer:new("/", {}, fn)
+	local layer = Layer:new("/", {}, fn, 3)
 	layer.method = nil
 
 	self.methods._all = true

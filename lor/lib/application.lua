@@ -41,8 +41,8 @@ function app:lazyrouter()
 		})
 	end
 
-	self._router:use("/", query())
-	self._router:use("/", middleware(self))
+	self._router:use("/", query(), 3)
+	self._router:use("/", middleware(self), 3)
 
 end
 
@@ -54,7 +54,7 @@ function app:handle(req, res, callback)
 
 	local done = callback or function(req, res)
 		return function(err)
-			print(err)
+			print("&&&&&&&&&&&&&&&&&&&&&&&&finallllll handler")
 			res.send(err)
 		end
 	end
@@ -69,19 +69,26 @@ end
 
 
 function app:use(path, fn)
+    app:inner_use(path, fn, 3)
+end
+
+
+function app:erroruse(path, fn)
+    app:inner_use(path, fn, 4)
+end
+
+-- shoule be private
+function app:inner_use(path, fn, fn_args_length)
 	self:lazyrouter()
 	local router = self._router
 
 	if path and fn and type(path)=="string" and type(fn)=="function" then
-		-- router:use(path, function()
-		-- 	return fn(self.request, self.response, next)
-		-- end)
-		router:use(path, fn)
+		router:use(path, fn, fn_args_length)
 	elseif path and not fn then
 		if type(path) == "function" then
 			fn = path
 			path = "/"
-			router:use(path, fn)
+			router:use(path, fn, fn_args_length)
 		end
 	else
 		-- todo: error usage

@@ -261,19 +261,18 @@ end
 --  to the handler function. The main effect of this feature is that mounted
 --  handlers can operate without any code changes regardless of the "prefix"
 --  pathname.
-function proto:use(path, fn)
+function proto:use(path, fn, fn_args_length)
     
     local layer = Layer:new(path, {
             sensitive = self.caseSensitive,
             strict = false,
             is_end = false
-    }, fn)
+    }, fn, fn_args_length)
 
     table.insert(self.stack, layer)
 
     return self
 end
-
 
 -- Create a new Route for the given path.
 function proto:route(path)
@@ -282,7 +281,7 @@ function proto:route(path)
             sensitive = self.caseSensitive,
             strict = self.strict,
             is_end = true
-    }, route) -- import: a magick to supply route:dispatch
+    }, route, 3) -- import: a magick to supply route:dispatch
 
     print("------------add route to layer")
     layer.route = route

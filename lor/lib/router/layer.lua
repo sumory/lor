@@ -14,7 +14,7 @@ end
 local Layer = {}
 
 
-function Layer:new(path, options, fn)
+function Layer:new(path, options, fn, fn_args_length)
     local opts = options or {}
     local instance = {}
     instance.handle = fn
@@ -22,6 +22,7 @@ function Layer:new(path, options, fn)
     instance.params = nil
     instance.path = nil
     instance.keys = {}
+    instance.length = fn_args_length -- todo:shoule only be 3 or 4
     instance.regexp = {
         pattern = pathRegexp.parse_pattern(path, instance.keys, opts),
         fast_slash = false
@@ -42,14 +43,16 @@ function Layer:handle_error(error, req, res, next)
     local fn = self.handle
 
     -- fn should pin a property named 'length' to indicate its args length
-    --	if fn.length ~=4 then
-    --		next(error)
-    --		return
-    --	end
+    if self.length ~= 4 then
+        next(error)
+        return
+    end
 
     local ok, e = pcall(function() fn(error, req, res, next) end)
+    print("layer.lua - Layer:handle_error", "ok?", ok, "error:", e, "pcall_error:", e, "layer.name:", self.name)
+
     if not ok then
-        next(erorr(e))
+        next(erorr({ msg = e }), req, res, next)
     end
 end
 
@@ -62,10 +65,10 @@ end
 
 function Layer:handle_request(req, res, next)
     local fn = self.handle
-    -- if fn.length > 3 then
-    -- 	next()
-    -- 	return
-    -- end
+    if self.length > 3 then
+        next()
+        return
+    end
 
 
     --  local result = xpcall(function() fn(req, res, next) end, doAfterError);
@@ -74,7 +77,6 @@ function Layer:handle_request(req, res, next)
     --	end
 
     local ok, e = pcall(function() fn(req, res, next) end);
-
     print("layer.lua - Layer:handle_request", "ok?", ok, "error:", e, "layer.name:", self.name)
 
     if not ok then
