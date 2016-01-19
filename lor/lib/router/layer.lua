@@ -28,7 +28,7 @@ function Layer:new(path, options, fn, fn_args_length)
         fast_slash = false
     }
 
-    print("layer.lua#new - path:" .. path .. "\tpattern:" .. instance.regexp.pattern)
+    print("layer.lua#new - " .. "fn_args_len:" .. fn_args_length .. "\tpath:" .. path .. "\tpattern:" .. instance.regexp.pattern)
 
     if path == '/' and opts.is_end == false then
         instance.regexp.fast_slash = true
@@ -40,6 +40,7 @@ end
 
 
 function Layer:handle_error(error, req, res, next)
+    print("layer.lua - Layer:handle_error", "error:", error)
     local fn = self.handle
 
     -- fn should pin a property named 'length' to indicate its args length
@@ -52,7 +53,7 @@ function Layer:handle_error(error, req, res, next)
     print("layer.lua - Layer:handle_error", "ok?", ok, "error:", e, "pcall_error:", e, "layer.name:", self.name)
 
     if not ok then
-        next(erorr({ msg = e }), req, res, next)
+        next(e)
     end
 end
 
@@ -76,39 +77,43 @@ function Layer:handle_request(req, res, next)
     --		next(error(e))
     --	end
 
+    -- fn(req, res, next)
+
+    print("layer.lua - Layer:handle_request-", "layer.name:", self.name)
     local ok, e = pcall(function() fn(req, res, next) end);
-    print("layer.lua - Layer:handle_request", "ok?", ok, "error:", e, "layer.name:", self.name)
+    print("layer.lua - Layer:handle_request+", "ok?", ok, "error:", e, "layer.name:", self.name)
 
     if not ok then
-        next(error(e))
+        print("handle_request:pcall error", ok, e)
+        next("e")
     end
 end
 
 
 function Layer:match(path)
-    print("layer.lua#match before:", "path:", path, "pattern:", self.regexp.pattern, "self.path:", self.path, "fast_slash:", self.regexp.fast_slash)
+    -- print("layer.lua#match before:", "path:", path, "pattern:", self.regexp.pattern, "self.path:", self.path, "fast_slash:", self.regexp.fast_slash)
     if not path then
         self.params = nil
         self.path = nil
-        print("layer.lua#match 1")
+        -- print("layer.lua#match 1")
         return false
     end
 
     if self.regexp.fast_slash then
         self.params = {}
         self.path = ''
-        print("layer.lua#match 2")
+        -- print("layer.lua#match 2")
         return true
     end
 
     if not pathRegexp.is_match(path, self.regexp.pattern) then
-        print("layer.lua#match 3")
+        -- print("layer.lua#match 3")
         return false
     end
 
     local m = pathRegexp.parse_path(path, self.regexp.pattern, self.keys)
     if m then
-        print("layer.lua#match 4", path, self.regexp.pattern, self.keys, m)
+        -- print("layer.lua#match 4", path, self.regexp.pattern, self.keys, m)
     end
 
     -- store values
@@ -127,9 +132,9 @@ function Layer:match(path)
         end
     end
 
-    print("layer.lua#match after", path, self.path)
+    -- print("layer.lua#match after", path, self.path)
 
-    print("layer.lua#match 4")
+    -- print("layer.lua#match 4")
     return true
 end
 

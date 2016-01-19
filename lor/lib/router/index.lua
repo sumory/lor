@@ -16,17 +16,17 @@ local function getPathname(req)
     return req.path
 end
 
-local function matchLayer(layer, path) 
+local function matchLayer(layer, path)
     local is_match = layer:match(path)
-    print("index.lua - is_match:", is_match, "path:", path)
+    -- print("index.lua - is_match:", is_match, "path:", path)
     return is_match
 end
 
 local function mixin(a, b)
     if a and b then
-        for k,v in pairs(b) do
-        a[k] = b[k]
-        end  
+        for k, v in pairs(b) do
+            a[k] = b[k]
+        end
     end
 
     return a
@@ -51,7 +51,7 @@ local function restore(fn, obj)
     local vals = {
         baseUrl = obj['baseUrl'],
         next = obj['next'],
-        params =  obj['params']
+        params = obj['params']
     }
 
     return function(err)
@@ -70,7 +70,7 @@ local proto = {}
 
 function proto:new(options)
     local opts = options or {}
-    
+
     local router = {}
     router.params = {}
     router._params = {} --array
@@ -80,40 +80,38 @@ function proto:new(options)
     router.stack = {} --array
 
     self:init()
-    setmetatable(router, {__index = self})
+    setmetatable(router, { __index = self })
 
     return router
 end
 
 -- Dispatch a req, res into the router.
 function proto:handle(req, res, out)
-    print("index.lua#handle")
+    -- print("index.lua#handle")
     local urlIndexOf = string.find(req.url, "?")
 
     local pathLength
-    if urlIndexOf then 
-        pathLength = urlIndexOf-1 
-    else 
-        pathLength = req.url:len() 
+    if urlIndexOf then
+        pathLength = urlIndexOf - 1
+    else
+        pathLength = req.url:len()
     end
 
-    local fqdn 
-    if string.sub(req.url, 1,1)~='/' then 
-        fqdn = 1 + string.find( string.sub(req.url, 1, pathLength), "://")
+    local fqdn
+    if string.sub(req.url, 1, 1) ~= '/' then
+        fqdn = 1 + string.find(string.sub(req.url, 1, pathLength), "://")
     end
 
-    local protohost 
-    if fqdn then 
-        local tt = string.find(req.url, "/", 2+fqdn)
+    local protohost
+    if fqdn then
+        local tt = string.find(req.url, "/", 2 + fqdn)
         protohost = string.sub(req.url, 1, tt)
     else
         protohost = ""
     end
 
-    local idx = 0
-    local removed = ""
+    local idx = 1
     local slashAdded = false
-    local paramcalled ={}
 
     -- middleware and routes
     local stack = self.stack
@@ -130,60 +128,43 @@ function proto:handle(req, res, out)
     req.baseUrl = parentUrl
     req.originalUrl = req.originalUrl or req.url
 
-    for k, v in pairs(req) do
-        print("index.lua - req: ", k, v)
-    end
 
     function next(err)
-        print("index.lua#next...")
-
-        local layerError
-        if err == 'route' then layerError = nil else layerError = err end
+        local layerError = err
+        print("index.lua#next..., layerError:", layerError)
 
         if slashAdded then
             req.url = string.sub(req.url, 2) -- 去除/
             slashAdded = false
         end
 
-        -- restore altered req.url
-        if string.len(removed) ~= 0 then
-            req.baseUrl = parentUrl
-            req.url = protohost .. removed .. string.sub(req.url, string.len(protohost)+1)
-            removed = ''
-        end
-
-
         -- no more matching layers
-        if idx >= #stack then
+        if idx > #stack  then
             done(layerError)
             return
         end
 
         -- get pathname of request
         local path = getPathname(req)
-
         if not path then
             done(layerError)
-            return 
+            return
         end
-
 
         -- find next matching layer
         local layer, match, route
-        print("11111", match, idx, #stack)
-        while (not match and idx < #stack)
+        while (not match and idx <= #stack)
         do
-            idx = idx + 1
+            local tmp_idx = idx
             layer = stack[idx]
+            idx = idx + 1
+
             match = matchLayer(layer, path)
-            if layer.route then print("+++") else print("000000") end
             route = layer.route
 
             if type(match) ~= 'boolean' then
                 layerError = layerError or match
             end
-
-
 
             if not match then
                 -- to continue
@@ -202,16 +183,14 @@ function proto:handle(req, res, out)
                             match = false
                             -- to continue
                         end
-
                     end
                 end
             end
         end
 
-
-
         -- no match
         if not match then
+            print("no mathhhhhhhhhhhhhh")
             done(layerError)
             return
         end
@@ -221,7 +200,7 @@ function proto:handle(req, res, out)
             req.route = route
         end
 
-        if self.mergeParams then 
+        if self.mergeParams then
             req.params = mergeParams(layer.params, parentParams)
         else
             req.params = layer.params
@@ -231,24 +210,23 @@ function proto:handle(req, res, out)
 
 
         if route then
-            print("index.lua#next has route->handle_request")
+            -- print("index.lua#next has route->handle_request")
             layer:handle_request(req, res, next)
         end
 
         if layerError then
-            print("index.lua#next no route and layerError->handle_error")
+            -- print("index.lua#next no route and layerError->handle_error", layer.length)
             layer:handle_error(layerError, req, res, next)
         else
-            print("index.lua#next no route->handle_request")
+            -- print("index.lua#next no route->handle_request", layer.length)
             layer:handle_request(req, res, next)
         end
+    end
 
-    end 
     -- end of next function
 
-    print("index.lua#next", next)
+    -- print("index.lua#next", next)
     next()
-
 end
 
 --  Use the given middleware function, with optional path, defaulting to "/".
@@ -262,11 +240,11 @@ end
 --  handlers can operate without any code changes regardless of the "prefix"
 --  pathname.
 function proto:use(path, fn, fn_args_length)
-    
+
     local layer = Layer:new(path, {
-            sensitive = self.caseSensitive,
-            strict = false,
-            is_end = false
+        sensitive = self.caseSensitive,
+        strict = false,
+        is_end = false
     }, fn, fn_args_length)
 
     table.insert(self.stack, layer)
@@ -278,15 +256,15 @@ end
 function proto:route(path)
     local route = Route:new(path)
     local layer = Layer:new(path, {
-            sensitive = self.caseSensitive,
-            strict = self.strict,
-            is_end = true
+        sensitive = self.caseSensitive,
+        strict = self.strict,
+        is_end = true
     }, route, 3) -- import: a magick to supply route:dispatch
 
-    print("------------add route to layer")
+    print("index.lua#route new route for path:" .. path)
     layer.route = route
 
-    table.insert(self.stack, layer) 
+    table.insert(self.stack, layer)
     return route
 end
 
@@ -300,10 +278,10 @@ function proto:init()
         --      
         -- end
         self[http_method] = function(self, path, fn) -- 形成
-            local route = self:route(path)
-            route[http_method](fn) -- 调用route的get或是set等的方法, fn也可能会是个数组，也可能是一个元素
+        local route = self:route(path)
+        route[http_method](fn) -- 调用route的get或是set等的方法, fn也可能会是个数组，也可能是一个元素
 
-            return self
+        return self
         end
     end
 end

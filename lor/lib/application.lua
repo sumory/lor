@@ -39,11 +39,9 @@ function app:lazyrouter()
 			caseSensitive = true,
 			strict = true
 		})
+        self._router:use("/", query(), 3)
+        self._router:use("/", middleware(self), 3)
 	end
-
-	self._router:use("/", query(), 3)
-	self._router:use("/", middleware(self), 3)
-
 end
 
 -- Dispatch a req, res pair into the application. Starts pipeline processing.
@@ -74,6 +72,7 @@ end
 
 
 function app:erroruse(path, fn)
+    print("application.lua#erroruse")
     app:inner_use(path, fn, 4)
 end
 
@@ -116,9 +115,14 @@ end
 function app:initMethod()
     for http_method, _ in pairs(supported_http_methods) do
         self[http_method] = function(self, path, fn)
+
+            print("\napp:"..http_method, "start init")
+
         	self:lazyrouter()
         	local route = self._router:route(path)
         	route[http_method](route, fn)
+
+            print("app:"..http_method, "end init\n")
         	return self
         end
     end

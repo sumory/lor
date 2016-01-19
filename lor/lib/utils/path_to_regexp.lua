@@ -50,10 +50,9 @@ function _M.parse_path(uri, pattern, keys)
 end
 
 function _M.is_match(uri, pattern)
-    print("======",  uri,pattern)
+    -- print("======",  uri,pattern)
     local ok = smatch(uri, pattern)
     return ok
-
 end
 
 
