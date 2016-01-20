@@ -56,56 +56,5 @@ function _M.is_match(uri, pattern)
 end
 
 
-function test1()
-    local keys = {}
-    local p = parse_pattern("/foo/:bar/create/:id/done", keys)
-    print('pattern: ' .. p)
-    for k,v in pairs(keys) do
-        print(k .. ' ' .. v)
-    end
-    print("--------------")
-    local params = parse_path("/foo/bar_value/create/123/done", p, keys)
-    for k,v in pairs(params) do
-        print(k .. ' ' .. v)
-    end
-end
-
-function test1_1()
-    local keys = {}
-    local p = parse_pattern("/foo/:bar/create/:id/done/", keys)
-    print('pattern: ' .. p)
-    for k,v in pairs(keys) do
-        print(k .. ' ' .. v)
-    end
-    print("--------------")
-    local params = parse_path("/foo/bar_value/create/123/done", p, keys)
-    for k,v in pairs(params) do
-        print(k .. ' ' .. v)
-    end
-end
-
-function test2()
-    local keys = {}
-    local p = parse_pattern("/foo/:id/*", keys)
-    print('pattern: ' .. p)
-    for k,v in pairs(keys) do
-        print(k .. ' ' .. v)
-    end
-    print("--------------")
-    local params = parse_path("/foo/123/ddfd/mmm", p, keys)
-    for k,v in pairs(params) do
-        print(k .. ' ' .. v)
-    end
-end
-
-
-function _M.test()
-    test1()
-    print()
-    test1_1()
-    print()
-    test2()
-end
-
 return _M
 
