@@ -1,5 +1,6 @@
 local pcall = pcall
 local pathRegexp = require("lor.lib.utils.path_to_regexp")
+local debug = require("lor.lib.debug")
 math.randomseed(os.time())
 
 local function isTableEmpty(t)
@@ -39,7 +40,7 @@ function Layer:new(path, options, fn, fn_args_length)
         fast_slash = false
     }
 
-    print("layer.lua#new - " .. "fn_args_len:" .. fn_args_length .. "\tname:" .. instance.name  .. "\tpath:" .. path .. "\tpattern:" .. instance.regexp.pattern)
+    debug("layer.lua#new - " .. "fn_args_len:" .. fn_args_length .. "\tname:" .. instance.name  .. "\tpath:" .. path .. "\tpattern:" .. instance.regexp.pattern)
 
     if path == '/' and opts.is_end == false then
         instance.regexp.fast_slash = true

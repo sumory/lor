@@ -1,8 +1,8 @@
-local Router = require("lor.lib.router.index")
-local middleware = require("lor.lib.middleware.init")
-local query = require("lor.lib.middleware.query")
+local Router = require("lor.lib.router.router")
+local middleware_init = require("lor.lib.middleware.init")
+local middleware_params = require("lor.lib.middleware.params")
 local supported_http_methods = require("lor.lib.methods")
-
+local debug = require("lor.lib.debug")
 
 local app = {}
 
@@ -15,8 +15,8 @@ function app:new()
         caseSensitive = true,
         strict = true
     })
-    -- self.router:use("/", query(), 3)
-    -- self.router:use("/", middleware(self), 3)
+    instance.router:use("/", middleware_params(), 3)
+    instance.router:use("/", middleware_init(self), 3)
 
     setmetatable(instance, {
         __index = self,
@@ -45,7 +45,7 @@ function app:handle(req, res, callback)
 
     local done = callback or function(req, res)
         return function(err)
-            print("&&&&&&&&&&&&&&&&&&&&&&&&finallllll handler")
+            print("----------------- finall handler -----------------")
             res.send(err)
         end
     end
@@ -60,12 +60,13 @@ end
 
 
 function app:use(path, fn)
+    debug("application.lua#normal middleware")
     self:inner_use(3, path, fn)
 end
 
 
 function app:erroruse(path, fn)
-    print("application.lua#erroruse")
+    debug("application.lua#error middleware")
     self:inner_use(4, path, fn)
 end
 
@@ -106,12 +107,10 @@ end
 function app:initMethod()
     for http_method, _ in pairs(supported_http_methods) do
         self[http_method] = function(self, path, fn)
-
-            print("\napp:" .. http_method, "start init")
+            debug("\napp:" .. http_method, "start init")
             local route = self.router:route(path)
             route[http_method](route, fn)
-
-            print("app:" .. http_method, "end init\n")
+            debug("app:" .. http_method, "end init\n")
             return self
         end
     end

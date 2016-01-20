@@ -1,6 +1,7 @@
 local Route = require("lor.lib.router.route")
 local Layer = require("lor.lib.router.layer")
 local supported_http_methods = require("lor.lib.methods")
+local debug = require("lor.lib.debug")
 
 local function table_is_array(t)
     if type(t) ~= "table" then return false end
@@ -28,7 +29,6 @@ local function mixin(a, b)
             a[k] = b[k]
         end
     end
-
     return a
 end
 
@@ -241,11 +241,15 @@ function proto:use(path, fn, fn_args_length)
     }, fn, fn_args_length)
 
     table.insert(self.stack, layer)
-    table.foreach(self.stack, function(i,v)
-        print(i, v)
+
+    debug(function()
+        for i, v in ipairs(self.stack) do
+            print(i, v)
+        end
     end)
 
-    print("index.lua#use new layer for path:", path, "stack length:", #self.stack, "middleware type:", fn_args_length)
+
+    --print("index.lua#use new layer for path:", path, "stack length:", #self.stack, "middleware type:", fn_args_length)
     return self
 end
 
@@ -260,28 +264,23 @@ function proto:route(path) -- 在第一层增加一个空route指向下一层
     layer.route = route
 
     table.insert(self.stack, layer)
-    table.foreach(self.stack, function(i,v)
-        print(i, v)
+    debug(function()
+        for i, v in ipairs(self.stack) do
+            print(i, v)
+        end
     end)
 
-
-    print("index.lua#route new route for path:", path, "stack length:", #self.stack, "middleware type:", 3)
+    --print("index.lua#route new route for path:", path, "stack length:", #self.stack, "middleware type:", 3)
     return route
 end
-
 
 
 -- create Router#VERB functions
 function proto:init()
     for http_method, _ in pairs(supported_http_methods) do
-        -- 生成方法，类似
-        -- proto:get = function(path, fn)
-        --
-        -- end
         self[http_method] = function(s, path, fn) -- 形成
             local route = s:route(path)
             route[http_method](fn) -- 调用route的get或是set等的方法, fn也可能会是个数组，也可能是一个元素
-
             return s
         end
     end

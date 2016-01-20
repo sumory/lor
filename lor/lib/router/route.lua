@@ -1,6 +1,8 @@
 local  tinsert = table.insert
 local Layer = require("lor.lib.router.layer")
 local supported_http_methods = require("lor.lib.methods")
+local debug = require("lor.lib.debug")
+
 
 local Route = {}
 
@@ -86,7 +88,7 @@ function Route:initMethod()
 			layer.method = http_method
 			s.methods[http_method] = true
 			tinsert(s.stack, layer)
-            print("add layer to route")
+            debug("route.lua add layer to route")
         end
     end
 end
