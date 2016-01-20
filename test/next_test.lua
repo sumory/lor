@@ -1,6 +1,6 @@
 --require('mobdebug').start()
 
-package.path = "/data/tmp/lua_framework/github_lor/?.lua;" .. package.path
+package.path = "../?.lua;" .. package.path
 
 local lor = require("lor.lib.lor")
 local Request = require("lor.lib.request")
@@ -28,11 +28,11 @@ app:get("/abc/error", function(req, res, next)
 end)
 
 
---app:get("/abc/error1", function(req, res, next)
---    print("shoule be error start2 ..")
---    next("fsdfsdf")
---    print("shoule be error end2 ..")
---end)
+app:get("/abc/error1", function(req, res, next)
+    print("shoule be error start2 ..")
+    error("fsdfsdffdfasdfdsafdsfsafsdafsdfsafsafd")
+    print("shoule be error end2 ..")
+end)
 
 app:erroruse( function(err, req, res, next)
     print("errrrrrrrrrrrrrrrrror middleware", err)
@@ -45,7 +45,7 @@ app:erroruse( function(err, req, res, next)
 
 end)
 
-print("@@@@@@@@@@@@@@@初始化完毕@@@@@@@@@@@@@@@@@@@")
+print("@@@@@@@@@@@@@@@init middlewares finished@@@@@@@@@@@@@@@@@@@")
 
 local req = Request:new()
 local res = Response:new()

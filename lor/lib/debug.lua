@@ -1,5 +1,7 @@
 local pcall = pcall
 local type = type
+local pairs = pairs
+local ipairs = ipairs
 
 local function table_is_array(t)
     if type(t) ~= "table" then return false end
@@ -19,13 +21,8 @@ local function debug(...)
     local info = { ... }
     if info and type(info[1]) == 'function' then
         pcall(function() info[1]() end)
-    elseif table_is_array(info) then
-        for i, v in ipairs(info)
-        do
-            print( v)
-        end
     else
-        print('debug function not works.')
+        print(...)
     end
 end
 

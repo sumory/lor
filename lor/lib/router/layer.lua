@@ -3,7 +3,7 @@ local pathRegexp = require("lor.lib.utils.path_to_regexp")
 local debug = require("lor.lib.debug")
 math.randomseed(os.time())
 
-local function isTableEmpty(t)
+local function is_table_empty(t)
     if t == nil or _G.next(t) == nil then
         return true
     else
@@ -91,50 +91,47 @@ end
 
 
 function Layer:match(path)
-    -- print("layer.lua#match before:", "path:", path, "pattern:", self.regexp.pattern, "self.path:", self.path, "fast_slash:", self.regexp.fast_slash)
+    --debug("layer.lua#match before:", "path:", path, "pattern:", self.regexp.pattern, "self.path:", self.path, "fast_slash:", self.regexp.fast_slash)
     if not path then
         self.params = nil
         self.path = nil
-        -- print("layer.lua#match 1")
+        --debug("layer.lua#match 1")
         return false
     end
 
     if self.regexp.fast_slash then
         self.params = {}
         self.path = ''
-        -- print("layer.lua#match 2")
+        --debug("layer.lua#match 2")
         return true
     end
 
-    if not pathRegexp.is_match(path, self.regexp.pattern) then
-        -- print("layer.lua#match 3")
+    local match_or_not = pathRegexp.is_match(path, self.regexp.pattern)
+    if not match_or_not then
+        --debug("layer.lua#match 3")
         return false
     end
 
+
     local m = pathRegexp.parse_path(path, self.regexp.pattern, self.keys)
     if m then
-        -- print("layer.lua#match 4", path, self.regexp.pattern, self.keys, m)
+        debug("layer.lua#match 4", path, self.regexp.pattern, self.keys, m)
     end
 
     -- store values
-    self.params = {}
     self.path = path
+    self.params = m
 
-    local keys = self.keys
-    local params = self.params
 
-    for j = 1, #keys do
-        local param_name = keys[j]
-        if param_name then
-            if m[j] then
-                params[param_name] = m[j] -- todo: 添加和覆盖规则
+    debug(function()
+        print("layer.lua# print layer.params")
+        if self.params then
+            for i,v in pairs(self.params) do
+                print(i,v)
             end
         end
-    end
+    end)
 
-    -- print("layer.lua#match after", path, self.path)
-
-    -- print("layer.lua#match 4")
     return true
 end
 

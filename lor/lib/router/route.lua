@@ -7,13 +7,11 @@ local debug = require("lor.lib.debug")
 local Route = {}
 
 function Route:new(path)
-
 	local instance = {}
 	instance.path = path
 	instance.stack = {}
 	instance.methods = {}
 
-	
 	setmetatable(instance, {
 		__index = self,
 		__call = self.dispatch  -- import: a magick to supply route:dispatch
@@ -37,7 +35,7 @@ function Route:_handles_method(method)
 end
 
 function Route:dispatch(req, res, done)
-    --print("route.lua#dispatch", req, res, done)
+    --debug("route.lua#dispatch", req, res, done)
 	local idx = 0
 	local stack = self.stack
 	if #stack == 0 then
@@ -49,7 +47,7 @@ function Route:dispatch(req, res, done)
 	req.route = self
 
 	local function next(err)
-        --print("route.lua#next err:", err)
+        --debug("route.lua#next err:", err)
 
 		if err then
 			done(err)
@@ -78,7 +76,6 @@ function Route:dispatch(req, res, done)
 
     next()
 end
-
 
 
 function Route:initMethod()
