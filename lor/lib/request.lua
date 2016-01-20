@@ -10,29 +10,18 @@ function Request:new()
     local query = {} -- uri params
     local body = {} -- body params
     local params = {}
-    
+
     local instance = {
+        method = "get",
+        query = {},
+        params = {},
+        body = {},
+        path = "",
         uri = "",
-
-        path = { -- path variables, init when `route`
-            params = {
-            }
-        },
-        query = query,
-        body = body,
-        
-        method = "get"
+        baseUrl = "",
     }
-    setmetatable(instance, {__index = self})
+    setmetatable(instance, { __index = self })
     return instance
-end
-
-function Request:getControllerName()
-    return self.controller_name
-end
-
-function Request:getActionName()
-    return self.action_name
 end
 
 function Request:getMethod()

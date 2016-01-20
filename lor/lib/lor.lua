@@ -4,7 +4,10 @@ local Request = require("lor.lib.request")
 local Response = require("lor.lib.response")
 local Application = require("lor.lib.application")
 
+local wrap = require("lor.lib.wrap")
+
 LOR_FRAMEWORK_DEBUG = false
+
 
 local createApplication = function(options)
 	if options and options.debug and type(options.debug) == 'boolean' then
@@ -23,4 +26,6 @@ local createApplication = function(options)
 end
 
 
-return createApplication
+local w = wrap:new(createApplication, Router, Request, Response, Route)
+
+return w

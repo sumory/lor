@@ -110,7 +110,6 @@ describe("test about variables parsed from path", function()
                 req.params.id = '2'
             end)
 
-
             app:erroruse("/user/:id/visit", function(err, req, res, next)
                 req.params.id = 'error'
             end)
@@ -122,5 +121,29 @@ describe("test about variables parsed from path", function()
             assert.is.equals('return', req.params.id)
         end)
 
+        it("test case 5.", function()
+            app:use("/user", function(req, res, next)
+                req.params.id = '1'
+                next()
+                req.params.id = 'return'
+            end)
+
+            app:get("/user/:id/visit", function(req, res, next)
+                error("error occurs")
+                req.params.id = '2'
+            end)
+
+            app:erroruse("/user/:id/visit", function(err, req, res, next)
+                req.params.id = 'error'
+            end)
+
+            req.url = "/user/3/visit"
+            req.path = req.url
+            req.method = "get"
+            app:handle(req, res, function(err)
+                req.params.id = "from final handler"
+            end)
+            assert.is.equals('return', req.params.id)
+        end)
     end)
 end)
