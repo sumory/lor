@@ -1,8 +1,11 @@
 local _M = {}
 
-function _M:new(create_app, router)
+function _M:new(create_app, router, route, request, response)
     local instance = {}
     instance.router = router
+    instance.route = route
+    instance.request = request
+    instance.response = response
     instance.fn = create_app
 
     setmetatable(instance, {
@@ -18,7 +21,19 @@ function _M:createApp(options)
 end
 
 function _M:Router()
-   return self.router
+    return self.router
+end
+
+function _M:Route()
+    return self.route
+end
+
+function _M:Request()
+    return self.Request
+end
+
+function _M:Response()
+    return self.Response
 end
 
 
