@@ -34,7 +34,7 @@ local function mixin(a, b)
 end
 
 -- todo: merge params with parent params
-local function mergeParams(params, parent)
+local function merge_params(params, parent)
     if not parent then
         return params
     end
@@ -47,13 +47,13 @@ local function restore(fn, obj)
     local origin = {
         baseUrl = obj['baseUrl'],
         next = obj['next'],
-        params = obj['params']
+        -- params = obj['params']
     }
 
     return function(err)
         obj['baseUrl'] = origin.baseUrl
         obj['next'] = origin.next
-        obj['params'] = origin.params
+       -- obj['params'] = origin.params -- maybe overrided by layer.params, so no need to keep
 
         fn(err)
         return
@@ -91,7 +91,6 @@ function proto:handle(req, res, out)
         local layerError = err
         --debug("index.lua#next..., layerError:", layerError, "stackLen:", #stack)
 
-        -- no more matching layers
         if idx > #stack then
             done(layerError)
             return
@@ -140,37 +139,46 @@ function proto:handle(req, res, out)
             end
         end
 
-        -- no match
         if not match then
-            --debug("no mathhhhhhhhhhhhhh")
+            --debug("no match")
             done(layerError)
             return
         end
 
-        -- store route for dispatch on change
+        -- store route
         if route then
             req.route = route
         end
 
         if self.mergeParams then
-            req.params = mergeParams(layer.params, parentParams)
+            debug("router.lua# merge params")
+            req.params = merge_params(layer.params, parentParams)
         else
+            debug("router.lua# not merge params")
+            debug(function()
+                print("router.lua# print layer.params")
+                if layer.params then
+                    for i,v in pairs(layer.params) do
+                        print(i,v)
+                    end
+                end
+            end)
             req.params = layer.params
         end
 
         if route then
-            --debug("111111111111111index.lua#next has route->handle_request", "layer.name", layer.name, "match:", match, idx)
+            --debug("[1]index.lua#next has route->handle_request", "layer.name", layer.name, "match:", match, idx)
             layer:handle_request(req, res, next)
         end
 
         if layerError then
-            --debug("2222222222222222index.lua#next no route and layerError->handle_error", "layer.name", layer.name, "match:", match, idx)
+            --debug("[2]index.lua#next no route and layerError->handle_error", "layer.name", layer.name, "match:", match, idx)
             layer:handle_error(layerError, req, res, next)
         elseif route then
-            --debug("333333333333333index.lua#next hasroute and not layerError->next()", "layer.name", layer.name, "match:", match, idx)
+            --debug("[3]index.lua#next hasroute and not layerError->next()", "layer.name", layer.name, "match:", match, idx)
             next()
         else
-            --debug("444444444444444index.lua#next no route->handle_request", "layer.name", layer.name, "match:", match, idx)
+            --debug("[4]index.lua#next no route->handle_request", "layer.name", layer.name, "match:", match, idx)
             layer:handle_request(req, res, next)
         end
     end

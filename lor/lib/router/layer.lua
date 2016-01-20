@@ -17,7 +17,7 @@ end
 
 local function doAfterError(err)
     print("---------------------------------------- TRACK BEGIN ----------------------------------------");
-    print("LUA PCALL ERROR:", err);
+    print("LUA XPCALL ERROR:", err);
     print("---------------------------------------- TRACK  END  ----------------------------------------");
     return false;
 end
@@ -30,7 +30,7 @@ function Layer:new(path, options, fn, fn_args_length)
     local opts = options or {}
     local instance = {}
     instance.handle = fn
-    instance.name =  random() -- path -- "default_fn_name" --fn and fn.name and (fn.name or '<anonymous>')
+    instance.name = random() -- path -- "default_fn_name" --fn and fn.name and (fn.name or '<anonymous>')
     instance.params = nil
     instance.path = nil
     instance.keys = {}
@@ -40,7 +40,7 @@ function Layer:new(path, options, fn, fn_args_length)
         fast_slash = false
     }
 
-    debug("layer.lua#new - " .. "fn_args_len:" .. fn_args_length .. "\tname:" .. instance.name  .. "\tpath:" .. path .. "\tpattern:" .. instance.regexp.pattern)
+    debug("layer.lua#new - ", "fn_args_len:", fn_args_length, "\tname:", instance.name, "\tpath:", path, "\tpattern:", instance.regexp.pattern)
 
     if path == '/' and opts.is_end == false then
         instance.regexp.fast_slash = true
@@ -77,14 +77,13 @@ function Layer:handle_request(req, res, next)
         return
     end
 
-    -- fn(req, res, next)
     --local trackId = random()
-    --print(trackId .. "  layer.lua - Layer:handle_request+", "layer.name:", self.name, "middle_type:", self.length)
+    --debug(trackId .. "  layer.lua - Layer:handle_request+", "layer.name:", self.name, "middle_type:", self.length)
     local ok, e = pcall(function() fn(req, res, next) end);
-    --print(trackId .. "  layer.lua - Layer:handle_request-", "ok?", ok, "error:", e, "layer.name:", self.name, "middle_type:", self.length)
+    --debug(trackId .. "  layer.lua - Layer:handle_request-", "ok?", ok, "error:", e, "layer.name:", self.name, "middle_type:", self.length)
 
     if not ok then
-        --print("handle_request:pcall error", ok, e)
+        --debug("handle_request:pcall error", ok, e)
         next(e)
     end
 end
@@ -126,8 +125,8 @@ function Layer:match(path)
     debug(function()
         print("layer.lua# print layer.params")
         if self.params then
-            for i,v in pairs(self.params) do
-                print(i,v)
+            for i, v in pairs(self.params) do
+                print(i, v)
             end
         end
     end)

@@ -1,5 +1,3 @@
---require('mobdebug').start()
-
 package.path = "../?.lua;" .. package.path
 
 local lor = require("lor.lib.lor")
