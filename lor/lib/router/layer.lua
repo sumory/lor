@@ -1,6 +1,6 @@
 local pcall = pcall
 local pathRegexp = require("lor.lib.utils.path_to_regexp")
-
+math.randomseed(os.time())
 
 local function isTableEmpty(t)
     if t == nil or _G.next(t) == nil then
@@ -10,15 +10,26 @@ local function isTableEmpty(t)
     end
 end
 
+local function random()
+    return math.random(0, 1000)
+end
+
+local function doAfterError(err)
+    print("---------------------------------------- TRACK BEGIN ----------------------------------------");
+    print("LUA PCALL ERROR:", err);
+    print("---------------------------------------- TRACK  END  ----------------------------------------");
+    return false;
+end
+
+
 
 local Layer = {}
-
 
 function Layer:new(path, options, fn, fn_args_length)
     local opts = options or {}
     local instance = {}
     instance.handle = fn
-    instance.name = path -- "default_fn_name" --fn and fn.name and (fn.name or '<anonymous>')
+    instance.name =  random() -- path -- "default_fn_name" --fn and fn.name and (fn.name or '<anonymous>')
     instance.params = nil
     instance.path = nil
     instance.keys = {}
@@ -28,7 +39,7 @@ function Layer:new(path, options, fn, fn_args_length)
         fast_slash = false
     }
 
-    print("layer.lua#new - " .. "fn_args_len:" .. fn_args_length .. "\tpath:" .. path .. "\tpattern:" .. instance.regexp.pattern)
+    print("layer.lua#new - " .. "fn_args_len:" .. fn_args_length .. "\tname:" .. instance.name  .. "\tpath:" .. path .. "\tpattern:" .. instance.regexp.pattern)
 
     if path == '/' and opts.is_end == false then
         instance.regexp.fast_slash = true
@@ -40,9 +51,8 @@ end
 
 
 function Layer:handle_error(error, req, res, next)
-    print("layer.lua - Layer:handle_error", "error:", error)
+    --print("layer.lua - Layer:handle_error", "error:", error)
     local fn = self.handle
-
     -- fn should pin a property named 'length' to indicate its args length
     if self.length ~= 4 then
         next(error)
@@ -50,19 +60,14 @@ function Layer:handle_error(error, req, res, next)
     end
 
     local ok, e = pcall(function() fn(error, req, res, next) end)
-    print("layer.lua - Layer:handle_error", "ok?", ok, "error:", e, "pcall_error:", e, "layer.name:", self.name)
+    --print(random() .. "  layer.lua - Layer:handle_error", "ok?", ok, "error:", e, "pcall_error:", e, "layer.name:", self.name)
 
     if not ok then
         next(e)
     end
 end
 
-local function doAfterError(err)
-    print("---------------------------------------- TRACK BEGIN ----------------------------------------");
-    print("LUA PCALL ERROR:", err);
-    print("---------------------------------------- TRACK  END  ----------------------------------------");
-    return false;
-end
+
 
 function Layer:handle_request(req, res, next)
     local fn = self.handle
@@ -71,20 +76,14 @@ function Layer:handle_request(req, res, next)
         return
     end
 
-
-    --  local result = xpcall(function() fn(req, res, next) end, doAfterError);
-    --	if not result then
-    --		next(error(e))
-    --	end
-
     -- fn(req, res, next)
-
-    print("layer.lua - Layer:handle_request-", "layer.name:", self.name)
+    --local trackId = random()
+    --print(trackId .. "  layer.lua - Layer:handle_request+", "layer.name:", self.name, "middle_type:", self.length)
     local ok, e = pcall(function() fn(req, res, next) end);
-    print("layer.lua - Layer:handle_request+", "ok?", ok, "error:", e, "layer.name:", self.name)
+    --print(trackId .. "  layer.lua - Layer:handle_request-", "ok?", ok, "error:", e, "layer.name:", self.name, "middle_type:", self.length)
 
     if not ok then
-        print("handle_request:pcall error", ok, e)
+        --print("handle_request:pcall error", ok, e)
         next(e)
     end
 end

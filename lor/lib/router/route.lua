@@ -35,22 +35,22 @@ function Route:_handles_method(method)
 end
 
 function Route:dispatch(req, res, done)
+    --print("route.lua#dispatch", req, res, done)
 	local idx = 0
 	local stack = self.stack
 	if #stack == 0 then
-		done()
+		done("empty route stack")
 		return
 	end
 
 	local method = string.lower(req.method)
-
 	req.route = self
 
-	next()
+	local function next(err)
+        --print("route.lua#next err:", err)
 
-	function next(err)
 		if err then
-			done()
+			done(err)
 			return
 		end
 
@@ -72,18 +72,21 @@ function Route:dispatch(req, res, done)
 			layer:handle_request(req, res, next)
 		end
 
-	end
+    end
+
+    next()
 end
 
 
 
 function Route:initMethod()
     for http_method, _ in pairs(supported_http_methods) do
-        self[http_method] = function(self, fn)
+        self[http_method] = function(s, fn)
         	local layer = Layer:new("/", {}, fn, 3)
 			layer.method = http_method
-			self.methods[http_method] = true
-			tinsert(self.stack, layer)
+			s.methods[http_method] = true
+			tinsert(s.stack, layer)
+            print("add layer to route")
         end
     end
 end

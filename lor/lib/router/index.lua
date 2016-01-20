@@ -124,9 +124,9 @@ function proto:handle(req, res, out)
 
 
 
-    function next(err)
+    local function next(err)
         local layerError = err
-        print("index.lua#next..., layerError:", layerError)
+        --print("index.lua#next..., layerError:", layerError, "stackLen:", #stack)
 
         if slashAdded then
             req.url = string.sub(req.url, 2) -- 去除/
@@ -134,7 +134,7 @@ function proto:handle(req, res, out)
         end
 
         -- no more matching layers
-        if idx > #stack  then
+        if idx > #stack then
             done(layerError)
             return
         end
@@ -185,7 +185,7 @@ function proto:handle(req, res, out)
 
         -- no match
         if not match then
-            print("no mathhhhhhhhhhhhhh")
+            --print("no mathhhhhhhhhhhhhh")
             done(layerError)
             return
         end
@@ -201,19 +201,19 @@ function proto:handle(req, res, out)
             req.params = layer.params
         end
 
-        local layerPath = layer.path
-
-
         if route then
-            print("111111111111111index.lua#next has route->handle_request",layer.length, match, idx)
+            --print("111111111111111index.lua#next has route->handle_request", "layer.name", layer.name, "match:", match, idx)
             layer:handle_request(req, res, next)
         end
 
         if layerError then
-            print("2222222222222222index.lua#next no route and layerError->handle_error", layer.length, match, idx)
+            --print("2222222222222222index.lua#next no route and layerError->handle_error", "layer.name", layer.name, "match:", match, idx)
             layer:handle_error(layerError, req, res, next)
+        elseif route then
+            --print("333333333333333index.lua#next hasroute and not layerError->next()", "layer.name", layer.name, "match:", match, idx)
+            next()
         else
-            print("333333333333333index.lua#next no route->handle_request", layer.length, match, idx)
+            --print("444444444444444index.lua#next no route->handle_request", "layer.name", layer.name, "match:", match, idx)
             layer:handle_request(req, res, next)
         end
     end
@@ -241,25 +241,31 @@ function proto:use(path, fn, fn_args_length)
     }, fn, fn_args_length)
 
     table.insert(self.stack, layer)
-    print("router--->stack length:", #self.stack, fn_args_length)
+    table.foreach(self.stack, function(i,v)
+        print(i, v)
+    end)
 
+    print("index.lua#use new layer for path:", path, "stack length:", #self.stack, "middleware type:", fn_args_length)
     return self
 end
 
 -- Create a new Route for the given path.
-function proto:route(path)
+function proto:route(path) -- 在第一层增加一个空route指向下一层
     local route = Route:new(path)
     local layer = Layer:new(path, {
         sensitive = self.caseSensitive,
         strict = self.strict,
         is_end = true
     }, route, 3) -- import: a magick to supply route:dispatch
-
-    print("index.lua#route new route for path:" .. path)
     layer.route = route
 
     table.insert(self.stack, layer)
-    print("-router--->stack length:", #self.stack, 3)
+    table.foreach(self.stack, function(i,v)
+        print(i, v)
+    end)
+
+
+    print("index.lua#route new route for path:", path, "stack length:", #self.stack, "middleware type:", 3)
     return route
 end
 
@@ -272,11 +278,11 @@ function proto:init()
         -- proto:get = function(path, fn)
         --
         -- end
-        self[http_method] = function(self, path, fn) -- 形成
-        local route = self:route(path)
-        route[http_method](fn) -- 调用route的get或是set等的方法, fn也可能会是个数组，也可能是一个元素
+        self[http_method] = function(s, path, fn) -- 形成
+            local route = s:route(path)
+            route[http_method](fn) -- 调用route的get或是set等的方法, fn也可能会是个数组，也可能是一个元素
 
-        return self
+            return s
         end
     end
 end
