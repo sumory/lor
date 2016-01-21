@@ -98,6 +98,7 @@ describe("error middleware test", function()
         end)
 
         app:erroruse(function(err, req, res, next)
+            assert.is.truthy(err)
             count = 100
         end)
 

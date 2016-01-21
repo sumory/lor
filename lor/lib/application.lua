@@ -89,8 +89,7 @@ function app:inner_use(fn_args_length, path, fn)
     return self
 end
 
--- Proxy to the app `Router#route()`
--- Returns a new `Route` instance for the _path_.
+
 function app:route(path)
     return self.router:route(path)
 end
@@ -101,9 +100,6 @@ function app:set(setting, val)
     return self
 end
 
-
-
--- Delegate `.VERB(...)` calls to `router.VERB(...)`.
 function app:initMethod()
     for http_method, _ in pairs(supported_http_methods) do
         self[http_method] = function(self, path, fn)
@@ -126,16 +122,6 @@ function app:all(path, fn)
 
     return self
 end
-
-
-
-
-
-
-
-
-
-
 
 
 return app

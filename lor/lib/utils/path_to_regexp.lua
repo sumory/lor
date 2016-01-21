@@ -49,6 +49,11 @@ function _M.parse_path(uri, pattern, keys)
 end
 
 function _M.is_match(uri, pattern)
+    if not pattern then
+        debug("empty pattern")
+        return false
+    end
+
     local ok = smatch(uri, pattern)
     if ok then return true else return false end
 end

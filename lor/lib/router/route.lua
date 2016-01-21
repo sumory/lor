@@ -7,7 +7,9 @@ local debug = require("lor.lib.debug")
 local Route = {}
 
 function Route:new(path)
-	local instance = {}
+	local instance = {
+        desc = "the route to a solid path"
+    }
 	instance.path = path
 	instance.stack = {}
 	instance.methods = {}
@@ -80,11 +82,11 @@ end
 
 function Route:initMethod()
     for http_method, _ in pairs(supported_http_methods) do
-        self[http_method] = function(s, fn)
+        self[http_method] = function(self, fn)
         	local layer = Layer:new("/", {}, fn, 3)
 			layer.method = http_method
-			s.methods[http_method] = true
-			tinsert(s.stack, layer)
+			self.methods[http_method] = true
+			tinsert(self.stack, layer)
             debug("route.lua add layer to route")
         end
     end
