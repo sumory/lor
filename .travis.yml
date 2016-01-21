@@ -30,7 +30,7 @@ install:
   - luarocks install lrexlib-pcre 2.7.2-1
   - luarocks install luaposix
   - luarocks install lua-cjson
-  - luarocks make
+  #- luarocks make
 
 script:
   - busted test/*.test.lua
