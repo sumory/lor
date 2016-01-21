@@ -1,6 +1,8 @@
 expose("expose modules", function()
     package.path = '../?.lua;' .. package.path
     _G.lor = require("lor.lib.lor")
+    _G.request = require("test.mock_request")
+    _G.response = require("test.mock_response")
 end)
 
 describe("group router middleware test", function()
@@ -16,11 +18,19 @@ describe("group router middleware test", function()
         app = lor({
             debug = false
         })
+        Request = _G.request
+        Response = _G.response
+        req = Request:new()
+        res = Response:new()
     end)
 
     after_each(function()
         lor = nil
         app = nil
+        Request = nil
+        Response = nil
+        req = nil
+        res = nil
     end)
 
     it("objects or modules should not be nil.", function()
@@ -53,8 +63,6 @@ describe("group router middleware test", function()
 
 
             -- start mock test
-            local req = lor:Request()
-            local res = lor:Response()
 
             req.url = "/user/create/123"
             req.path = req.url
@@ -101,8 +109,6 @@ describe("group router middleware test", function()
 
 
             -- start mock test
-            local req = lor:Request()
-            local res = lor:Response()
 
             req.url = "/user/find/456"
             req.path = req.url
@@ -164,8 +170,6 @@ describe("group router middleware test", function()
 
 
             -- start mock test
-            local req = lor:Request()
-            local res = lor:Response()
 
             req.url = "/user/find/456"
             req.path = req.url
@@ -241,8 +245,6 @@ describe("group router middleware test", function()
             end)
 
             -- start mock test
-            local req = lor:Request()
-            local res = lor:Response()
 
             req.url = "/user/create/123"
             req.path = req.url

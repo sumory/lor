@@ -1,6 +1,8 @@
 expose("expose modules", function()
     package.path = '../?.lua;' .. package.path
     _G.lor = require("lor.lib.lor")
+    _G.request = require("test.mock_request")
+    _G.response = require("test.mock_response")
 end)
 
 describe("not found test", function()
@@ -13,13 +15,21 @@ describe("not found test", function()
     before_each(function()
         lor = _G.lor
         app = lor({
-            debug = false
+            debug = true
         })
+        Request = _G.request
+        Response = _G.response
+        req = Request:new()
+        res = Response:new()
     end)
 
     after_each(function()
         lor = nil
         app = nil
+        Request = nil
+        Response = nil
+        req = nil
+        res = nil
     end)
 
     it("objects or modules should not be nil.", function()
@@ -73,8 +83,6 @@ describe("not found test", function()
 
 
         -- start mock test
-        local req = lor:Request()
-        local res = lor:Response()
 
         req.url = "/user/find/456"
         req.path = req.url
@@ -92,5 +100,47 @@ describe("not found test", function()
             end
         end)
         assert.is.equals(404, count)
+    end)
+
+    it("test case 2", function()
+        local count = 0
+        local errorMsg = "an error occurs."
+        local userRouter = lor:Router()
+
+        userRouter:get("/find/:id", function(req, res, next)
+            count = 1
+        end)
+
+        app:use("/user", userRouter())
+
+
+        app:use(function(req, res, next)
+            if req:isFound() ~= true then
+                count = 404
+            end
+        end)
+
+
+        app:erroruse(function(err, req, res, next)
+            count = 500
+        end)
+
+
+        -- start mock test
+        req.url = "/user/find/456"
+        req.path = req.url
+        req.method = "get"
+        app:handle(req, res)
+        assert.is_not.equals(404, count)-- should not be 404
+
+        req.url = "/notfound"
+        req.path = req.url
+        req.method = "post"
+        app:handle(req, res, function(err)
+            if err then
+                print(err)
+            end
+        end)
+        assert.is.equals(1, count)
     end)
 end)

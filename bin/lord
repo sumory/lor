@@ -1,0 +1,50 @@
+#!/usr/bin/env luajit
+
+package.path = './?.lua;' .. package.path
+
+local generator = require("bin.scaffold.generator")
+local lor = require("bin.scaffold.launcher")
+
+-- LOR_CONTEXT should be the only global app variable.
+local version = "0.0.2"
+
+
+local usages = [[lor v]] .. version .. [[, a Lua web framework based on OpenResty.
+
+Usage: lor COMMAND [OPTIONS]
+
+Commands:
+ new [name]             Create a new application
+ start                  Starts the server
+ stop                   Stops the server
+ restart                Restart the server
+ version                Show version of lor
+ help                   Show help tips
+
+Options:
+ --debug                Show some runtime details
+]]
+
+
+-- if debug?
+if arg[#arg] == '--debug' then
+    table.remove(arg, #arg)
+end
+
+-- parse commands and options
+if arg[1] == 'new' and arg[2] then
+    generator.new(arg[2]) -- generate example code
+elseif arg[1] == 'start' then
+    lor.start() -- start application
+elseif arg[1] == 'stop' then
+    lor.stop() -- stop application
+elseif arg[1] == 'restart' then
+    lor.stop()
+    lor.start()
+elseif arg[1] == 'help' or arg[1] == '-h' then
+    print(usages)
+elseif arg[1] == 'version' or arg[1] == '-v' then
+    print(version) -- show lor framework version
+else
+    print("[lor] unsupported commands or options")
+end

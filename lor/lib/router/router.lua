@@ -114,7 +114,7 @@ function proto:handle(req, res, out)
 
     local function next(err)
         local layerError = err
-        debug("\nindex.lua#next..., layerError:", layerError, "stackLen:", #stack)
+        debug("\nindex.lua#next..., layerError:", layerError, "stackLen:", #stack, "idx:", idx)
 
         if idx > #stack then
             done(layerError)
@@ -173,6 +173,7 @@ function proto:handle(req, res, out)
         -- store route
         if route then
             req.route = route
+            req:setFound(true)
         end
 
         if match then

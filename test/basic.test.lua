@@ -20,8 +20,8 @@
 expose("expose modules", function()
     package.path = '../?.lua;' .. package.path
     _G.lor = require("lor.index")
-    _G.request = require("lor.lib.request")
-    _G.response = require("lor.lib.response")
+    _G.request = require("test.mock_request")
+    _G.response = require("test.mock_response")
 end)
 
 describe("basic test for common usages", function()

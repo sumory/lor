@@ -15,11 +15,6 @@ local createApplication = function(options)
     end
 
     local app = Application:new()
-    local request = Request:new()
-    local response = Response:new()
-
-    app.reqeust = request
-    app.response = response
     app:init()
 
     return app

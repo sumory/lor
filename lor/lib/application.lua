@@ -1,4 +1,6 @@
 local Router = require("lor.lib.router.router")
+local Request = require("lor.lib.request")
+local Response = require("lor.lib.response")
 local middleware_init = require("lor.lib.middleware.init")
 local middleware_params = require("lor.lib.middleware.params")
 local supported_http_methods = require("lor.lib.methods")
@@ -25,6 +27,15 @@ function app:new()
 
     instance:initMethod()
     return instance
+end
+
+function app:run(finalHandler)
+    local request = Request:new()
+    local response = Response:new()
+
+    self.request = request
+    self.response = response
+    self:handle(self.request, self.response,finalHandler)
 end
 
 function app:init()

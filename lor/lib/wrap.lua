@@ -9,6 +9,7 @@ function _M:new(create_app, Router, Route, Request, Response)
     instance.request = Request
     instance.response = Response
     instance.fn = create_app
+    instance.app = nil
 
     setmetatable(instance, {
         __index = self,
@@ -20,7 +21,8 @@ end
 
 -- Generally, this shouled only be used for `lor` framework itself.
 function _M:createApp(options)
-    return self.fn(options)
+    self.app = self.fn(options)
+    return self.app
 end
 
 function _M:Router(options)
