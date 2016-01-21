@@ -19,7 +19,7 @@
 
 expose("expose modules", function()
     package.path = '../?.lua;' .. package.path
-    _G.lor = require("lor.lib.lor")
+    _G.lor = require("lor.index")
     _G.request = require("lor.lib.request")
     _G.response = require("lor.lib.response")
 end)

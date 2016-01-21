@@ -19,6 +19,7 @@ env:
       # - LUA=lua5.3
 
 branches:
+  - master
   - v0.0.2
 
 

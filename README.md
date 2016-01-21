@@ -1,5 +1,7 @@
 # Lor
 
+[![https://travis-ci.org/sumory/lor.svg?branch=v0.0.2](https://travis-ci.org/sumory/lor.svg?branch=v0.0.2)](https://travis-ci.org/sumory/lor)
+
 lor is a framework particularly designed for API usages. lor is based on [OpenResty](http://openresty.org) and still under heavy development.
 
 ## Get started

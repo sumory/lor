@@ -24,6 +24,24 @@ function Request:new()
     return instance
 end
 
+function Request:mock()
+    local query = {} -- uri params
+    local body = {} -- body params
+    local params = {}
+
+    local instance = {
+        method = "get",
+        query = {},
+        params = {},
+        body = {},
+        path = "",
+        uri = "",
+        baseUrl = "",
+    }
+    setmetatable(instance, { __index = self })
+    return instance
+end
+
 function Request:getMethod()
     return self.method
 end
