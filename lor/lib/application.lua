@@ -17,8 +17,8 @@ function app:new()
         caseSensitive = true,
         strict = true
     })
-    instance.router:use("/", middleware_params(), 3)
-    instance.router:use("/", middleware_init(self), 3)
+    --instance.router:use("/", middleware_params(), 3)
+    --instance.router:use("/", middleware_init(self), 3)
 
     setmetatable(instance, {
         __index = self,
@@ -48,16 +48,16 @@ function app:defaultConfiguration()
     self.locals.settings = self.setttings
 end
 
--- Dispatch a req, res pair into the application. Starts pipeline processing.
--- If no callback is provided, then default error handlers will respond
--- in the event of an error bubbling through the stack.
+-- dispatch `req, res` into the pipeline.
 function app:handle(req, res, callback)
+    debug("app.lua#handle start------------------------------------->")
     local router = self.router
-
     local done = callback or function(req, res)
         return function(err)
-            print("----------------- finall handler -----------------")
-            res.send(err)
+            debug("----------------- finall handler -----------------")
+            if err then
+                res:status(500):send(err)
+            end
         end
     end
 
@@ -71,7 +71,7 @@ end
 
 
 function app:use(path, fn)
-    debug("application.lua#normal middleware")
+    debug("application.lua#use", path)
     self:inner_use(3, path, fn)
 end
 
@@ -114,10 +114,10 @@ end
 function app:initMethod()
     for http_method, _ in pairs(supported_http_methods) do
         self[http_method] = function(self, path, fn)
-            debug("\napp:" .. http_method, "start init")
+            debug("\napp:"..http_method, path, "start init##############################")
             local route = self.router:route(path)
-            route[http_method](route, fn)
-            debug("app:" .. http_method, "end init\n")
+            route[http_method](route, fn) -- like route:get(fn)
+            debug("app:".. http_method, path, "end init################################\n")
             return self
         end
     end

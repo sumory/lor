@@ -4,7 +4,7 @@ local Request = require("lor.lib.request")
 local Response = require("lor.lib.response")
 local Application = require("lor.lib.application")
 
-local wrap = require("lor.lib.wrap")
+local Wrap = require("lor.lib.wrap")
 
 LOR_FRAMEWORK_DEBUG = false
 
@@ -21,6 +21,6 @@ local createApplication = function(options)
 end
 
 
-local w = wrap:new(createApplication, Router, Route, Request, Response)
+local lor = Wrap:new(createApplication, Router, Route, Request, Response)
 
-return w
+return lor

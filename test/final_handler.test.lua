@@ -35,15 +35,6 @@ describe("if finall handler defined, it will always be executed. but maybe not t
         res = nil
     end)
 
-    it("objects or modules should not be nil.", function()
-        assert.is.truthy(lor)
-        assert.is.truthy(app)
-        assert.is.truthy(Request)
-        assert.is.truthy(req)
-        assert.is.truthy(Response)
-        assert.is.truthy(res)
-    end)
-
 
     it("the request has no execution except for `use` middlewares.", function()
         local count = 1

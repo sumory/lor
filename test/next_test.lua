@@ -1,8 +1,8 @@
 package.path = "../?.lua;" .. package.path
 
-local lor = require("lor.lib.lor")
-local Request = require("lor.lib.request")
-local Response = require("lor.lib.response")
+local lor = require("lor.index")
+local Request = require("test.mock_request")
+local Response = require("test.mock_response")
 
 local app = lor()
 

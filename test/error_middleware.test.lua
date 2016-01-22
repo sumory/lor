@@ -33,16 +33,6 @@ describe("error middleware test", function()
         res = nil
     end)
 
-    it("objects or modules should not be nil.", function()
-        assert.is.truthy(lor)
-        assert.is.truthy(app)
-        assert.is.truthy(Request)
-        assert.is.truthy(req)
-        assert.is.truthy(Response)
-        assert.is.truthy(res)
-    end)
-
-
     it("error middleware should stop the left error middlewares if has no `next`.", function()
         local count = 1
         app:use("/user", function(req, res, next)

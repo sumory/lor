@@ -1,36 +1,13 @@
 local pcall = pcall
+local ostime = os.time
 local pathRegexp = require("lor.lib.utils.path_to_regexp")
+local utils = require("lor.lib.utils.utils")
+local is_table_empty = utils.is_table_empty
+local mixin = utils.mixin
+local random = utils.random
 local debug = require("lor.lib.debug")
-math.randomseed(os.time())
 
-local function is_table_empty(t)
-    if t == nil or _G.next(t) == nil then
-        return true
-    else
-        return false
-    end
-end
-
-local function mixin(a, b)
-    if a and b then
-        for k, v in pairs(b) do
-            a[k] = b[k]
-        end
-    end
-    return a
-end
-
-local function random()
-    return math.random(0, 1000)
-end
-
-local function doAfterError(err)
-    print("---------------------------------------- TRACK BEGIN ----------------------------------------");
-    print("LUA XPCALL ERROR:", err);
-    print("---------------------------------------- TRACK  END  ----------------------------------------");
-    return false;
-end
-
+math.randomseed(ostime())
 
 
 local Layer = {}
@@ -39,29 +16,44 @@ function Layer:new(path, options, fn, fn_args_length)
     local opts = options or {}
     local instance = {}
     instance.handle = fn
-    instance.name = random() -- path -- "default_fn_name" --fn and fn.name and (fn.name or '<anonymous>')
+    instance.name = "layer-" .. random()
     instance.params = {}
-    instance.path = nil
+    instance.path = path
     instance.keys = {}
     instance.length = fn_args_length -- todo:shoule only be 3 or 4
-    instance.regexp = {}
     local tmp_pattern = pathRegexp.parse_pattern(path, instance.keys, opts)
     if tmp_pattern == "" or not tmp_pattern then
-        instance.regexp.pattern = "/"
+        instance.pattern = "/"
     else
-        instance.regexp.pattern = tmp_pattern
+        instance.pattern = tmp_pattern
     end
 
-    debug("layer.lua#new - ", "fn_args_len:", fn_args_length, "\tname:", instance.name, "\tpath:", path, "\tpattern:", instance.regexp.pattern)
+    setmetatable(instance, {
+        __index = self,
+        __tostring = function(s)
+            local ok, result = pcall(function()
+                local route_name = "<nil>"
+                if s.route then
+                    route_name = s.route.name
+                end
 
-
-    setmetatable(instance, { __index = self })
+                return "(name:" .. s.name .. "\tpath:" .. s.path .. "\tlength:" .. s.length ..
+                        "\t layer.route.name:" .. route_name .. "\tpattern:" .. s.pattern .. ")"
+            end)
+            if ok then
+                return result
+            else
+                return "layer.tostring() error"
+            end
+        end
+    })
+    debug("layer.lua#new:", instance)
     return instance
 end
 
 
 function Layer:handle_error(error, req, res, next)
-    --print("layer.lua - Layer:handle_error", "error:", error)
+    debug("layer.lua#handel_error:", self, error)
     local fn = self.handle
     -- fn should pin a property named 'length' to indicate its args length
     if self.length ~= 4 then
@@ -80,6 +72,8 @@ end
 
 
 function Layer:handle_request(req, res, next)
+    debug("layer.lua#handel_request:", self)
+
     local fn = self.handle
     if self.length > 3 then
         debug("---------->not match handle_request")
@@ -88,7 +82,6 @@ function Layer:handle_request(req, res, next)
     end
 
     --local trackId = random()
-    --debug(trackId .. "  layer.lua - Layer:handle_request+", "layer.name:", self.name, "middle_type:", self.length)
     local ok, e = pcall(function() fn(req, res, next) end);
     --debug(trackId .. "  layer.lua - Layer:handle_request-", "ok?", ok, "error:", e, "layer.name:", self.name, "middle_type:", self.length)
 
@@ -100,7 +93,7 @@ end
 
 -- req's fullpath
 function Layer:match(path)
-    debug("layer.lua#match before:", "path:", path, "pattern:", self.regexp.pattern,  "fast_slash:", self.regexp.fast_slash)
+    debug("layer.lua#match before:", "path:", path, "pattern:", self.pattern)
     if not path then
         self.params = nil
         self.path = nil
@@ -108,38 +101,32 @@ function Layer:match(path)
         return false
     end
 
-
-    local match_or_not = pathRegexp.is_match(path, self.regexp.pattern)
+    local match_or_not = pathRegexp.is_match(path, self.pattern)
     if not match_or_not then
         debug("layer.lua#match 3")
         return false
     end
 
-
-    local m = pathRegexp.parse_path(path, self.regexp.pattern, self.keys)
+    local m = pathRegexp.parse_path(path, self.pattern, self.keys)
     if m then
-        debug("layer.lua#match 4", path, self.regexp.pattern, self.keys, m)
+        debug("layer.lua#match 4", path, self.pattern, self.keys, m)
     end
 
     -- store values
     self.path = path
-    self.params = mixin( m, self.params) -- this is only this layer's params
+    self.params = mixin(m, self.params) -- this is only this layer's params
 
-
---    debug(function()
---        print("layer.lua# print layer.params")
---        if self.params then
---            for i, v in pairs(self.params) do
---                print(i, v)
---            end
---        end
---    end)
+    debug(function()
+        print("layer.lua# print layer.params")
+        if self.params then
+            for i, v in pairs(self.params) do
+                print(i, v)
+            end
+        end
+    end)
 
     return true
 end
-
-
-
 
 
 return Layer

@@ -49,13 +49,13 @@ describe("path match and parse rule test", function()
         assert.is.equals(params["what"], "1")
     end)
 
-    it("method:removelast should work.", function()
-        local p1, p1_expected = "/foo/", "/foo"
-        local p1_removed = Regexp.removelast(p1)
+    it("method:clear_slash should work.", function()
+        local p1, p1_expected = "/a///foo//", "/a/foo/"
+        local p1_removed = Regexp.clear_slash(p1)
         assert.is.equals(p1_removed, p1_expected)
 
-        local p2, p2_expected = "/abc/foo///", "/abc/foo"
-        local p2_removed = Regexp.removelast(p2)
+        local p2, p2_expected = "/abc/foo///", "/abc/foo/"
+        local p2_removed = Regexp.clear_slash(p2)
         assert.is.equals(p2_removed, p2_expected)
     end)
 

@@ -1,46 +1,22 @@
 local tinsert = table.insert
 local pairs = pairs
 local ipairs = ipairs
+local utils = require("lor.lib.utils.utils")
+local is_table_empty = utils.is_table_empty
+local table_is_array = utils.table_is_array
+local random = utils.random
+local mixin = utils.mixin
+
 local Route = require("lor.lib.router.route")
 local Layer = require("lor.lib.router.layer")
 local supported_http_methods = require("lor.lib.methods")
 local debug = require("lor.lib.debug")
 
-local function table_is_array(t)
-    if type(t) ~= "table" then return false end
-    local i = 0
-    for _ in pairs(t) do
-        i = i + 1
-        if t[i] == nil then return false end
-    end
-    return true
-end
-
-local function is_table_empty(t)
-    if t == nil or _G.next(t) == nil then
-        return true
-    else
-        return false
-    end
-end
-
-local function get_path_name(req)
-    return req.path
-end
 
 local function layer_match(layer, path)
     local is_match = layer:match(path)
-     debug("index.lua - is_match:", is_match, "path:", path, "layer.pattern", layer.regexp.pattern,"layer.length", layer.length)
+     debug("index.lua - is_match:", is_match, "path:", path, "layer.pattern", layer.pattern,"layer.length", layer.length)
     return is_match
-end
-
-local function mixin(a, b)
-    if a and b then
-        for k, v in pairs(b) do
-            a[k] = b[k]
-        end
-    end
-    return a
 end
 
 -- todo: merge params with parent params
@@ -70,7 +46,6 @@ local function restore(fn, obj)
         -- obj['params'] = origin.params -- maybe overrided by layer.params, so no need to keep
 
         fn(err)
-        return
     end
 end
 
@@ -82,6 +57,8 @@ function proto:new(options)
     local router = {
         desc = "the router of `lor`"
     }
+
+    router.name =  "routerr-" .. random()
     router.params = {}
     router._params = {} --array
     router.caseSensitive = opts.caseSensitive
@@ -92,8 +69,20 @@ function proto:new(options)
     self:init()
     setmetatable(router, {
         __index = self,
-        __call = self.call
+        __call = self.call,
+        __tostring = function(s)
+            local ok, result = pcall(function()
+                return "(name:" .. s.name .. "\tstack_length:" .. #s.stack .. ")"
+            end)
+            if ok then
+                return result
+            else
+                return "router.tostring() error"
+            end
+        end
     })
+
+    debug("router.lua#new:", router)
     return router
 end
 
@@ -121,7 +110,7 @@ function proto:handle(req, res, out)
             return
         end
 
-        local path = get_path_name(req)
+        local path = req.path
         if not path then
             done(layerError)
             return
@@ -200,12 +189,6 @@ function proto:handle(req, res, out)
             debug("[4]index.lua#next no route->handle_request", "layer.name", layer.name, "layer.length", layer.length,"match:", match, idx)
             layer:handle_request(req, res, next)
 
---            if layer.length == 3 then
---                layer:handle_request(req, res, next)
---            else
---                layer:handle_error(layerError, req, res, next)
---            end
-
         end
     end
     -- end of next function
@@ -220,9 +203,8 @@ function proto:handle(req, res, out)
     next()
 end
 
---  Use the given middleware function, with optional path, defaulting to "/".
-function proto:use(path, fn, fn_args_length)
 
+function proto:use(path, fn, fn_args_length)
     local layer = Layer:new(path, {
         sensitive = self.caseSensitive,
         strict = false,
@@ -231,12 +213,13 @@ function proto:use(path, fn, fn_args_length)
 
     tinsert(self.stack, layer)
 
+    debug("router.lua#use now the router(" .. self.name .. ") stack is:")
     debug(function()
         for i, v in ipairs(self.stack) do
             print(i, v)
         end
     end)
-
+    debug("router.lua#use now the router(" .. self.name .. ") stack is-------------\n")
 
     --debug("index.lua#use new layer for path:", path, "stack length:", #self.stack, "middleware type:", fn_args_length)
     return self
@@ -253,11 +236,14 @@ function proto:route(path) -- 在第一层增加一个空route指向下一层
     layer.route = route
 
     tinsert(self.stack, layer)
+
+    debug("router.lua#route now the router(" .. self.name .. ") stack is:")
     debug(function()
         for i, v in ipairs(self.stack) do
             print(i, v)
         end
     end)
+    debug("router.lua#route now the router(" .. self.name .. ") stack is+++++++++++\n")
 
     --debug("index.lua#route new route for path:", path, "stack length:", #self.stack, "middleware type:", 3)
     return route
@@ -268,8 +254,6 @@ function proto:init()
     for http_method, _ in pairs(supported_http_methods) do
         self[http_method] = function(s, path, fn)
             local route = s:route(path)
-
-            -- 调用route的get或是set等的方法, fn也可能会是个数组，也可能是一个元素
             -- 参数应该明确指定为route，不得省略，否则group_router.test.lua使用lor:Router()语法时无法传递route
             route[http_method](route, fn)
             return s

@@ -2,5 +2,6 @@
 local_install.sh
 test.sh
 test.lua
+snippets.lua
 .idea
 *.iml

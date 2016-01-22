@@ -8,13 +8,13 @@ local debug = require("lor.lib.debug")
 local _M = {}
 
 -- 去除最后的/
-function _M.removelast(s)
-    s, _ = sgsub(s, "/*$", "")
+function _M.clear_slash(s)
+    s, _ = sgsub(s, "(/+)", "/")
     return s
 end
 --
 function _M.parse_pattern(path, keys, options)
-    path = _M.removelast(path)
+    path = _M.clear_slash(path)
 
     local new_pattern = sgsub(path, "/:([A-Za-z0-9_]+)", function(m)
         tappend(keys, m)
@@ -29,7 +29,7 @@ function _M.parse_pattern(path, keys, options)
 end
 
 function _M.parse_path(uri, pattern, keys)
-    uri = _M.removelast(uri)
+    uri = _M.clear_slash(uri)
 
     local params = {}
     local match = { smatch(uri, pattern) } -- param values
