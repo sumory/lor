@@ -62,11 +62,11 @@ end)
 sh install.sh /opt/lua/lor 
 ```
 
-执行以上命令后lor的命令行工具`lord`就被安装在了`/usr/local/bin`下, 通过`which lor`查看:
+执行以上命令后lor的命令行工具`lord`就被安装在了`/usr/local/bin`下, 通过`which lord`查看:
 
 ```
-$ which lor
-/usr/local/bin/lor
+$ which lord
+/usr/local/bin/lord
 ```
 
 `lor`的运行时包安装在了`/opt/lua/lor`下, 通过`ll /opt/lua/lor`查看:
@@ -96,7 +96,7 @@ drwxr-xr-x  13 root  wheel   442B  1 22 01:17 test
 ### 使用
 
 ```
-$ lor -h
+$ lord -h
 lor v0.0.2, a Lua web framework based on OpenResty.
 
 Usage: lor COMMAND [OPTIONS]
