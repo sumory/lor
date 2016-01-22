@@ -79,7 +79,7 @@ describe("if finall handler defined, it will always be executed. but maybe not t
                     count = 222
                 end
             end)
-            assert.is.equals(count, 4) -- not 222, because there is no err
+            assert.is.equals(2, count) -- not 222, because there is no err; not 4,because `/user/123/create` does not math `/user/123$`
         end)
 
         it("test case 2", function()
@@ -98,7 +98,9 @@ describe("if finall handler defined, it will always be executed. but maybe not t
             req.path = req.url
             req.method = "get"
             app:handle(req, res, function(err)
-                count = 222
+                assert.is_falsy(err) -- 没有发生错误，此时err为nil
+                assert.is_not_true(req:isFound()) -- 没有匹配到/user/123/create
+                count = 222 -- finallhandler 仍被执行
             end)
             assert.is.equals(count, 222)
         end)

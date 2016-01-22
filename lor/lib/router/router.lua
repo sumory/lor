@@ -15,7 +15,7 @@ local debug = require("lor.lib.debug")
 
 local function layer_match(layer, path)
     local is_match = layer:match(path)
-     debug("index.lua - is_match:", is_match, "path:", path, "layer.pattern", layer.pattern,"layer.length", layer.length)
+    debug("index.lua - is_match:", is_match, "path:", path, layer)
     return is_match
 end
 
@@ -98,7 +98,6 @@ function proto:handle(req, res, out)
     -- debug("index.lua#handle")
     local idx = 1
     local stack = self.stack
-    local parentUrl = req.baseUrl or ''
     local done = restore(out, req)
 
     local function next(err)
@@ -125,10 +124,6 @@ function proto:handle(req, res, out)
 
             match = layer_match(layer, path)
             route = layer.route
-
-            if type(match) ~= 'boolean' then
-                layerError = layerError or match
-            end
 
             -- lua has no `break` keyword, such a pain
             if not match then
@@ -195,9 +190,6 @@ function proto:handle(req, res, out)
 
     -- setup next layer
     req.next = next
-
-    --setup basic req values
-    req.baseUrl = parentUrl
 
     -- debug("index.lua#next", next)
     next()

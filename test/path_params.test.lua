@@ -88,6 +88,7 @@ describe("test about variables parsed from path", function()
 
 
             app:erroruse("/user/:id/visit", function(err, req, res, next)
+                assert.is_not_nil(err)
                 req.params.id = 'error'
             end)
 

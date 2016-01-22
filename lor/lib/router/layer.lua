@@ -21,6 +21,8 @@ function Layer:new(path, options, fn, fn_args_length)
     instance.path = path
     instance.keys = {}
     instance.length = fn_args_length -- todo:shoule only be 3 or 4
+    instance.is_end = opts.is_end or false -- is belong to a route?;is the last really to match the path?
+
     local tmp_pattern = pathRegexp.parse_pattern(path, instance.keys, opts)
     if tmp_pattern == "" or not tmp_pattern then
         instance.pattern = "/"
@@ -28,17 +30,31 @@ function Layer:new(path, options, fn, fn_args_length)
         instance.pattern = tmp_pattern
     end
 
+    if instance.is_end then -- 如果是is_end，则pattern要匹配末尾
+        instance.pattern = instance.pattern .. "$"
+    else
+        instance.pattern = pathRegexp.clear_slash(instance.pattern .. "/")
+    end
+
+
     setmetatable(instance, {
         __index = self,
         __tostring = function(s)
             local ok, result = pcall(function()
-                local route_name = "<nil>"
+                local route_name, is_end = "<nil>", ""
                 if s.route then
                     route_name = s.route.name
                 end
 
+                if s.is_end then
+                    is_end = "true"
+                else
+                    is_end = "false"
+                end
+
                 return "(name:" .. s.name .. "\tpath:" .. s.path .. "\tlength:" .. s.length ..
-                        "\t layer.route.name:" .. route_name .. "\tpattern:" .. s.pattern .. ")"
+                        "\t layer.route.name:" .. route_name ..
+                        "\tpattern:" .. s.pattern .."\tis_end:" .. is_end .. ")"
             end)
             if ok then
                 return result
@@ -93,13 +109,19 @@ end
 
 -- req's fullpath
 function Layer:match(path)
-    debug("layer.lua#match before:", "path:", path, "pattern:", self.pattern)
+    debug("layer.lua#match before:", "path:", path, "layer:", self)
     if not path then
         self.params = nil
-        self.path = nil
         debug("layer.lua#match 1")
         return false
     end
+
+    if self.is_end then
+        path = pathRegexp.clear_slash(path)
+    else
+        path = pathRegexp.clear_slash(path .. "/")
+    end
+
 
     local match_or_not = pathRegexp.is_match(path, self.pattern)
     if not match_or_not then

@@ -7,7 +7,7 @@ local debug = require("lor.lib.debug")
 -- pattern或是uri末尾为n个/，均忽略
 local _M = {}
 
--- 去除最后的/
+-- 去除多余的/
 function _M.clear_slash(s)
     s, _ = sgsub(s, "(/+)", "/")
     return s
@@ -49,6 +49,7 @@ function _M.parse_path(uri, pattern, keys)
 end
 
 function _M.is_match(uri, pattern)
+    debug("path_to_regexp.lua#is_match, uri:", uri, "pattern:", pattern)
     if not pattern then
         debug("empty pattern")
         return false
