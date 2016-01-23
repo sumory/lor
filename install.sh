@@ -31,7 +31,7 @@ echo "exec 'luajit' -e 'package.path=\"$PACKAGE_PATH/?.lua;$PACKAGE_PATH/?/init.
 echo "fi ">> tmp_lor_bin
 
 mv tmp_lor_bin $LOR_PATH/lord
-chmod 711 $LOR_PATH/lord
+chmod 755 $LOR_PATH/lord
 
 echo "install lor package to $PACKAGE_PATH"
 cp -a ./* $PACKAGE_PATH/
