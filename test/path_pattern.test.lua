@@ -16,7 +16,7 @@ describe("next function usages test", function()
     before_each(function()
         lor = _G.lor
         app = lor({
-            debug = true
+            debug = false
         })
         Request = _G.request
         Response = _G.response
@@ -66,19 +66,19 @@ describe("next function usages test", function()
             count = 999
         end)
 
-        print("middleware has been initialized.")
-
-        print("testRouter's stack:")
-        local s1 = testRouter.stack
-        for i, v in ipairs(s1) do
-            print(i, v)
-        end
-
-        print("app.router's stack:")
-        local s2 = app.router.stack
-        for i, v in ipairs(s2) do
-            print(i, v)
-        end
+--        print("middleware has been initialized.")
+--
+--        print("testRouter's stack:")
+--        local s1 = testRouter.stack
+--        for i, v in ipairs(s1) do
+--            print(i, v)
+--        end
+--
+--        print("app.router's stack:")
+--        local s2 = app.router.stack
+--        for i, v in ipairs(s2) do
+--            print(i, v)
+--        end
 
 --        1	(name:layer-898	path:/	length:3	 layer.route.name:<nil>	pattern:/	is_end:false)
 --        2	(name:layer-71	path:/user/	length:3	 layer.route.name:<nil>	pattern:/user/	is_end:false)
@@ -196,4 +196,14 @@ describe("next function usages test", function()
         assert.is.equals("123", req.params.id)
     end)
 
+    it("test case 9", function() -- 过了3个middleware，解析了path variable，但是最后匹配不到路由，则为404
+        req.path = "/inject/user/123/view"
+        req.method = "get"
+        app:handle(req, res, function(err)
+            assert.is_not_true(req:isFound())
+        end)
+
+        assert.is.equals(1, count)
+        assert.is.equals(nil, req.params.id)
+    end)
 end)

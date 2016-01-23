@@ -1,6 +1,7 @@
 local Router = require("lor.lib.router.router")
 local Request = require("lor.lib.request")
 local Response = require("lor.lib.response")
+local View = require("lor.lib.view")
 local middleware_init = require("lor.lib.middleware.init")
 local middleware_params = require("lor.lib.middleware.params")
 local supported_http_methods = require("lor.lib.methods")
@@ -11,19 +12,22 @@ local app = {}
 function app:new()
     local instance = {}
     instance.cache = {}
-    instance.engines = {}
     instance.settings = {}
     instance.router = Router:new({
         caseSensitive = true,
         strict = true
     })
-    --instance.router:use("/", middleware_params(), 3)
-    --instance.router:use("/", middleware_init(self), 3)
+
 
     setmetatable(instance, {
         __index = self,
         __call = self.handle
     })
+
+    -- default middlewares
+    --instance.router:use("/", middleware_params, 3)
+    --instance.router:use("/", middleware_init, 3)
+
 
     instance:initMethod()
     return instance
@@ -33,9 +37,18 @@ function app:run(finalHandler)
     local request = Request:new()
     local response = Response:new()
 
+    local view_config = {
+        view_engine = self:getconf("view engine"), -- view engine: resty-template or others...
+        view_ext = self:getconf("view ext"), -- defautl is "html"
+        views = self:getconf("views") -- template files directory
+    }
+    --ngx.say(self:getconf("view engine"))
+    local view = View:new(view_config)
+    response.view = view
+
     self.request = request
     self.response = response
-    self:handle(self.request, self.response,finalHandler)
+    self:handle(self.request, self.response, finalHandler)
 end
 
 function app:init()
@@ -43,8 +56,14 @@ function app:init()
 end
 
 function app:defaultConfiguration()
+    self:enable('x-powered-by')
+
+    -- view and template configuration
+    self:conf("view engine", "tmpl")
+    self:conf("view ext", "html")
+    self:conf("views", "./app/views/")
+
     self.locals = {}
-    self.mountpath = "/"
     self.locals.settings = self.setttings
 end
 
@@ -101,23 +120,14 @@ function app:inner_use(fn_args_length, path, fn)
 end
 
 
-function app:route(path)
-    return self.router:route(path)
-end
-
-
-function app:set(setting, val)
-    self.settings[setting] = val
-    return self
-end
 
 function app:initMethod()
     for http_method, _ in pairs(supported_http_methods) do
         self[http_method] = function(self, path, fn)
-            debug("\napp:"..http_method, path, "start init##############################")
-            local route = self.router:route(path)
+            debug("\napp:" .. http_method, path, "start init##############################")
+            local route = self.router:app_route(path)
             route[http_method](route, fn) -- like route:get(fn)
-            debug("app:".. http_method, path, "end init################################\n")
+            debug("app:" .. http_method, path, "end init################################\n")
             return self
         end
     end
@@ -125,12 +135,34 @@ end
 
 
 function app:all(path, fn)
-    local route = self.router:route(path)
+    local route = self.router:app_route(path)
 
     for http_method, _ in pairs(supported_http_methods) do
-        route[http_method](fn)
+        route[http_method](route, fn)
     end
 
+    return self
+end
+
+
+function app:conf(setting, val)
+    self.settings[setting] = val
+    return self
+end
+
+function app:getconf(setting)
+    return self.settings[setting]
+end
+
+
+function app:enable(setting)
+    self.settings[setting] = true
+    return self
+end
+
+
+function app:disable(setting)
+    self.settings[setting] = false
     return self
 end
 

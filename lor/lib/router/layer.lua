@@ -22,6 +22,7 @@ function Layer:new(path, options, fn, fn_args_length)
     instance.keys = {}
     instance.length = fn_args_length -- todo:shoule only be 3 or 4
     instance.is_end = opts.is_end or false -- is belong to a route?;is the last really to match the path?
+    instance.is_start = opts.is_start or false -- is belong to a route?;is the last really to match the path?
 
     local tmp_pattern = pathRegexp.parse_pattern(path, instance.keys, opts)
     if tmp_pattern == "" or not tmp_pattern then
@@ -33,9 +34,14 @@ function Layer:new(path, options, fn, fn_args_length)
     if instance.is_end then -- 如果是is_end，则pattern要匹配末尾
         instance.pattern = instance.pattern .. "$"
     else
-        instance.pattern = pathRegexp.clear_slash(instance.pattern .. "/")
+        instance.pattern = pathRegexp.clear_slash( instance.pattern .. "/")
     end
 
+    if instance.is_start then -- 如果是is_start，则pattern要匹配开头
+        instance.pattern = "^" .. pathRegexp.clear_slash("/" .. instance.pattern)
+    else
+        instance.pattern =  instance.pattern
+    end
 
     setmetatable(instance, {
         __index = self,

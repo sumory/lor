@@ -89,7 +89,7 @@ a {
 <body>
 
 <div class="lor">
-<a href="https://github.com/sumory/lor" class="name">{{name}}</a>
+<a href="#" class="name">{{name}}</a>
 <span class="description">{{desc}}</span>
 </div>
 </body>
@@ -102,6 +102,10 @@ local main_tpl = [[
 local lor = require("lor.index")
 local router = require("app.router")
 local app = lor()
+
+app:conf("view engine", "tmpl")
+app:conf("view ext", "html")
+app:conf("views", "./app/views")
 
 app:use(function(req, res, next)
     -- 插件，在处理业务route之前的插件，可作编码解析、过滤等操作
@@ -136,7 +140,6 @@ local router_tpl = [[
 local userRouter = require("app.routes.user")
 local testRouter = require("app.routes.test")
 
-
 return function(app)
 
     -- group router, 对以`/user`开始的请求做过滤处理
@@ -146,11 +149,27 @@ return function(app)
     app:use("/test", testRouter())
 
     -- 除使用group router外，也可单独进行路由处理，支持get/post/put/delete...
-    app:get("/book/:id/view", function(req, res, next)
-        res:send("view book" .. req.params.id)
+
+    -- welcome to lor!
+    app:get("/", function(req, res, next)
+        res:send("hi! welcome to lor framework.")
     end)
 
+    -- hello world!
+    app:get("/index", function(req, res, next)
+        res:send("hello world!")
+    end)
+
+    -- render html, visit "/view" or "/view?name=foo&desc=bar
+    app:get("/view", function(req, res, next)
+        local data = {
+            name =  req.query.name or "lor",
+            desc =   req.query.desc or 'a framework of lua based on OpenResty'
+        }
+        res:render("index", data)
+    end)
 end
+
 ]]
 
 

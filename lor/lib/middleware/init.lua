@@ -1,17 +1,23 @@
-local init = function(app)
-    return function(req, res, next)
-        req.res = res
-        req.next = next
+local init = function(req, res, next)
+    req.res = res
+    req.next = next
+    res.req = req
 
-        res.req = req
-        res:setHeader('X-Powered-By', 'Lor Framework')
-        res.locals = res.locals or {}
+    --        if app and app:getconf("x-powered-by") then
+    --            if app.version then
+    --                res:setHeader('X-Powered-By', 'Lor Framework ' .. app.version)
+    --            else
+    --
+    --            end
+    --        end
 
-        -- setmetatable(req, {__index = app.request})
-        -- setmetatable(res, {__index = app.response})
+    --ngx.say(req.query.name)
 
-        next()
-    end
+    res:setHeader('X-Powered-By', 'Lor Framework')
+    res.locals = res.locals or {}
+    -- setmetatable(req, {__index = app.request})
+    -- setmetatable(res, {__index = app.response})
+    next()
 end
 
 return init

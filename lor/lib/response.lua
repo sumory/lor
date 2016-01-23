@@ -1,7 +1,7 @@
 local setmetatable = setmetatable
 local json = require("cjson")
 
-local function json_encode( data, empty_table_as_object )
+local function json_encode(data, empty_table_as_object)
     local json_value = nil
     if json.encode_empty_table_as_object then
         json.encode_empty_table_as_object(empty_table_as_object or false) -- 空的table默认为array
@@ -9,7 +9,7 @@ local function json_encode( data, empty_table_as_object )
     if require("ffi").os ~= "Windows" then
         json.encode_sparse_array(true)
     end
-    pcall(function (data) json_value = json.encode(data) end, data)
+    pcall(function(data) json_value = json.encode(data) end, data)
     return json_value
 end
 
@@ -26,7 +26,7 @@ function Response:new()
         view = nil,
     }
 
-    setmetatable(instance, {__index = self})
+    setmetatable(instance, { __index = self })
     return instance
 end
 
@@ -35,6 +35,11 @@ function Response:render(view_file, data)
     self:setHeader('Content-Type', 'text/html; charset=UTF-8')
     local body = self.view:render(view_file, data)
     self:_send(body)
+end
+
+function Response:html(data)
+    self:setHeader('Content-Type', 'text/html; charset=UTF-8')
+    self:_send(data)
 end
 
 function Response:json(data)
@@ -74,7 +79,7 @@ function Response:setBody(body)
 end
 
 function Response:status(status)
-   ngx.status = status
+    ngx.status = status
     return self
 end
 

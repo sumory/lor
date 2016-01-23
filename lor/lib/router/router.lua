@@ -23,25 +23,27 @@ end
 local function merge_params(params, parent)
     local obj = mixin({}, parent)
     local result =  mixin(obj, params)
---    debug("merge_params: params")
---    debug(params)
---    debug("merge_params: parent")
---    debug(parent)
---    debug("merge_params: result")
---    debug(result)
+    --    debug("merge_params: params")
+    --    debug(params)
+    --    debug("merge_params: parent")
+    --    debug(parent)
+    --    debug("merge_params: result")
+    --    debug(result)
     return result
 end
 
 
 local function restore(fn, obj)
     local origin = {
-        baseUrl = obj['baseUrl'],
+        path = obj['path'],
+        query = obj['query'],
         next = obj['next'],
         -- params = obj['params']
     }
 
     return function(err)
-        obj['baseUrl'] = origin.baseUrl
+        obj['path'] = origin.path
+        obj['query'] = origin.query
         obj['next'] = origin.next
         -- obj['params'] = origin.params -- maybe overrided by layer.params, so no need to keep
 
@@ -59,8 +61,6 @@ function proto:new(options)
     }
 
     router.name =  "routerr-" .. random()
-    router.params = {}
-    router._params = {} --array
     router.caseSensitive = opts.caseSensitive
     router.mergeParams = opts.mergeParams
     router.strict = opts.strict
@@ -200,7 +200,8 @@ function proto:use(path, fn, fn_args_length)
     local layer = Layer:new(path, {
         sensitive = self.caseSensitive,
         strict = false,
-        is_end = false
+        is_end = false, -- 参数path能确定是整个uri的结束
+        is_start = true -- 参数path能确定是整个uri的开始???
     }, fn, fn_args_length)
 
     tinsert(self.stack, layer)
@@ -218,12 +219,39 @@ function proto:use(path, fn, fn_args_length)
 end
 
 
+-- app route,pattern前加^
+function proto:app_route(path) -- 在第一层增加一个空route指向下一层
+    local route = Route:new(path)
+    local layer = Layer:new(path, {
+        sensitive = self.caseSensitive,
+        strict = self.strict,
+        is_end = true,  -- 参数path能确定是整个uri的结束
+        is_start = true -- 参数path能确定是整个uri的开始
+    }, route, 3) -- import: a magick to supply route:dispatch
+    layer.route = route
+
+    tinsert(self.stack, layer)
+
+    debug("router.lua#route now the router(" .. self.name .. ") stack is:")
+    debug(function()
+        for i, v in ipairs(self.stack) do
+            print(i, v)
+        end
+    end)
+    debug("router.lua#route now the router(" .. self.name .. ") stack is+++++++++++\n")
+
+    --debug("index.lua#route new route for path:", path, "stack length:", #self.stack, "middleware type:", 3)
+    return route
+end
+
+
 function proto:route(path) -- 在第一层增加一个空route指向下一层
     local route = Route:new(path)
     local layer = Layer:new(path, {
         sensitive = self.caseSensitive,
         strict = self.strict,
-        is_end = true
+        is_end = true, --  参数path能确定是整个uri的结束
+        is_start = false --参数path 暂时不能确定是整个uri的开始, 如何判别？
     }, route, 3) -- import: a magick to supply route:dispatch
     layer.route = route
 

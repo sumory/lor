@@ -7,35 +7,34 @@
 - 路由采用[Sinatra](http://www.sinatrarb.com/)风格，Sinatra是Ruby小而精的web框架.
 - API基本采用了[Express](http://expressjs.com)的思路和设计，Node.js跨界开发者可以很快上手.
 - 支持插件(middleware)，路由可分组，路由匹配支持string/正则模式.
-- lor以后会保持核心足够精简，扩展功能依赖`middleware`来实现. `lor`本身也是基于`middleware`来实现的.
-- 推荐使用lor作为HTTP API Server，lor此后也会支持模板渲染/Session/Cookie等常规web功能.
-- 框架文档在[这里](http://lor.sumory.com)
+- lor以后会保持核心足够精简，扩展功能依赖`middleware`来实现. `lor`本身也是基于`middleware`来构建的.
+- 推荐使用lor作为HTTP API Server，lor此后也会支持Session/Cookie等常规web功能.
+- 框架文档在[这里](http://lor.sumory.com)，0.0.4版本发布后将专注于文档完善，之后再开启0.0.5版本.
+
+当前版本：v0.0.3，下一版本v0.0.4计划：
+
+- 支持session、cookie，完善测试用例和项目骨架
+- 完善文档
+
 
 ### 快速开始
 
 在使用lor之前请首先确保OpenResty和luajit已安装.
 
-一个简单实例：
+一个简单示例，更复杂的示例或项目模板请使用`lord`命令生成：
 
 ```
 local lor = require("lor.index")
 local app = lor()
 
--- 插件: 对以`/user`开始的请求做过滤处理
-app:use("/user", function(req, res, next)
-    req.params.inject = 'inject value'
-    next()
-end)
-
--- 按id查找用户
-app:get("/user/query/:id", function(req, res, next)
-    local query_id = req.params.id -- 从req.params取参数
-    -- 处理...
-    next() -- 交给下一个调用者
-end)
-
-app:post("/user/:id/create", function(req, res, next)
-    -- 创建一个用户
+-- 示例: 匹配/query/123?foo=bar
+app:get("/query/:id", function(req, res, next)
+    local foo = req.query.foo -- 从url queryString取值："bar"
+    local path_id = req.params.id -- 从path取值："123"
+    res:json({
+        foo = foo,
+        id = path_id
+    })
 end)
 
 -- 404 error
@@ -97,7 +96,7 @@ drwxr-xr-x  13 root  wheel   442B  1 22 01:17 test
 
 ```
 $ lord -h
-lor v0.0.2, a Lua web framework based on OpenResty.
+lor v0.0.3, a Lua web framework based on OpenResty.
 
 Usage: lor COMMAND [OPTIONS]
 
@@ -123,6 +122,11 @@ lord start
 之后访问http://localhost:8888/，即可。
 
 更多使用方法，请参考[test](./test)测试用例。
+
+
+### 讨论交流
+
+目前有一个QQ群用于在线讨论：[![QQ群522410959](http://pub.idqqimg.com/wpa/images/group.png)](http://shang.qq.com/wpa/qunwpa?idkey=b930a7ba4ac2ecac927cb51101ff26de1170c0d0a31c554b5383e9e8de004834) 522410959
 
 
 ### License
