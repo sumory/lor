@@ -4,6 +4,7 @@ local Response = require("lor.lib.response")
 local View = require("lor.lib.view")
 local middleware_init = require("lor.lib.middleware.init")
 local middleware_params = require("lor.lib.middleware.params")
+local middleware_cookie = require("lor.lib.middleware.cookie")
 local supported_http_methods = require("lor.lib.methods")
 local debug = require("lor.lib.debug")
 
@@ -25,8 +26,8 @@ function app:new()
     })
 
     -- default middlewares
-    --instance.router:use("/", middleware_params, 3)
-    --instance.router:use("/", middleware_init, 3)
+    -- instance.router:use("/", middleware_params, 3)
+    -- instance.router:use("/", middleware_init, 3)
 
 
     instance:initMethod()

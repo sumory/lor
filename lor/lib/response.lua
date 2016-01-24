@@ -1,6 +1,7 @@
 local setmetatable = setmetatable
 local json = require("cjson")
 
+
 local function json_encode(data, empty_table_as_object)
     local json_value = nil
     if json.encode_empty_table_as_object then
@@ -23,7 +24,7 @@ function Response:new()
     local instance = {
         headers = {},
         body = '--default body. you should not see this by default--',
-        view = nil,
+        view = nil
     }
 
     setmetatable(instance, { __index = self })
@@ -35,6 +36,30 @@ function Response:render(view_file, data)
     self:setHeader('Content-Type', 'text/html; charset=UTF-8')
     local body = self.view:render(view_file, data)
     self:_send(body)
+end
+
+function Response:setCookie(...)
+    local cookie = self._cookie
+    if not cookie then
+        ngx.log(ngx.ERR, "response.lua#none _cookie found to write")
+        return
+    end
+
+    local p = ...
+    if type(p) == "table" then
+        local ok, err = cookie:set(p)
+        if not ok then
+            ngx.log(ngx.ERR, err)
+        end
+    else
+        local params = {... }
+        local ok, err = cookie:set({
+            key = params[1], value = params[2] or "",
+        })
+        if not ok then
+            ngx.log(ngx.ERR, err)
+        end
+    end
 end
 
 function Response:html(data)
