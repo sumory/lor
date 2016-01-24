@@ -1,4 +1,4 @@
-local init = function(req, res, next)
+local init_middleware = function(req, res, next)
     req.res = res
     req.next = next
     res.req = req
@@ -20,4 +20,4 @@ local init = function(req, res, next)
     next()
 end
 
-return init
+return init_middleware

@@ -1,5 +1,5 @@
 -- do something before handling every request
-local handle_params = function(req, res, next)
+local params_middleware = function(req, res, next)
     req.query = req.query
     req.params = req.params
     req.body = req.body
@@ -7,4 +7,4 @@ local handle_params = function(req, res, next)
 end
 
 
-return handle_params
+return params_middleware
