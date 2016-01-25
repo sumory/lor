@@ -23,7 +23,7 @@ echo "install lor cli to $LOR_PATH"
 
 echo "#!/bin/sh" > tmp_lor_bin
 echo "LOR_PACKAGE_PATH=$PACKAGE_PATH" >> tmp_lor_bin
-echo "if [ \"\$1\" == \"--path\" ] " >> tmp_lor_bin #space should be @ both side of ==
+echo "if [ \"\$1\" = \"--path\" ] " >> tmp_lor_bin #space should be @ both side of ==
 echo "then " >> tmp_lor_bin
 echo "echo \"\$LOR_PACKAGE_PATH\" " >> tmp_lor_bin
 echo "else" >> tmp_lor_bin
