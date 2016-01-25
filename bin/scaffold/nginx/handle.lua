@@ -20,7 +20,7 @@ local function nginx_command(env, nginx_conf_file_path, nginx_signal)
 
     if env ~= nil then env_cmd = "-g \"env LOR_ENV=" .. env .. ";\"" end
     local cmd = "nginx " .. nginx_signal .. " " .. env_cmd .. " -p `pwd`/ -c " .. nginx_conf_file_path
-
+    print("execcute:" .. cmd)
     return os.execute(cmd)
 end
 
