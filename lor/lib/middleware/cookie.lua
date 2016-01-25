@@ -1,7 +1,7 @@
 local ck = require("resty.cookie")
 
 -- Mind:
--- base on 'lua-resty-cookie'
+-- base on 'lua-resty-cookie', https://github.com/cloudflare/lua-resty-cookie
 -- this is the default `cookie` middleware
 -- you're recommended to define your own `cookie` middleware.
 
