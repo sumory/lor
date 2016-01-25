@@ -6,7 +6,7 @@ local generator = require("bin.scaffold.generator")
 local lor = require("bin.scaffold.launcher")
 
 -- LOR_CONTEXT should be the only global app variable.
-local version = "0.0.3"
+local version = "0.0.4"
 
 
 local usages = [[lor v]] .. version .. [[, a Lua web framework based on OpenResty.

@@ -7,14 +7,13 @@
 - 路由采用[Sinatra](http://www.sinatrarb.com/)风格，Sinatra是Ruby小而精的web框架.
 - API基本采用了[Express](http://expressjs.com)的思路和设计，Node.js跨界开发者可以很快上手.
 - 支持插件(middleware)，路由可分组，路由匹配支持string/正则模式.
-- lor以后会保持核心足够精简，扩展功能依赖`middleware`来实现. `lor`本身也是基于`middleware`来构建的.
-- 推荐使用lor作为HTTP API Server，lor此后也会支持Session/Cookie等常规web功能.
-- 框架文档在[这里](http://lor.sumory.com)，0.0.4版本发布后将专注于文档完善，之后再开启0.0.5版本.
+- lor以后会保持核心足够精简，扩展功能依赖`middleware`来实现. `lor`本身也是基于`middleware`构建的.
+- 推荐使用lor作为HTTP API Server，lor也已支持session/cookie/html template等功能.
+- 框架文档在[这里](http://lor.sumory.com)，正在逐步完善.
 
-当前版本：v0.0.3，下一版本v0.0.4计划：
+当前版本：v0.0.4，下一版本v0.0.5计划：
 
-- 支持session、cookie，完善测试用例和项目骨架
-- 完善文档
+- 完善文档，补充用例
 
 
 ### 快速开始
@@ -27,7 +26,11 @@
 local lor = require("lor.index")
 local app = lor()
 
--- 示例: 匹配/query/123?foo=bar
+app:get("/", function(req, res, next)
+    res:send("hello world!")
+end)
+
+-- 路由示例: 匹配/query/123?foo=bar
 app:get("/query/:id", function(req, res, next)
     local foo = req.query.foo -- 从url queryString取值："bar"
     local path_id = req.params.id -- 从path取值："123"
@@ -96,7 +99,7 @@ drwxr-xr-x  13 root  wheel   442B  1 22 01:17 test
 
 ```
 $ lord -h
-lor v0.0.3, a Lua web framework based on OpenResty.
+lor v0.0.4, a Lua web framework based on OpenResty.
 
 Usage: lor COMMAND [OPTIONS]
 
