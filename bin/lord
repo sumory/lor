@@ -20,9 +20,6 @@ Commands:
  restart                Restart the server
  version                Show version of lor
  help                   Show help tips
-
-Options:
- --debug                Show some runtime details
 ]]
 
 
