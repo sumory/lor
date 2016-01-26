@@ -13,9 +13,7 @@
 - 推荐使用lor作为HTTP API Server，lor也已支持session/cookie/html template等功能.
 - 框架文档在[这里](http://lor.sumory.com)，正在逐步完善.
 
-当前版本：v0.0.4，下一版本v0.0.5计划：
-
-- 完善文档，补充用例
+当前版本：v0.0.5
 
 
 ### 快速开始
@@ -101,7 +99,7 @@ drwxr-xr-x  13 root  wheel   442B  1 22 01:17 test
 
 ```
 $ lord -h
-lor v0.0.4, a Lua web framework based on OpenResty.
+lor v0.0.5, a Lua web framework based on OpenResty.
 
 Usage: lor COMMAND [OPTIONS]
 

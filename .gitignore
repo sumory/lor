@@ -1,7 +1,9 @@
 ###test
 local_install.sh
+gen_rockspec.sh
 test.sh
 test.lua
 snippets.lua
 .idea
 *.iml
+*.rock
