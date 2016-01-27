@@ -8,7 +8,7 @@ echo "start installing lord..."
 if [ -n "$PACKAGE_PATH" ];then
    echo "use defined PATH: "${PACKAGE_PATH}
 else
-   PACKAGE_PATH="/tmp/lua_framework"
+   PACKAGE_PATH="/usr/local/lor"
    echo "use default PATH: ${PACKAGE_PATH}"
 fi
 
