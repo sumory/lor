@@ -1,7 +1,21 @@
+### v0.0.5 2016.01.28
+
+- 完善了Documents和API文档，详见[lor官网](http://lor.sumory.com)
+- `lor new`命令生成的项目模板增加了一个middleware目录，用于存放自定义插件
+    - 该目录的命名和位置都是非强制的，用户可按需要将自定义的插件放在任何地方
+- 修改了lor new产生的项目模板，增加了几个基本API的使用方式
+
+
+### v0.0.4 2016.01.25
+
+- 以默认插件的形式添加cookie支持(lua-resty-cookie)
+- 以默认插件的形式添加session支持(lua-resty-session)
+
+
 ### v0.0.3 2016.01.23
 
 - 修复上版本路由bug
-- 添加模板支持（resty-template）
+- 添加模板支持（lua-resty-template）
 - 完善了40余个常规测试用例
 - 完善了命令行工具`lord`
 - 常规API使用方法添加到默认项目模板

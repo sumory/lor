@@ -220,6 +220,28 @@ end)
 return testRouter
 ]]
 
+local middleware_tpl = [[
+
+### 自定义插件目录(define your own middleware)
+
+
+You are recommended to define your own middlewares and keep them in one place to manage.
+
+建议用户将自定义插件存放在此目录下统一管理，然后在其他地方引用，插件的格式如下:
+
+```
+local middleware =  function(params)
+    return function(req, res, next)
+        -- do something with req/res
+        next()
+    end
+end
+
+return middleware
+```
+
+]]
+
 
 local Generator = {}
 
@@ -229,7 +251,8 @@ Generator.files = {
     ['app/router.lua'] = router_tpl,
     ['app/routes/user.lua'] = user_router_tpl,
     ['app/routes/test.lua'] = test_router_tpl,
-    ['app/views/index.html'] = index_view_tpl
+    ['app/views/index.html'] = index_view_tpl,
+    ['app/middleware/README.md'] = middleware_tpl
 }
 
 function Generator.new(name)
