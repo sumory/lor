@@ -44,7 +44,7 @@ function new_handler()
     return ngx_handle.new(
         necessary_dirs,
         Lor.nginx_conf_content(),
-        necessary_dirs.tmp .. "/" .. env .. "-nginx.conf"
+        "conf/nginx-" .. env .. ".conf"
     )
 end
 
@@ -79,6 +79,21 @@ function Lor.stop()
             print("app in " .. env .. " was succesfully stopped.")
         else
             print("ERROR: Could not stop app (are you sure it is running?).")
+        end
+    end
+end
+
+function Lor.reload()
+    local env = ogetenv("LOR_ENV") or 'dev'
+
+    local handler = new_handler()
+    local result = handler:reload(env)
+
+    if env ~= 'test' then
+        if result == 0 then
+            print("app in " .. env .. " was succesfully reloaded.")
+        else
+            print("ERROR: Could not reloaded app.")
         end
     end
 end

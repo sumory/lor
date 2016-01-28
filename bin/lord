@@ -38,6 +38,8 @@ elseif arg[1] == 'stop' then
 elseif arg[1] == 'restart' then
     lor.stop()
     lor.start()
+elseif arg[1] == 'reload' then
+    lor.reload()
 elseif arg[1] == 'help' or arg[1] == '-h' then
     print(usages)
 elseif arg[1] == 'version' or arg[1] == '-v' then

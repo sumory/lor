@@ -20,7 +20,7 @@ local function nginx_command(env, nginx_conf_file_path, nginx_signal)
 
     if env ~= nil then env_cmd = "-g \"env LOR_ENV=" .. env .. ";\"" end
     local cmd = "nginx " .. nginx_signal .. " " .. env_cmd .. " -p `pwd`/ -c " .. nginx_conf_file_path
-    print("execcute:" .. cmd)
+    print("execute: " .. cmd)
     return os.execute(cmd)
 end
 
@@ -54,22 +54,22 @@ end
 
 function NginxHandle:start(env)
     create_dirs(self.necessary_dirs)
-    create_nginx_conf(self.nginx_conf_file_path, self.nginx_conf_content)
+    -- create_nginx_conf(self.nginx_conf_file_path, self.nginx_conf_content)
 
     return start_nginx(env, self.nginx_conf_file_path)
 end
 
 function NginxHandle:stop(env)
     local result = stop_nginx(env, self.nginx_conf_file_path)
-    remove_nginx_conf(self.nginx_conf_file_path)
+    -- remove_nginx_conf(self.nginx_conf_file_path)
 
     return result
 end
 
 function NginxHandle:reload(env)
-    remove_nginx_conf(self.nginx_conf_file_path)
+    -- remove_nginx_conf(self.nginx_conf_file_path)
     create_dirs(self.necessary_dirs)
-    create_nginx_conf(self.nginx_conf_file_path, self.nginx_conf_content)
+    -- create_nginx_conf(self.nginx_conf_file_path, self.nginx_conf_content)
 
     return reload_nginx(env, self.nginx_conf_file_path)
 end
