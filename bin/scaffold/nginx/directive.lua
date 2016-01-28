@@ -164,6 +164,13 @@ function Directive:logByLuaFile(lua_file)
     return res
 end
 
+
+function Directive:staticFileDirectory(static_file_directory)
+    if static_file_directory == nil then return '' end
+    return static_file_directory
+end
+
+
 function Directive:directiveSets()
     return {
         ['LOR_ENV'] = self.run_env,
@@ -190,7 +197,8 @@ function Directive:directiveSets()
         ['BODY_FILTER_BY_LUA'] = Directive.bodyFilterByLua,
         ['BODY_FILTER_BY_LUA_FILE'] = Directive.bodyFilterByLuaFile,
         ['LOG_BY_LUA'] = Directive.logByLua,
-        ['LOG_BY_LUA_FILE'] = Directive.logByLuaFile
+        ['LOG_BY_LUA_FILE'] = Directive.logByLuaFile,
+        ['STATIC_FILE_DIRECTORY'] = Directive.staticFileDirectory
     }
 end
 

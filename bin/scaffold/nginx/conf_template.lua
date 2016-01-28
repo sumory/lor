@@ -39,7 +39,7 @@ http {
         set $template_root '';
 
         location /static {
-            alias pub/static;
+            alias {{STATIC_FILE_DIRECTORY}}; #app/static;
         }
 
         # Access log with buffer, or disable it completetely if unneeded

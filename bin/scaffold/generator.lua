@@ -242,6 +242,20 @@ return middleware
 
 ]]
 
+local static_tpl = [[
+
+### 静态文件目录(static files directory)
+
+nginx对应配置为
+
+```
+location /static {
+    alias app/static;
+}
+```
+
+]]
+
 
 local Generator = {}
 
@@ -252,7 +266,8 @@ Generator.files = {
     ['app/routes/user.lua'] = user_router_tpl,
     ['app/routes/test.lua'] = test_router_tpl,
     ['app/views/index.html'] = index_view_tpl,
-    ['app/middleware/README.md'] = middleware_tpl
+    ['app/middleware/README.md'] = middleware_tpl,
+    ['app/static/README.md'] = static_tpl -- static files directory,e.g. js/css/img
 }
 
 function Generator.new(name)
