@@ -305,7 +305,7 @@ local start_sh = [[
 
 # examples:
 # sh start.sh prod -- use conf/nginx-prod.conf to start OpenResty
-# sh start.sh -- use conf/nginx-dev.conf to start OpenRest
+# sh start.sh -- use conf/nginx-dev.conf to start OpenResty
 #####################################################################
 
 if [ -n "$1" ];then
@@ -330,7 +330,7 @@ local stop_sh = [[
 
 # examples:
 # sh stop.sh prod -- use conf/nginx-prod.conf to stop OpenResty
-# sh stop.sh -- use conf/nginx-dev.conf to stop OpenRest
+# sh stop.sh -- use conf/nginx-dev.conf to stop OpenResty
 #####################################################################
 
 if [ -n "$1" ];then
@@ -354,7 +354,7 @@ local reload_sh = [[
 
 # examples:
 # sh reload.sh prod -- use conf/nginx-prod.conf to reload OpenResty
-# sh reload.sh -- use conf/nginx-dev.conf to reload OpenRest
+# sh reload.sh -- use conf/nginx-dev.conf to reload OpenResty
 #####################################################################
 
 if [ -n "$1" ];then
