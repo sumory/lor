@@ -25,7 +25,7 @@ function View:render(view_file, data)
     local view_file_name = view_file .. "." .. self.view_ext
 
     local t = template.new(view_file_name)
-    if type(data) == 'table' then
+    if data and type(data) == 'table' then
         for k,v in pairs(data) do
             t[k] = v
         end

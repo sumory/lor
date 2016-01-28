@@ -22,6 +22,8 @@ function Request:new()
         body_raw = ngx.req.get_body_data(),
         url = ngx.var.request_uri,
         uri = ngx.var.request_uri,
+        headers = ngx.req.get_headers(), -- request headers
+
         req_args = ngx.var.args,
         found = false --标识404错误
     }
