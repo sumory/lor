@@ -9,8 +9,13 @@ function Request:new()
     ngx.req.read_body()
 
     local body = {} -- body params
-    for k,v in pairs(ngx.req.get_post_args()) do
-        body[k] = v
+
+    local post_args = ngx.req.get_post_args()
+
+    if post_args and type(post_args) == "table" then
+        for k,v in pairs(post_args) do
+            body[k] = v
+        end
     end
 
     local instance = {
