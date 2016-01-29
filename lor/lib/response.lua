@@ -49,8 +49,12 @@ function Response:json(data)
     self:_send(json_encode(data))
 end
 
-function Response:redirect(url)
-    ngx.redirect(url)
+function Response:redirect(url, code)
+    if code and (code == 301 or code == 302) then
+        ngx.redirect(url ,code)
+    else
+        ngx.redirect(url)
+    end
 end
 
 function Response:send(text)
