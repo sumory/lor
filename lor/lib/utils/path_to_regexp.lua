@@ -16,9 +16,9 @@ end
 function _M.parse_pattern(path, keys, options)
     path = _M.clear_slash(path)
 
-    local new_pattern = sgsub(path, "/:([A-Za-z0-9_]+)", function(m)
+    local new_pattern = sgsub(path, "/:([A-Za-z0-9_-]+)", function(m)
         tappend(keys, m)
-        return "/([A-Za-z0-9_]+)"
+        return "/([A-Za-z0-9_-]+)"
     end)
 
     -- 以*结尾
