@@ -1,4 +1,9 @@
 local setmetatable = setmetatable
+local pairs = pairs
+local ipairs = ipairs
+local tinsert = table.insert
+local tconcat = table.concat
+
 local json = require("cjson")
 
 
@@ -49,11 +54,55 @@ function Response:json(data)
     self:_send(json_encode(data))
 end
 
-function Response:redirect(url, code)
-    if code and (code == 301 or code == 302) then
-        ngx.redirect(url ,code)
-    else
+function Response:redirect(url, code, query)
+    if url and not code and not query then -- only one param
         ngx.redirect(url)
+    elseif url and code and not query then -- two param
+        if type(code) == "number" then
+            ngx.redirect(url ,code)
+        elseif type(code) == "table" then
+            query = code
+            local q = {}
+            local is_q_exist = false
+            if query and type(query) == "table" then
+                for i,v in pairs(query) do
+                    tinsert(q, i .. "=" .. v)
+                    is_q_exist = true
+                end
+            end
+
+            if is_q_exist then
+                url = url .. "?" .. tconcat(q, "&")
+            end
+
+            ngx.redirect(url)
+        else
+            ngx.redirect(url)
+        end
+    else -- three param
+        local q = {}
+        local is_q_exist = false
+        if query and type(query) == "table" then
+           for i,v in pairs(query) do
+               tinsert(q, i .. "=" .. v)
+               is_q_exist = true
+           end
+        end
+
+        if is_q_exist then
+            url = url .. "?" .. tconcat(q, "&")
+        end
+        ngx.redirect(url ,code)
+    end
+end
+
+function Response:location(url, data)
+    if data and type(data) == "table" then
+        ngx.req.set_uri_args(data)
+        ngx.req.set_uri(url, false)
+    else
+        ngx.say(url)
+        ngx.req.set_uri(url, false)
     end
 end
 
