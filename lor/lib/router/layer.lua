@@ -141,8 +141,10 @@ function Layer:match(path)
     end
 
     -- store values
-    self.path = path
-    self.params = mixin(m, self.params) -- this is only this layer's params
+    -- self.path = path
+
+    -- self.params = mixin(m, self.params) -- this is only this layer's params
+    self.params = m  -- fixbug: the params should not be transfered to next Request.
 
     debug(function()
         print("layer.lua# print layer.params")
