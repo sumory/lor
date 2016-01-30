@@ -1,3 +1,19 @@
+### v0.0.6 2016.01.30
+
+- 修改了lor的默认安装路径到/usr/local/lor
+- 命令行工具`lord`生成的项目模板更改
+    - 加入了nginx.conf配置，方便之后维护自定义的nginx配置
+    - 加入start/stop/restart脚本，方便之后项目的灵活部署
+- 改善了路由pattern，支持path variable含有"-"字符
+- 增加了几个测试用例
+- 修复了上一个请求的path variable会污染之后请求的bug
+- 完善了res:redirect API
+- 修复了请求体为空时解析的bug
+- 给lor对象添加了版本号
+- 添加了静态文件支持（通过在nginx.conf里配置）
+- 编写了lor框架示例项目[lor-example](https://github.com/lorlabs/lor-example)
+
+
 ### v0.0.5 2016.01.28
 
 - 完善了Documents和API文档，详见[lor官网](http://lor.sumory.com)
