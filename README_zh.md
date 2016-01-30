@@ -12,8 +12,9 @@
 - lor以后会保持核心足够精简，扩展功能依赖`middleware`来实现. `lor`本身也是基于`middleware`构建的.
 - 推荐使用lor作为HTTP API Server，lor也已支持session/cookie/html template等功能.
 - 框架文档在[这里](http://lor.sumory.com)，正在逐步完善.
+- 框架示例项目[lor-example](https://github.com/lorlabs/lor-example)
 
-当前版本：v0.0.5
+当前版本：v0.0.6
 
 
 ### 快速开始
@@ -61,7 +62,7 @@ end)
 
 ```
 #如把lor安装到/opt/lua/lor目录下
-sh install.sh /opt/lua/lor 
+sh install.sh /opt/lua/lor  #不加路径参数则默认安装到/usr/local/lor
 ```
 
 执行以上命令后lor的命令行工具`lord`就被安装在了`/usr/local/bin`下, 通过`which lord`查看:
@@ -99,7 +100,7 @@ drwxr-xr-x  13 root  wheel   442B  1 22 01:17 test
 
 ```
 $ lord -h
-lor v0.0.5, a Lua web framework based on OpenResty.
+lor v0.0.6, a Lua web framework based on OpenResty.
 
 Usage: lor COMMAND [OPTIONS]
 
@@ -110,9 +111,6 @@ Commands:
  restart                Restart the server
  version                Show version of lor
  help                   Show help tips
-
-Options:
- --debug                Show some runtime details
 ```
 
 执行`lord new lor_demo`，则会生成一个名为lor_demo的示例项目，然后执行：
