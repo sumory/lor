@@ -26,6 +26,8 @@ function _M:createApp(options)
 end
 
 function _M:Router(options)
+    options = options or {}
+    options.group_router = true
     return self.router:new(options)
 end
 

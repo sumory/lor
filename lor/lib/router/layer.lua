@@ -108,7 +108,7 @@ function Layer:handle_request(req, res, next)
     --debug(trackId .. "  layer.lua - Layer:handle_request-", "ok?", ok, "error:", e, "layer.name:", self.name, "middle_type:", self.length)
 
     if not ok then
-        --debug("handle_request:pcall error", ok, e)
+        debug("handle_request:pcall error", ok, e)
         next(e)
     end
 end

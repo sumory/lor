@@ -64,12 +64,13 @@ function proto:new(options)
     router.caseSensitive = opts.caseSensitive
     router.mergeParams = opts.mergeParams
     router.strict = opts.strict
+    router.group_router = opts.group_router
     router.stack = {} --array
 
     self:init()
     setmetatable(router, {
         __index = self,
-        __call = self.call,
+        __call = self._call,
         __tostring = function(s)
             local ok, result = pcall(function()
                 return "(name:" .. s.name .. "\tstack_length:" .. #s.stack .. ")"
@@ -86,16 +87,22 @@ function proto:new(options)
     return router
 end
 
+function proto:_call()
+
+    return self
+end
+
 -- a magick for usage like `lor:Router()` to invoke `handle`
 function proto:call()
     return function(req, res, next)
         return self:handle(req, res, next)
     end
+
 end
 
 -- dispatch a request
 function proto:handle(req, res, out)
-    -- debug("index.lua#handle")
+     debug("index.lua#handle")
     local idx = 1
     local stack = self.stack
     local done = restore(out, req)
@@ -197,12 +204,30 @@ end
 
 
 function proto:use(path, fn, fn_args_length)
-    local layer = Layer:new(path, {
-        sensitive = self.caseSensitive,
-        strict = false,
-        is_end = false, -- 参数path能确定是整个uri的结束
-        is_start = true -- 参数path能确定是整个uri的开始???
-    }, fn, fn_args_length)
+    local layer
+    if type(fn) == "function" then --传入的是function
+        layer = Layer:new(path, {
+            sensitive = self.caseSensitive,
+            strict = false,
+            is_end = false, -- 参数path能确定是整个uri的结束
+            is_start = true -- 参数path能确定是整个uri的开始???
+        }, fn, fn_args_length)
+    else -- 传入的是group router
+        layer = Layer:new(path, {
+            sensitive = self.caseSensitive,
+            strict = false,
+            is_end = false, -- 参数path能确定是整个uri的结束
+            is_start = true -- 参数path能确定是整个uri的开始???
+        }, fn.call(fn), fn_args_length)
+
+        local group_router_stack = fn.stack
+        if group_router_stack then
+            for i, v in ipairs(group_router_stack) do
+                v.pattern = utils.clear_slash("^/" .. path .. v.pattern)
+            end
+        end
+    end
+
 
     tinsert(self.stack, layer)
 

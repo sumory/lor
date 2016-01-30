@@ -102,14 +102,24 @@ end
 function app:inner_use(fn_args_length, path, fn)
     local router = self.router
 
-    if path and fn and type(path) == "string" and type(fn) == "function" then
+--    if path and fn and type(path) == "string" and type(fn) == "function" then
+--        router:use(path, fn, fn_args_length)
+--    elseif path and not fn then
+--        if type(path) == "function" then
+--            fn = path
+--            path = "/"
+--            router:use(path, fn, fn_args_length)
+--        end
+--    else
+--        -- todo: error usage
+--    end
+
+    if path and fn and type(path) == "string" then
         router:use(path, fn, fn_args_length)
     elseif path and not fn then
-        if type(path) == "function" then
-            fn = path
-            path = "/"
-            router:use(path, fn, fn_args_length)
-        end
+        fn = path
+        path = "/"
+        router:use(path, fn, fn_args_length)
     else
         -- todo: error usage
     end
