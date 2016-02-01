@@ -26,20 +26,17 @@ describe("path match test", function()
         count = 0
         match = 1
 
-        app:get("/all", function(req, res, next)
+        app:get("/hello", function(req, res, next)
             count = 1
+            match = 2
         end)
 
         local testRouter = lor:Router()
-        testRouter:get("/all", function(req, res, next)
-            count = 6
-            match = 2
-            next()
+        testRouter:get("/hello", function(req, res, next)
+            --count = 2
+            match = 3
         end)
-        testRouter:get("/find/:type", function(req, res, next)
-            count = 7
-            next()
-        end)
+
         app:use("/test", testRouter())
 
     end)
@@ -56,27 +53,19 @@ describe("path match test", function()
 
 
     it("test case 1", function()
-        req.path = "/test/all"
+        req.path = "/test/hello"
         req.method = "get"
         app:handle(req, res)
-        assert.is.equals(2, match)
-        assert.is.equals(6, count)
+        assert.is.equals(3, match)
+        assert.is.equals(0, count)
     end)
 
     it("test case 2", function()
-        req.path = "/test/find/all"
+        req.path = "/hello"
         req.method = "get"
         app:handle(req, res)
-        assert.is.equals(1, match) -- should not match "/test/all"
-        assert.is.equals(7, count)
+        assert.is.equals(2, match)
     end)
 
 
-    it("test case 3", function()
-        req.path = "/test/find/all/1"
-        req.method = "get"
-        app:handle(req, res)
-        assert.is.equals(1, match)
-        assert.is.equals(0, count)
-    end)
 end)

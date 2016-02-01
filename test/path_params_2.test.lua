@@ -16,7 +16,7 @@ describe("test about variables parsed from path", function()
     before_each(function()
         lor = _G.lor
         app = lor({
-            debug = true
+            debug = false
         })
         Request = _G.request
         Response = _G.response

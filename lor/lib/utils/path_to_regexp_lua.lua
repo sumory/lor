@@ -34,14 +34,14 @@ function _M.parse_path(uri, pattern, keys)
     local params = {}
     local match = { smatch(uri, pattern) } -- param values
     if #match > 0 then -- uri match some route
-    for j = 1, #match do
-        if match[j] then
-            local param_name = keys[j]
-            if param_name then
-                params[param_name] = match[j]
+        for j = 1, #match do
+            if match[j] then
+                local param_name = keys[j]
+                if param_name then
+                    params[param_name] = match[j]
+                end
             end
         end
-    end
     else
         debug("path_to_regexp.lua#parse_path not match", uri, pattern)
     end
