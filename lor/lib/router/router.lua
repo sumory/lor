@@ -88,8 +88,8 @@ function proto:new(options)
 end
 
 function proto:_call()
-
-    return self
+    local function get() return self end
+    return get()
 end
 
 -- a magick for usage like `lor:Router()` to invoke `handle`
@@ -221,7 +221,8 @@ function proto:use(path, fn, fn_args_length)
         }, fn.call(fn), fn_args_length)
 
         local group_router_stack = fn.stack
-        if group_router_stack then
+        if group_router_stack and not fn.is_repatterned then
+            fn.is_repatterned = true -- fixbug: fn.is_repatternd to remember, avoid 404 error when "lua_code_cache on"
             for i, v in ipairs(group_router_stack) do
                 v.pattern = utils.clear_slash("^/" .. path .. v.pattern)
             end
