@@ -14,7 +14,7 @@
 - 框架文档在[这里](http://lor.sumory.com)，正在逐步完善.
 - 框架示例项目[lor-example](https://github.com/lorlabs/lor-example)
 
-当前版本：v0.0.6
+当前版本：v0.0.7
 
 
 ### 快速开始

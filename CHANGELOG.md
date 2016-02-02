@@ -1,3 +1,11 @@
+### v0.0.7 2016.02.02
+
+- 统一代码风格
+- 优化部分代码，比如使用ngx.re代替string对应方法、尽量使用local等
+- Break API: req:isFound() -> req:is_found()
+- Fix bug: 修复了在lua_code_cache on时的一些404问题
+
+
 ### v0.0.6 2016.01.30
 
 - 修改了lor的默认安装路径到/usr/local/lor
