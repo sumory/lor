@@ -43,7 +43,7 @@ end)
 
 -- 404 error
 app:use(function(req, res, next)
-    if req:isFound() ~= true then
+    if req:is_found() ~= true then
         res:status(404):send("sorry, not found.")
     end
 end)

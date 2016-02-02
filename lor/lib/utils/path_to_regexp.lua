@@ -1,10 +1,10 @@
 local sgsub = ngx.re.gsub
 local smatch = ngx.re.match
+local type = type
 local function tappend(t, v) t[#t+1] = v end
 local debug = require("lor.lib.debug")
 
 
--- pattern或是uri末尾为n个/，均忽略
 local _M = {}
 
 -- 去除多余的/
@@ -12,6 +12,7 @@ function _M.clear_slash(s)
     s, _ = sgsub(s, "(/+)", "/", "io")
     return s
 end
+
 --
 function _M.parse_pattern(path, keys, options)
     path = _M.clear_slash(path)
@@ -52,7 +53,6 @@ function _M.parse_path(uri, pattern, keys)
         if err then
             ngx.log(ngx.ERR, "parse_path error: ", uri, " " , pattern)
         end
-        return params
     end
 
     return params
@@ -68,7 +68,6 @@ function _M.is_match(uri, pattern)
         -- for i,v in ipairs(ok) do
         -- 	ngx.say(#ok , " ", ok[0] .. " " .. i .. " |-> " .. v)
         -- end
-
         return true
     else
         if err then

@@ -1,13 +1,11 @@
 local type = type
 local pairs = pairs
-local ipairs = ipairs
+local type = type
 local mrandom = math.random
 local sgsub = string.gsub
-local smatch = string.match
-local gmatch = string.gmatch
+
 
 local _M = {}
-
 
 function _M.clear_slash(s)
     s, _ = sgsub(s, "(/+)", "/")

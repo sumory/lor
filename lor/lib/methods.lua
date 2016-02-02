@@ -5,9 +5,9 @@ local supported_http_methods = {
     post = true, -- work well
     head = true, -- no test
     options = true, -- no test
-    put = true, -- no test
+    put = true, -- work well
     patch = true, -- no test
-    delete = true, -- no test
+    delete = true, -- work well
     trace = true, -- no test
     all = true -- todo:
 }

@@ -1,9 +1,11 @@
 local tinsert = table.insert
-local ostime = os.time
 local utils = require("lor.lib.utils.utils")
-local is_table_empty = utils.is_table_empty
 local random = utils.random
-local mixin = utils.mixin
+local slower = string.lower
+local pairs = pairs
+local ipairs = ipairs
+local type = type
+local setmetatable = setmetatable
 
 local supported_http_methods = require("lor.lib.methods")
 local Layer = require("lor.lib.router.layer")
@@ -13,9 +15,7 @@ local debug = require("lor.lib.debug")
 local Route = {}
 
 function Route:new(path)
-    local instance = {
-        desc = "the route to a solid path"
-    }
+    local instance = {}
     instance.path = path
     instance.stack = {}
     instance.methods = {}
@@ -23,7 +23,7 @@ function Route:new(path)
 
     setmetatable(instance, {
         __index = self,
-        __call = self.dispatch, -- import: a magick to supply route:dispatch
+        __call = self.dispatch, -- important: a magick to supply `route:dispatch`
         __tostring = function(s)
             local ok, result = pcall(function()
                 return "(name:" .. s.name .. "\tpath:" .. s.path .. "\tstack_length:" .. #s.stack .. ")"
@@ -46,7 +46,7 @@ function Route:_handles_method(method)
         return true
     end
 
-    local name = string.lower(method)
+    local name = slower(method)
 
     if self.methods[name] then
         return true
@@ -64,7 +64,7 @@ function Route:dispatch(req, res, done)
         return
     end
 
-    local method = string.lower(req.method)
+    local method = slower(req.method)
     req.route = self
 
     local function next(err)
@@ -107,6 +107,7 @@ function Route:initMethod()
             layer.method = http_method
             self.methods[http_method] = true
             tinsert(self.stack, layer)
+
             debug("route.lua# now the route(" ..  self.name .. ") stack is:")
             debug(function()
                 for i, v in ipairs(self.stack) do

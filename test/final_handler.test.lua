@@ -99,7 +99,7 @@ describe("if finall handler defined, it will always be executed. but maybe not t
             req.method = "get"
             app:handle(req, res, function(err)
                 assert.is_falsy(err) -- 没有发生错误，此时err为nil
-                assert.is_not_true(req:isFound()) -- 没有匹配到/user/123/create
+                assert.is_not_true(req:is_found()) -- 没有匹配到/user/123/create
                 count = 222 -- finallhandler 仍被执行
             end)
             assert.is.equals(count, 222)

@@ -104,7 +104,7 @@ describe("next function usages test", function()
         req.path = "/user/123/view"
         req.method = "get"
         app:handle(req, res, function(err)
-            assert.is_true(req:isFound())
+            assert.is_true(req:is_found())
         end)
 
         assert.is.equals(4, count)
@@ -115,7 +115,7 @@ describe("next function usages test", function()
         req.path = "/user/123/view/" -- 不能匹配app:get("/user/123/view", fn()), 多了一个slash
         req.method = "get"
         app:handle(req, res, function(err)
-            assert.is_not_true(req:isFound()) -- 404 not found
+            assert.is_not_true(req:is_found()) -- 404 not found
         end)
 
         assert.is.equals(3, count)
@@ -133,7 +133,7 @@ describe("next function usages test", function()
 
         req.method = "post" -- post match
         app:handle(req, res, function(err)
-            assert.is_true(req:isFound())
+            assert.is_true(req:is_found())
         end)
 
         assert.is.equals(5, count)
@@ -144,7 +144,7 @@ describe("next function usages test", function()
         req.path = "/notfound" -- 不能匹配app:get("/user/123/view", fn()), 多了一个slash
         req.method = "get"
         app:handle(req, res, function(err)
-            assert.is_not_true(req:isFound())
+            assert.is_not_true(req:is_found())
             assert.is_nil(err)
         end)
 
@@ -156,7 +156,7 @@ describe("next function usages test", function()
         req.path = "/user_abc/123/view" -- 不能匹配app:get("/user/123/view", fn()), 多了一个slash
         req.method = "get"
         app:handle(req, res, function(err)
-            assert.is_not_true(req:isFound())
+            assert.is_not_true(req:is_found())
         end)
 
         assert.is.equals(1, count)
@@ -167,7 +167,7 @@ describe("next function usages test", function()
         req.path = "/user/123/view_mm" -- 不能匹配app:get("/user/123/view", fn()), 多了一个slash
         req.method = "get"
         app:handle(req, res, function(err)
-            assert.is_not_true(req:isFound())
+            assert.is_not_true(req:is_found())
         end)
 
         assert.is.equals(2, count) -- passed 2 middleware
@@ -178,7 +178,7 @@ describe("next function usages test", function()
         req.path = "/user/inject/123/view"
         req.method = "get"
         app:handle(req, res, function(err)
-            assert.is_not_true(req:isFound())
+            assert.is_not_true(req:is_found())
         end)
 
         assert.is.equals(2, count)
@@ -189,7 +189,7 @@ describe("next function usages test", function()
         req.path = "/user/123/view/inject"
         req.method = "get"
         app:handle(req, res, function(err)
-            assert.is_not_true(req:isFound())
+            assert.is_not_true(req:is_found())
         end)
 
         assert.is.equals(3, count)
@@ -200,7 +200,7 @@ describe("next function usages test", function()
         req.path = "/inject/user/123/view"
         req.method = "get"
         app:handle(req, res, function(err)
-            assert.is_not_true(req:isFound())
+            assert.is_not_true(req:is_found())
         end)
 
         assert.is.equals(1, count)

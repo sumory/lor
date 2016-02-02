@@ -1,9 +1,11 @@
 local pcall = pcall
+local pairs = pairs
+local ipairs = ipairs
+local type = type
+local setmetatable = setmetatable
 local ostime = os.time
 local pathRegexp = require("lor.lib.utils.path_to_regexp")
 local utils = require("lor.lib.utils.utils")
-local is_table_empty = utils.is_table_empty
-local mixin = utils.mixin
 local random = utils.random
 local debug = require("lor.lib.debug")
 
@@ -31,13 +33,13 @@ function Layer:new(path, options, fn, fn_args_length)
         instance.pattern = tmp_pattern
     end
 
-    if instance.is_end then -- 如果是is_end，则pattern要匹配末尾
+    if instance.is_end then
         instance.pattern = instance.pattern .. "$"
     else
-        instance.pattern = pathRegexp.clear_slash( instance.pattern .. "/")
+        instance.pattern = pathRegexp.clear_slash(instance.pattern .. "/")
     end
 
-    if instance.is_start then -- 如果是is_start，则pattern要匹配开头
+    if instance.is_start then
         instance.pattern = "^" .. pathRegexp.clear_slash("/" .. instance.pattern)
     else
         instance.pattern =  instance.pattern
@@ -62,6 +64,7 @@ function Layer:new(path, options, fn, fn_args_length)
                         "\t layer.route.name:" .. route_name ..
                         "\tpattern:" .. s.pattern .."\tis_end:" .. is_end .. ")"
             end)
+
             if ok then
                 return result
             else
@@ -73,11 +76,11 @@ function Layer:new(path, options, fn, fn_args_length)
     return instance
 end
 
-
 function Layer:handle_error(error, req, res, next)
     debug("layer.lua#handel_error:", self, error)
     local fn = self.handle
-    -- fn should pin a property named 'length' to indicate its args length
+
+    -- a property named 'length' to indicate its args length
     if self.length ~= 4 then
         debug("not match handle_error")
         next(error)
@@ -92,9 +95,8 @@ function Layer:handle_error(error, req, res, next)
     end
 end
 
-
 function Layer:handle_request(req, res, next)
-    debug("layer.lua#handel_request:", self)
+    debug("layer.lua#handle_request:", self)
 
     local fn = self.handle
     if self.length > 3 then
@@ -113,7 +115,6 @@ function Layer:handle_request(req, res, next)
     end
 end
 
--- req's fullpath
 function Layer:match(path)
     debug("layer.lua#match before:", "path:", path, "layer:", self)
     if not path then
@@ -142,7 +143,6 @@ function Layer:match(path)
 
     -- store values
     -- self.path = path
-
     -- self.params = mixin(m, self.params) -- this is only this layer's params
     self.params = m  -- fixbug: the params should not be transfered to next Request.
 

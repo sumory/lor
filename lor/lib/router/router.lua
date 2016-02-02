@@ -1,15 +1,17 @@
 local tinsert = table.insert
 local pairs = pairs
 local ipairs = ipairs
+local type = type
+local setmetatable = setmetatable
+
 local utils = require("lor.lib.utils.utils")
 local is_table_empty = utils.is_table_empty
-local table_is_array = utils.table_is_array
 local random = utils.random
 local mixin = utils.mixin
 
+local supported_http_methods = require("lor.lib.methods")
 local Route = require("lor.lib.router.route")
 local Layer = require("lor.lib.router.layer")
-local supported_http_methods = require("lor.lib.methods")
 local debug = require("lor.lib.debug")
 
 
@@ -19,19 +21,11 @@ local function layer_match(layer, path)
     return is_match
 end
 
--- todo: merge params with parent params
 local function merge_params(params, parent)
     local obj = mixin({}, parent)
     local result =  mixin(obj, params)
-    --    debug("merge_params: params")
-    --    debug(params)
-    --    debug("merge_params: parent")
-    --    debug(parent)
-    --    debug("merge_params: result")
-    --    debug(result)
     return result
 end
-
 
 local function restore(fn, obj)
     local origin = {
@@ -46,26 +40,20 @@ local function restore(fn, obj)
         obj['query'] = origin.query
         obj['next'] = origin.next
         -- obj['params'] = origin.params -- maybe overrided by layer.params, so no need to keep
-
         fn(err)
     end
 end
 
 
-local proto = {}
+local Router = {}
 
-function proto:new(options)
+function Router:new(options)
     local opts = options or {}
-    local router = {
-        desc = "the router of `lor`"
-    }
+    local router = {}
 
     router.name =  "routerr-" .. random()
-    router.caseSensitive = opts.caseSensitive
-    router.mergeParams = opts.mergeParams
-    router.strict = opts.strict
-    router.group_router = opts.group_router
-    router.stack = {} --array
+    router.group_router = opts.group_router -- is a group router
+    router.stack = {} -- layer array
 
     self:init()
     setmetatable(router, {
@@ -87,42 +75,42 @@ function proto:new(options)
     return router
 end
 
-function proto:_call()
-    local function get() return self end
-    return get()
+-- a magick for usage like `lor:Router()`
+function Router:_call()
+    return self
 end
 
--- a magick for usage like `lor:Router()` to invoke `handle`
-function proto:call()
+-- a magick to convert `router()` to `router:handle()`
+-- so a router() could be regarded as a `middleware`
+function Router:call()
     return function(req, res, next)
         return self:handle(req, res, next)
     end
-
 end
 
 -- dispatch a request
-function proto:handle(req, res, out)
-     debug("index.lua#handle")
+function Router:handle(req, res, out)
+    debug("index.lua#handle")
     local idx = 1
     local stack = self.stack
     local done = restore(out, req)
 
     local function next(err)
-        local layerError = err
-        debug("\nindex.lua#next..., layerError:", layerError, "stackLen:", #stack, "idx:", idx)
+        local layer_error = err
+        debug("\nindex.lua#next..., layer_error:", layer_error, "stack_len:", #stack, "idx:", idx)
 
         if idx > #stack then
-            done(layerError)
+            done(layer_error)
             return
         end
 
         local path = req.path
         if not path then
-            done(layerError)
+            done(layer_error)
             return
         end
 
-        -- find the next layer
+        -- to find the next matched layer
         local layer, match, route
         while (not match and idx <= #stack)
         do
@@ -139,7 +127,7 @@ function proto:handle(req, res, out)
                 if not route then
                     -- to continue
                 else
-                    if layerError then
+                    if layer_error then
                         match = false
                         -- to continue
                     else
@@ -156,15 +144,15 @@ function proto:handle(req, res, out)
         end
 
         if not match then
-            --debug("no match")
-            done(layerError)
+            -- debug("no match")
+            done(layer_error)
             return
         end
 
         -- store route
         if route then
             req.route = route
-            req:setFound(true)
+            req:set_found(true) -- to indicate that this req is not a 404 request.
         end
 
         if match then
@@ -181,16 +169,15 @@ function proto:handle(req, res, out)
             layer:handle_request(req, res, next)
         end
 
-        if layerError then
-            debug("[2]index.lua#next no route and layerError->handle_error", "layer.name", layer.name, "layer.length", layer.length,"match:", match, idx)
-            layer:handle_error(layerError, req, res, next)
+        if layer_error then
+            debug("[2]index.lua#next no route and layer_error->handle_error", "layer.name", layer.name, "layer.length", layer.length,"match:", match, idx)
+            layer:handle_error(layer_error, req, res, next)
         elseif route then
-            debug("[3]index.lua#next hasroute and not layerError->next()", "layer.name", layer.name, "layer.length", layer.length,"match:", match, idx)
+            debug("[3]index.lua#next hasroute and not layer_error->next()", "layer.name", layer.name, "layer.length", layer.length,"match:", match, idx)
             next()
         else
             debug("[4]index.lua#next no route->handle_request", "layer.name", layer.name, "layer.length", layer.length,"match:", match, idx)
             layer:handle_request(req, res, next)
-
         end
     end
     -- end of next function
@@ -202,22 +189,17 @@ function proto:handle(req, res, out)
     next()
 end
 
-
-function proto:use(path, fn, fn_args_length)
+function Router:use(path, fn, fn_args_length)
     local layer
-    if type(fn) == "function" then --传入的是function
+    if type(fn) == "function" then -- fn is a function
         layer = Layer:new(path, {
-            sensitive = self.caseSensitive,
-            strict = false,
-            is_end = false, -- 参数path能确定是整个uri的结束
-            is_start = true -- 参数path能确定是整个uri的开始???
+            is_end = false,
+            is_start = true
         }, fn, fn_args_length)
-    else -- 传入的是group router
+    else -- fn is a group router
         layer = Layer:new(path, {
-            sensitive = self.caseSensitive,
-            strict = false,
-            is_end = false, -- 参数path能确定是整个uri的结束
-            is_start = true -- 参数path能确定是整个uri的开始???
+            is_end = false,
+            is_start = true
         }, fn.call(fn), fn_args_length)
 
         local group_router_stack = fn.stack
@@ -229,7 +211,6 @@ function proto:use(path, fn, fn_args_length)
         end
     end
 
-
     tinsert(self.stack, layer)
 
     debug("router.lua#use now the router(" .. self.name .. ") stack is:")
@@ -238,22 +219,19 @@ function proto:use(path, fn, fn_args_length)
             print(i, v)
         end
     end)
-    debug("router.lua#use now the router(" .. self.name .. ") stack is-------------\n")
+    debug("router.lua#use now the router(" .. self.name .. ") stack is------\n")
 
-    --debug("index.lua#use new layer for path:", path, "stack length:", #self.stack, "middleware type:", fn_args_length)
     return self
 end
 
-
--- app route,pattern前加^
-function proto:app_route(path) -- 在第一层增加一个空route指向下一层
+-- invoked by app:route, add ^ before pattern
+-- add an empty route pointing to next layer
+function Router:app_route(path)
     local route = Route:new(path)
     local layer = Layer:new(path, {
-        sensitive = self.caseSensitive,
-        strict = self.strict,
-        is_end = true,  -- 参数path能确定是整个uri的结束
-        is_start = true -- 参数path能确定是整个uri的开始
-    }, route, 3) -- import: a magick to supply route:dispatch
+        is_end = true,
+        is_start = true
+    }, route, 3) -- important: a magick to supply route:dispatch
     layer.route = route
 
     tinsert(self.stack, layer)
@@ -264,21 +242,18 @@ function proto:app_route(path) -- 在第一层增加一个空route指向下一�
             print(i, v)
         end
     end)
-    debug("router.lua#route now the router(" .. self.name .. ") stack is+++++++++++\n")
+    debug("router.lua#route now the router(" .. self.name .. ") stack is++++++\n")
 
-    --debug("index.lua#route new route for path:", path, "stack length:", #self.stack, "middleware type:", 3)
     return route
 end
 
-
-function proto:route(path) -- 在第一层增加一个空route指向下一层
+-- add an empty route pointing to next layer
+function Router:route(path)
     local route = Route:new(path)
     local layer = Layer:new(path, {
-        sensitive = self.caseSensitive,
-        strict = self.strict,
-        is_end = true, --  参数path能确定是整个uri的结束
-        is_start = false --参数path 暂时不能确定是整个uri的开始, 如何判别？
-    }, route, 3) -- import: a magick to supply route:dispatch
+        is_end = true,
+        is_start = false
+    }, route, 3)
     layer.route = route
 
     tinsert(self.stack, layer)
@@ -289,14 +264,12 @@ function proto:route(path) -- 在第一层增加一个空route指向下一层
             print(i, v)
         end
     end)
-    debug("router.lua#route now the router(" .. self.name .. ") stack is+++++++++++\n")
+    debug("router.lua#route now the router(" .. self.name .. ") stack is++++++\n")
 
-    --debug("index.lua#route new route for path:", path, "stack length:", #self.stack, "middleware type:", 3)
     return route
 end
 
-
-function proto:init()
+function Router:init()
     for http_method, _ in pairs(supported_http_methods) do
         self[http_method] = function(s, path, fn)
             local route = s:route(path)
@@ -308,5 +281,4 @@ function proto:init()
 end
 
 
-
-return proto
+return Router

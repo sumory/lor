@@ -1,9 +1,14 @@
+local error = error
+local pairs = pairs
+local type = type
+local setmetatable = setmetatable
+local tostring = tostring
+
+
 local _M = {}
 
 function _M:new(create_app, Router, Route, Request, Response)
-    local instance = {
-        desc = "a wrapper of `lor`"
-    }
+    local instance = {}
     instance.router = Router
     instance.route = Route
     instance.request = Request
@@ -13,14 +18,14 @@ function _M:new(create_app, Router, Route, Request, Response)
 
     setmetatable(instance, {
         __index = self,
-        __call = self.createApp
+        __call = self.create_app
     })
 
     return instance
 end
 
 -- Generally, this shouled only be used for `lor` framework itself.
-function _M:createApp(options)
+function _M:create_app(options)
     self.app = self.fn(options)
     return self.app
 end

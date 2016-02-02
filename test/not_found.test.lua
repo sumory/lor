@@ -115,7 +115,7 @@ describe("not found test", function()
 
 
         app:use(function(req, res, next)
-            if req:isFound() ~= true then
+            if req:is_found() ~= true then
                 count = 404
             end
         end)

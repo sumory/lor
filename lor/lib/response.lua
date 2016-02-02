@@ -1,6 +1,7 @@
-local setmetatable = setmetatable
 local pairs = pairs
 local ipairs = ipairs
+local type = type
+local setmetatable = setmetatable
 local tinsert = table.insert
 local tconcat = table.concat
 
@@ -38,19 +39,19 @@ end
 
 -- todo: optimize-compile before used
 function Response:render(view_file, data)
-    self:setHeader('Content-Type', 'text/html; charset=UTF-8')
+    self:set_header('Content-Type', 'text/html; charset=UTF-8')
     local body = self.view:render(view_file, data)
     self:_send(body)
 end
 
 
 function Response:html(data)
-    self:setHeader('Content-Type', 'text/html; charset=UTF-8')
+    self:set_header('Content-Type', 'text/html; charset=UTF-8')
     self:_send(data)
 end
 
 function Response:json(data)
-    self:setHeader('Content-Type', 'application/json; charset=utf-8')
+    self:set_header('Content-Type', 'application/json; charset=utf-8')
     self:_send(json_encode(data))
 end
 
@@ -107,7 +108,7 @@ function Response:location(url, data)
 end
 
 function Response:send(text)
-    self:setHeader('Content-Type', 'text/plain; charset=UTF-8')
+    self:set_header('Content-Type', 'text/plain; charset=UTF-8')
     self:_send(text)
 end
 
@@ -119,17 +120,15 @@ function Response:_send(content)
     ngx.say(content)
 end
 
-
-
-function Response:getBody()
+function Response:get_body()
     return self.body
 end
 
-function Response:getHeader()
+function Response:get_header()
     return self.headers
 end
 
-function Response:setBody(body)
+function Response:set_body(body)
     if body ~= nil then self.body = body end
 end
 
@@ -138,7 +137,7 @@ function Response:status(status)
     return self
 end
 
-function Response:setHeader(key, value)
+function Response:set_header(key, value)
     ngx.header[key] = value
 end
 

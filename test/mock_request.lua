@@ -23,12 +23,12 @@ function Request:new()
     return instance
 end
 
-function Request:isFound()
+function Request:is_found()
     return self.found
 end
 
-function Request:setFound(isFound)
-    self.found = isFound
+function Request:set_found(found)
+    self.found = found
 end
 
 
