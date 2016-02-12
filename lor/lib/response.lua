@@ -29,6 +29,7 @@ function Response:new()
 
     local instance = {
         headers = {},
+        locals = {},
         body = '--default body. you should not see this by default--',
         view = nil
     }
@@ -40,6 +41,9 @@ end
 -- todo: optimize-compile before used
 function Response:render(view_file, data)
     self:set_header('Content-Type', 'text/html; charset=UTF-8')
+    data = data or {}
+    data.locals = self.locals -- inject res.locals
+
     local body = self.view:render(view_file, data)
     self:_send(body)
 end
