@@ -32,6 +32,7 @@ local function restore(fn, obj)
         path = obj['path'],
         query = obj['query'],
         next = obj['next'],
+        locals = obj['locals'],
         -- params = obj['params']
     }
 
@@ -39,6 +40,7 @@ local function restore(fn, obj)
         obj['path'] = origin.path
         obj['query'] = origin.query
         obj['next'] = origin.next
+        obj['locals'] = origin.locals
         -- obj['params'] = origin.params -- maybe overrided by layer.params, so no need to keep
         fn(err)
     end
