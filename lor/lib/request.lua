@@ -1,4 +1,5 @@
 local error = error
+local sfind = string.find
 local pairs = pairs
 local ipairs = ipairs
 local type = type
@@ -8,14 +9,32 @@ local Request = {}
 
 -- new request: init args/params/body etc from http request
 function Request:new()
-    ngx.req.read_body()
+
 
     local body = {} -- body params
+    local headers = ngx.req.get_headers()
 
-    local post_args = ngx.req.get_post_args()
-    if post_args and type(post_args) == "table" then
-        for k,v in pairs(post_args) do
-            body[k] = v
+    local header = headers['Content-Type']
+    if header then
+        local is_multipart = sfind(header, "multipart")
+        if is_multipart and is_multipart>0 then
+
+        else
+            ngx.req.read_body()
+            local post_args = ngx.req.get_post_args()
+            if post_args and type(post_args) == "table" then
+                for k,v in pairs(post_args) do
+                    body[k] = v
+                end
+            end
+        end
+    else
+        ngx.req.read_body()
+        local post_args = ngx.req.get_post_args()
+        if post_args and type(post_args) == "table" then
+            for k,v in pairs(post_args) do
+                body[k] = v
+            end
         end
     end
 
@@ -28,7 +47,7 @@ function Request:new()
         body_raw = ngx.req.get_body_data(),
         url = ngx.var.request_uri,
         uri = ngx.var.request_uri,
-        headers = ngx.req.get_headers(), -- request headers
+        headers = headers, -- request headers
 
         req_args = ngx.var.args,
         found = false -- 404 or not
