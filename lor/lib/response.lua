@@ -9,7 +9,7 @@ local json = require("cjson")
 
 
 local function json_encode(data, empty_table_as_object)
-    local json_value = nil
+    local json_value
     if json.encode_empty_table_as_object then
         json.encode_empty_table_as_object(empty_table_as_object or false) -- 空的table默认为array
     end
@@ -25,7 +25,7 @@ local Response = {}
 
 function Response:new()
     ngx.header['X-Powered-By'] = 'Lor Framework'
-    ngx.status = 200
+    --ngx.status = 200
 
     local instance = {
         headers = {},
@@ -54,9 +54,9 @@ function Response:html(data)
     self:_send(data)
 end
 
-function Response:json(data)
+function Response:json(data, empty_table_as_object)
     self:set_header('Content-Type', 'application/json; charset=utf-8')
-    self:_send(json_encode(data))
+    self:_send(json_encode(data, empty_table_as_object))
 end
 
 function Response:redirect(url, code, query)
@@ -121,6 +121,7 @@ end
 --~=============================================================
 
 function Response:_send(content)
+    ngx.status = 200
     ngx.say(content)
 end
 
