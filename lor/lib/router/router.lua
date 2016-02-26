@@ -3,6 +3,7 @@ local pairs = pairs
 local ipairs = ipairs
 local type = type
 local setmetatable = setmetatable
+local getmetatable = getmetatable
 
 local utils = require("lor.lib.utils.utils")
 local is_table_empty = utils.is_table_empty
@@ -14,6 +15,24 @@ local Route = require("lor.lib.router.route")
 local Layer = require("lor.lib.router.layer")
 local debug = require("lor.lib.debug")
 
+
+local function clone(object)
+    local lookup_table = {}
+    local function _copy(object)
+        if type(object) ~= "table" then
+            return object
+        elseif lookup_table[object] then
+            return lookup_table[object]
+        end
+        local new_object = {}
+        lookup_table[object] = new_object
+        for key, value in pairs(object) do
+            new_object[_copy(key)] = _copy(value)
+        end
+        return setmetatable(new_object, getmetatable(object))
+    end
+    return _copy(object)
+end
 
 local function layer_match(layer, path)
     local is_match = layer:match(path)
@@ -53,7 +72,7 @@ function Router:new(options)
     local opts = options or {}
     local router = {}
 
-    router.name =  "routerr-" .. random()
+    router.name =  "origin-router-" .. random()
     router.group_router = opts.group_router -- is a group router
     router.stack = {} -- layer array
 
@@ -77,9 +96,13 @@ function Router:new(options)
     return router
 end
 
--- a magick for usage like `lor:Router()`
+
+
+-- a magick for usage like `lor:Router()`, generate a new router for different routes group
 function Router:_call()
-    return self
+    local new_router =  clone(self)
+    new_router.name = self.name .. ":group-router-" .. random()
+    return new_router
 end
 
 -- a magick to convert `router()` to `router:handle()`
@@ -211,6 +234,14 @@ function Router:use(path, fn, fn_args_length)
                 v.pattern = utils.clear_slash("^/" .. path .. v.pattern)
             end
         end
+
+        debug("router.lua#use-inner now the group router(" .. fn.name .. ") stack is:")
+        debug(function()
+            for i, v in ipairs(fn.stack) do
+                print(i, v)
+            end
+        end)
+        debug("router.lua#use-inner now the group router(" .. fn.name .. ") stack is------\n")
     end
 
     tinsert(self.stack, layer)
