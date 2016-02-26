@@ -12,14 +12,15 @@
 - lor以后会保持核心足够精简，扩展功能依赖`middleware`来实现. `lor`本身也是基于`middleware`构建的.
 - 推荐使用lor作为HTTP API Server，lor也已支持session/cookie/html template等功能.
 - 框架文档在[这里](http://lor.sumory.com)，正在逐步完善.
-- 框架示例项目[lor-example](https://github.com/lorlabs/lor-example)
+- 框架简单示例项目[lor-example](https://github.com/lorlabs/lor-example)
+- 框架全站示例项目[openresty-china](https://github.com/sumory/openresty-china)
 
-当前版本：v0.0.7
+当前版本：v0.0.8
 
 
 ### 快速开始
 
-在使用lor之前请首先确保OpenResty和luajit已安装.
+在使用lor之前请首先确保OpenResty和luajit已安装。即在命令行直接输入`nginx -v`、`luajit -v`能正确输出。
 
 一个简单示例，更复杂的示例或项目模板请使用`lord`命令生成：
 
@@ -100,7 +101,7 @@ drwxr-xr-x  13 root  wheel   442B  1 22 01:17 test
 
 ```
 $ lord -h
-lor v0.0.6, a Lua web framework based on OpenResty.
+lor ${version}, a Lua web framework based on OpenResty.
 
 Usage: lor COMMAND [OPTIONS]
 

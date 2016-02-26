@@ -28,7 +28,9 @@ app:run()
 ```
 git clone https://github.com/sumory/lor
 cd lor
-sh install.sh /path/to/your/lor 
+sh install.sh /path/to/your/lor # install lor in /path/to/your/lor
+# or
+sh install.sh # install lor in /usr/local/lor
 ```
 
 

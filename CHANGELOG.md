@@ -1,3 +1,17 @@
+### v0.0.9
+
+- TODO: debug时列出整个路由表供参考
+
+### v0.0.8 2016.02.26
+
+- 支持multipart/form文件上传
+- 修复了一个group router被多次app:use时出现404的bug
+- 支持Response:json(data, flag)方法传入第二个bool类型参数falg，指明序列化json时默认的空table是否编码为{}
+    - true 作为{}处理
+    - false 作为[]处理
+    - 不传入第二个参数则当作[]处理
+
+
 ### v0.0.7 2016.02.02
 
 - 统一代码风格

@@ -43,13 +43,13 @@ function _M.parse_path(uri, pattern, keys)
             end
         end
     else
-        debug("path_to_regexp_ngx.lua#parse_path not match", uri, pattern)
+        debug("path_to_regexp.lua#parse_path not match", uri, pattern)
     end
     return params
 end
 
 function _M.is_match(uri, pattern)
-    debug("path_to_regexp_ngx.lua#is_match, uri:", uri, "pattern:", pattern)
+    debug("path_to_regexp.lua#is_match, uri:", uri, "pattern:", pattern)
     if not pattern then
         debug("empty pattern")
         return false
