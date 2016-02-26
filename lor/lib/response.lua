@@ -28,6 +28,7 @@ function Response:new()
     --ngx.status = 200
 
     local instance = {
+        status = nil,
         headers = {},
         locals = {},
         body = '--default body. you should not see this by default--',
@@ -121,7 +122,7 @@ end
 --~=============================================================
 
 function Response:_send(content)
-    ngx.status = 200
+    ngx.status =  self.status or 200
     ngx.say(content)
 end
 
@@ -139,6 +140,7 @@ end
 
 function Response:status(status)
     ngx.status = status
+    self.status = status
     return self
 end
 
