@@ -9,8 +9,6 @@ local Request = {}
 
 -- new request: init args/params/body etc from http request
 function Request:new()
-
-
     local body = {} -- body params
     local headers = ngx.req.get_headers()
 
@@ -18,7 +16,7 @@ function Request:new()
     if header then
         local is_multipart = sfind(header, "multipart")
         if is_multipart and is_multipart>0 then
-
+            -- upload request, should not invoke ngx.req.read_body()
         else
             ngx.req.read_body()
             local post_args = ngx.req.get_post_args()
@@ -51,24 +49,6 @@ function Request:new()
 
         req_args = ngx.var.args,
         found = false -- 404 or not
-    }
-    setmetatable(instance, { __index = self })
-    return instance
-end
-
-function Request:mock()
-    local query = {} -- uri params
-    local body = {} -- body params
-    local params = {}
-
-    local instance = {
-        method = "get",
-        query = {},
-        params = {},
-        body = {},
-        path = "",
-        uri = "",
-        baseUrl = "",
     }
     setmetatable(instance, { __index = self })
     return instance
