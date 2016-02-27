@@ -4,6 +4,7 @@ local Session = require("resty.session")
 -- base on 'lua-resty-session'
 -- this is the default `session` middleware which uses storage `cookie`
 -- you're recommended to define your own `session` middleware.
+-- you're strongly recommended to set your own session.secret
 
 -- usage example:
 --    app:get("/session/set", function(req, res, next)
@@ -30,6 +31,7 @@ local Session = require("resty.session")
 --        req.session.destroy()
 --    end)
 local session_middleware = function(sessionConfig)
+    sessionConfig = sessionConfig or {}
     return function(req, res, next)
         -- local config = sessionConfig or {}
         -- config.storage = config.storage or "cookie" -- default is “cookie”
@@ -37,7 +39,7 @@ local session_middleware = function(sessionConfig)
         req.session = {
             set = function(key, value)
                 local s = Session.start({
-                    secret = "7su3k78hjqw90fvj480fsdi934j7ery3n59ljf295d"
+                    secret = sessionConfig.secret or "7su3k78hjqw90fvj480fsdi934j7ery3n59ljf295d"
                 })
                 s.data[key] = value
                 s:save()
@@ -45,14 +47,14 @@ local session_middleware = function(sessionConfig)
 
             get = function(key)
                 local s = Session.open({
-                    secret = "7su3k78hjqw90fvj480fsdi934j7ery3n59ljf295d"
+                    secret = sessionConfig.secret or "7su3k78hjqw90fvj480fsdi934j7ery3n59ljf295d"
                 })
                 return s.data[key] or ""
             end,
 
             destroy = function()
                 local session = Session.start({
-                    secret = "7su3k78hjqw90fvj480fsdi934j7ery3n59ljf295d"
+                    secret = sessionConfig.secret or "7su3k78hjqw90fvj480fsdi934j7ery3n59ljf295d"
                 })
                 session:destroy()
             end
