@@ -130,8 +130,12 @@ function Response:get_body()
     return self.body
 end
 
-function Response:get_header()
+function Response:get_headers()
     return self.headers
+end
+
+function Response:get_header(key)
+    return self.headers[key]
 end
 
 function Response:set_body(body)
