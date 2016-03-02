@@ -20,6 +20,10 @@ end)
 app:run()
 ```
 
+## Examples
+
+- [lor-example](https://github.com/lorlabs/lor-example)
+- [openresty-china](https://github.com/sumory/openresty-china)
 
 
 ## Installation

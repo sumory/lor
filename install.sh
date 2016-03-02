@@ -3,9 +3,10 @@
 PACKAGE_PATH="$1"
 LOR_PATH="/usr/local/bin/"
 
-echo "start installing lord..."
+echo "start installing lor..."
 
 if [ -n "$PACKAGE_PATH" ];then
+	PACKAGE_PATH="${PACKAGE_PATH}/lor" #add sub folder for lor
    echo "use defined PATH: "${PACKAGE_PATH}
 else
    PACKAGE_PATH="/usr/local/lor"
@@ -15,7 +16,7 @@ fi
 mkdir -p $PACKAGE_PATH
 mkdir -p $LOR_PATH
 
-rm -rf $LOR_PATH/lor
+rm -rf $LOR_PATH/lord
 rm -rf $PACKAGE_PATH/*
 
 
@@ -36,4 +37,4 @@ chmod 755 $LOR_PATH/lord
 echo "install lor package to $PACKAGE_PATH"
 cp -a ./* $PACKAGE_PATH/
 
-echo "lord(lor framework cli tool) installed."
+echo "lor framework installed."

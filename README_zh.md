@@ -2,7 +2,7 @@
 
 <a href="./README_zh.md" style="font-size:13px">中文</a> <a href="./README.md" style="font-size:13px">English</a> 
 
-[![https://travis-ci.org/sumory/lor.svg?branch=master](https://travis-ci.org/sumory/lor.svg?branch=master)](https://travis-ci.org/sumory/lor) [![Issue Stats](http://issuestats.com/github/sumory/lor/badge/pr)](http://issuestats.com/github/sumory/lor) [![Issue Stats](http://issuestats.com/github/sumory/lor/badge/issue)](http://issuestats.com/github/sumory/lor)
+[![https://travis-ci.org/sumory/lor.svg?branch=master](https://travis-ci.org/sumory/lor.svg?branch=master)](https://travis-ci.org/sumory/lor) 
 
 **Lor**是一个运行在[OpenResty](http://openresty.org)上的基于Lua编写的Web框架. 
 
@@ -15,7 +15,7 @@
 - 框架简单示例项目[lor-example](https://github.com/lorlabs/lor-example)
 - 框架全站示例项目[openresty-china](https://github.com/sumory/openresty-china)
 
-当前版本：v0.0.8
+当前版本：v0.0.9
 
 
 ### 快速开始
@@ -59,11 +59,13 @@ end)
 ### 安装
 
 
-使用install.sh安装lor框架
+使用install.sh安装lor框架，强烈建议在使用install.sh安装前阅读该脚本代码。
 
 ```
-#如把lor安装到/opt/lua/lor目录下
-sh install.sh /opt/lua/lor  #不加路径参数则默认安装到/usr/local/lor
+# 把lor安装到/opt/lua/lor目录下
+sh install.sh /opt/lua
+# 或者安装到默认目录/usr/local/lor下
+sh install.sh
 ```
 
 执行以上命令后lor的命令行工具`lord`就被安装在了`/usr/local/bin`下, 通过`which lord`查看:
@@ -89,7 +91,6 @@ drwxr-xr-x   4 root  wheel   136B  1 22 00:06 bin
 -rw-r--r--   1 root  wheel   1.6K  1 19 23:48 install.md
 -rw-r--r--   1 root  wheel   1.0K  1 21 22:37 install.sh
 drwxr-xr-x   4 root  wheel   136B  1 21 22:40 lor
-drwxr-xr-x  13 root  wheel   442B  1 22 01:17 test
 ```
 
 至此， `lor`框架已经安装完毕，接下来使用`lord`命令行工具快速开始一个项目.
@@ -128,7 +129,7 @@ lord start
 
 ### 讨论交流
 
-目前有一个QQ群用于在线讨论：[![QQ群522410959](http://pub.idqqimg.com/wpa/images/group.png)](http://shang.qq.com/wpa/qunwpa?idkey=b930a7ba4ac2ecac927cb51101ff26de1170c0d0a31c554b5383e9e8de004834) 522410959
+目前有一个QQ群用于在线讨论: 522410959
 
 
 ### License
