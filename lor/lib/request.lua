@@ -44,6 +44,7 @@ function Request:new()
         body = body,
         body_raw = ngx.req.get_body_data(),
         url = ngx.var.request_uri,
+        origin_uri = ngx.var.request_uri,
         uri = ngx.var.request_uri,
         headers = headers, -- request headers
 

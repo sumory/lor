@@ -1,3 +1,10 @@
+### v0.1.0 2016.03.15
+
+- view.lua中ngx.var.template_root存在性判断
+- 增加docker支持
+- 命令`lord --path`变更为`lord path`，用于查看当前lor的安装路径
+- 官网文档更新[http://lor.sumory.com](http://lor.sumory.com)
+
 ### v0.0.9 2016.03.02
 
 - 使用install.sh安装lor时如果有指定安装目录，则在指定的目录后面拼上"lor"，避免文件误删的问题

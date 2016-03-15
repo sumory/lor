@@ -5,7 +5,7 @@
 
 A fast and minimalist web framework based on [OpenResty](http://openresty.org).
 
-[![https://travis-ci.org/sumory/lor.svg?branch=master](https://travis-ci.org/sumory/lor.svg?branch=master)](https://travis-ci.org/sumory/lor) [![Issue Stats](http://issuestats.com/github/sumory/lor/badge/pr)](http://issuestats.com/github/sumory/lor) [![Issue Stats](http://issuestats.com/github/sumory/lor/badge/issue)](http://issuestats.com/github/sumory/lor)
+[![https://travis-ci.org/sumory/lor.svg?branch=master](https://travis-ci.org/sumory/lor.svg?branch=master)](https://travis-ci.org/sumory/lor) 
 
 
 
@@ -32,7 +32,7 @@ app:run()
 ```
 git clone https://github.com/sumory/lor
 cd lor
-sh install.sh /path/to/your/lor # install lor in /path/to/your/lor
+sh install.sh /opt/lua # install lor in /opt/lua/lor
 # or
 sh install.sh # install lor in /usr/local/lor
 ```

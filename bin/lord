@@ -16,6 +16,7 @@ Commands:
  stop                   Stops the server
  restart                Restart the server
  version                Show version of lor
+ path                   Show `lor` install path
  help                   Show help tips
 ]]
 

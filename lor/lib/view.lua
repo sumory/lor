@@ -10,8 +10,13 @@ local template_new = template.new
 local View = {}
 
 function View:new(view_config)
-    ngx.var.template_root =  view_config.views
     local instance = {}
+
+    if ngx.var.template_root then
+        ngx.var.template_root =  view_config.views
+    else
+        ngx.log(ngx.ERR, "ngx.var.template_root is not set in nginx.conf")
+    end
     instance.view_engine = view_config.view_engine
     instance.view_ext = view_config.view_ext
     instance.views = view_config.views

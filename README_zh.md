@@ -8,19 +8,19 @@
 
 - 路由采用[Sinatra](http://www.sinatrarb.com/)风格，Sinatra是Ruby小而精的web框架.
 - API基本采用了[Express](http://expressjs.com)的思路和设计，Node.js跨界开发者可以很快上手.
-- 支持插件(middleware)，路由可分组，路由匹配支持string/正则模式.
-- lor以后会保持核心足够精简，扩展功能依赖`middleware`来实现. `lor`本身也是基于`middleware`构建的.
+- 支持插件(middleware)，路由可分组，路由匹配支持strin或正则模式.
+- lor以后会保持核心足够精简，扩展功能依赖middleware来实现. `lor`本身也是基于middleware构建的.
 - 推荐使用lor作为HTTP API Server，lor也已支持session/cookie/html template等功能.
-- 框架文档在[这里](http://lor.sumory.com)，正在逐步完善.
-- 框架简单示例项目[lor-example](https://github.com/lorlabs/lor-example)
-- 框架全站示例项目[openresty-china](https://github.com/sumory/openresty-china)
+- 框架文档在[http://lor.sumory.com](http://lor.sumory.com).
+- 简单示例项目[lor-example](https://github.com/lorlabs/lor-example)
+- 全站示例项目[openresty-china](https://github.com/sumory/openresty-china)
 
-当前版本：v0.0.9
+当前版本：v0.1.0
 
 
 ### 快速开始
 
-在使用lor之前请首先确保OpenResty和luajit已安装。即在命令行直接输入`nginx -v`、`luajit -v`能正确输出。
+**特别注意:** 在使用lor之前请首先确保OpenResty和luajit已安装，并配置到环境变量中。即在命令行直接输入`nginx -v`、`luajit -v`能正确输出。
 
 一个简单示例，更复杂的示例或项目模板请使用`lord`命令生成：
 
@@ -34,8 +34,8 @@ end)
 
 -- 路由示例: 匹配/query/123?foo=bar
 app:get("/query/:id", function(req, res, next)
-    local foo = req.query.foo -- 从url queryString取值："bar"
-    local path_id = req.params.id -- 从path取值："123"
+    local foo = req.query.foo
+    local path_id = req.params.id
     res:json({
         foo = foo,
         id = path_id
@@ -75,7 +75,7 @@ $ which lord
 /usr/local/bin/lord
 ```
 
-`lor`的运行时包安装在了`/opt/lua/lor`下, 通过`ll /opt/lua/lor`查看:
+`lor`的运行时包安装在了指定目录下, 若安装在`/opt/lua/lor`，通过`ll /opt/lua/lor`查看:
 
 ```
 $ ll /opt/lua/lor
@@ -88,12 +88,11 @@ drwxrwxrwt  14 root  wheel   476B  1 22 01:18 ..
 -rw-r--r--   1 root  wheel   1.9K  1 21 20:59 README-zh.md
 -rw-r--r--   1 root  wheel   870B  1 21 20:59 README.md
 drwxr-xr-x   4 root  wheel   136B  1 22 00:06 bin
--rw-r--r--   1 root  wheel   1.6K  1 19 23:48 install.md
 -rw-r--r--   1 root  wheel   1.0K  1 21 22:37 install.sh
 drwxr-xr-x   4 root  wheel   136B  1 21 22:40 lor
 ```
 
-至此， `lor`框架已经安装完毕，接下来使用`lord`命令行工具快速开始一个项目.
+至此， `lor`框架已经安装完毕，接下来使用`lord`命令行工具快速开始一个项目骨架.
 
 
 
@@ -122,7 +121,7 @@ cd lor_demo
 lord start
 ```
 
-之后访问http://localhost:8888/，即可。
+之后访问[http://localhost:8888/](http://localhost:8888/)，即可。
 
 更多使用方法，请参考[test](./test)测试用例。
 
