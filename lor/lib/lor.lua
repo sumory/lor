@@ -15,7 +15,7 @@ local createApplication = function(options)
     end
 
     local app = Application:new()
-    app:init()
+    app:init(options)
 
     return app
 end

@@ -12,10 +12,13 @@ local View = {}
 function View:new(view_config)
     local instance = {}
 
-    if ngx.var.template_root then
-        ngx.var.template_root =  view_config.views
-    else
-        ngx.log(ngx.ERR, "ngx.var.template_root is not set in nginx.conf")
+    instance.view_enable = view_config.view_enable
+    if instance.view_enable then
+        if ngx.var.template_root then
+            ngx.var.template_root =  view_config.views
+        else
+            ngx.log(ngx.ERR, "$template_root is not set in nginx.conf")
+        end
     end
     instance.view_engine = view_config.view_engine
     instance.view_ext = view_config.view_ext
@@ -30,16 +33,20 @@ end
 
 -- to optimize
 function View:render(view_file, data)
-    local view_file_name = view_file .. "." .. self.view_ext
+    if not self.view_enable then
+        ngx.log(ngx.ERR, "view is not enabled. you may need `app:conf('view enable', true)`")
+    else
+        local view_file_name = view_file .. "." .. self.view_ext
 
-    local t = template_new(view_file_name)
-    if data and type(data) == 'table' then
-        for k,v in pairs(data) do
-            t[k] = v
+        local t = template_new(view_file_name)
+        if data and type(data) == 'table' then
+            for k,v in pairs(data) do
+                t[k] = v
+            end
         end
-    end
 
-    return tostring(t)
+        return tostring(t)
+    end
 end
 
 

@@ -36,31 +36,40 @@ function App:run(final_handler)
     local request = Request:new()
     local response = Response:new()
 
-    local view_config = {
-        view_engine = self:getconf("view engine"), -- view engine: resty-template or others...
-        view_ext = self:getconf("view ext"), -- defautl is "html"
-        views = self:getconf("views") -- template files directory
-    }
+    local enable_view = self:getconf("view enable")
+    if enable_view then
+        local view_config = {
+            view_enable = enable_view,
+            view_engine = self:getconf("view engine"), -- view engine: resty-template or others...
+            view_ext = self:getconf("view ext"), -- defautl is "html"
+            views = self:getconf("views") -- template files directory
+        }
 
-    local view = View:new(view_config)
-    response.view = view
+        local view = View:new(view_config)
+        response.view = view
+    end
 
     self.request = request
     self.response = response
     self:handle(self.request, self.response, final_handler)
 end
 
-function App:init()
-    self:default_configuration()
+function App:init(options)
+    self:default_configuration(options)
 end
 
-function App:default_configuration()
-    self:enable('x-powered-by')
-
+function App:default_configuration(options)
+    options = options or {}
+    
     -- view and template configuration
-    self:conf("view engine", "tmpl")
-    self:conf("view ext", "html")
-    self:conf("views", "./app/views/")
+    if options["view enable"] ~= nil and options["view enable"] == false then
+        self:conf("view enable", false)
+    else
+        self:conf("view enable", true)
+    end
+    self:conf("view engine", options["view engine"] or "tmpl")
+    self:conf("view ext", options["view ext"] or "html")
+    self:conf("views", options["views"] or "./app/views/")
 
     self.locals = {}
     self.locals.settings = self.setttings

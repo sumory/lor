@@ -1,5 +1,6 @@
 ### v0.1.0 2016.03.15
 
+- 增加一配置项，是否启用模板功能：app:conf("view enable", true), 默认启用
 - view.lua中ngx.var.template_root存在性判断
 - 增加docker支持
 - 命令`lord --path`变更为`lord path`，用于查看当前lor的安装路径
