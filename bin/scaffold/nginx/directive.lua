@@ -1,6 +1,6 @@
 -- most code is from https://github.com/idevz/vanilla/blob/master/vanilla/sys/nginx/directive.lua
 
-package.path = './app/?.lua;./app/library/?.lua;./app/?/init.lua;' .. package.path
+package.path = './app/?.lua;' .. package.path
 package.cpath = './app/library/?.so;' .. package.cpath
 
 

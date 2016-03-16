@@ -110,6 +110,7 @@ local middleware_session = require("lor.lib.middleware.session")
 app:use(middleware_cookie())
 app:use(middleware_session())
 
+app:conf("view enable", true)
 app:conf("view engine", "tmpl")
 app:conf("view ext", "html")
 app:conf("views", "./app/views")
