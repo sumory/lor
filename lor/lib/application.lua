@@ -62,10 +62,10 @@ function App:default_configuration(options)
     options = options or {}
     
     -- view and template configuration
-    if options["view enable"] ~= nil and options["view enable"] == false then
-        self:conf("view enable", false)
-    else
+    if options["view enable"] ~= nil and options["view enable"] == true then
         self:conf("view enable", true)
+    else
+        self:conf("view enable", false)
     end
     self:conf("view engine", options["view engine"] or "tmpl")
     self:conf("view ext", options["view ext"] or "html")
