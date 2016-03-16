@@ -11,11 +11,15 @@
 - 支持插件(middleware)，路由可分组，路由匹配支持strin或正则模式.
 - lor以后会保持核心足够精简，扩展功能依赖middleware来实现. `lor`本身也是基于middleware构建的.
 - 推荐使用lor作为HTTP API Server，lor也已支持session/cookie/html template等功能.
-- 框架文档在[http://lor.sumory.com](http://lor.sumory.com).
 - 简单示例项目[lor-example](https://github.com/lorlabs/lor-example)
 - 全站示例项目[openresty-china](https://github.com/sumory/openresty-china)
 
 当前版本：v0.1.0
+
+
+### 文档
+
+[http://lor.sumory.com](http://lor.sumory.com)
 
 
 ### 快速开始
