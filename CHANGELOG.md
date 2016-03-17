@@ -1,3 +1,7 @@
+### v0.1.1 
+
+- 支持ngx.req.get_uri_args(0)
+
 ### v0.1.0 2016.03.15
 
 - 增加一配置项，是否启用模板功能：app:conf("view enable", true), 默认为关闭
