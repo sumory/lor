@@ -130,6 +130,12 @@ lord start
 更多使用方法，请参考[test](./test)测试用例。
 
 
+### 贡献者
+
+- [@wanghaisheng](https://github.com/wanghaisheng)
+- [@lihuibin](https://github.com/lihuibin)
+
+
 ### 讨论交流
 
 目前有一个QQ群用于在线讨论: 522410959
