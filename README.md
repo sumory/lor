@@ -104,6 +104,11 @@ busted test/*.test.lua
 ```
 
 
+### Contributors
+
+- [@wanghaisheng](https://github.com/wanghaisheng)
+- [@lihuibin](https://github.com/lihuibin)
+
 
 ## License
 
