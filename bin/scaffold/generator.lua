@@ -191,7 +191,7 @@ userRouter:get("/query/:id", function(req, res, next)
     local query_id = req.params.id -- 从req.params取参数
     res:json({
         id = query_id,
-        desc = "this if from user router"
+        desc = "this is from user router"
     })
 end)
 
