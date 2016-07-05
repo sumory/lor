@@ -108,6 +108,7 @@ busted test/*.test.lua
 
 - [@wanghaisheng](https://github.com/wanghaisheng)
 - [@lihuibin](https://github.com/lihuibin)
+- [@ms2008](https://github.com/ms2008)
 
 
 ## License
