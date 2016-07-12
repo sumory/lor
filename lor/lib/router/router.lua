@@ -145,7 +145,7 @@ function Router:handle(req, res, out)
             match = layer_match(layer, path)
             route = layer.route
 
-            -- lua has no `break` keyword, such a pain
+            -- lua has no `continue` keyword, such a pain
             if not match then
                 -- to continue
             else
