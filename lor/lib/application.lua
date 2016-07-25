@@ -49,8 +49,8 @@ function App:run(final_handler)
         response.view = view
     end
 
-    self.request = request
-    self.response = response
+    --self.request = request
+    --self.response = response
     self:handle(self.request, self.response, final_handler)
 end
 
