@@ -100,6 +100,8 @@ Visit [http://localhost:8888](http://localhost:8888).
 Install [busted](http://olivinelabs.com/busted/), then run test
 
 ```
+rm -rf lor/lib/utils/path_to_regexp.lua
+mv lor/lib/utils/path_to_regexp_lua.lua lor/lib/utils/path_to_regexp.lua
 busted test/*.test.lua
 ```
 
