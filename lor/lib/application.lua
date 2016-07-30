@@ -51,7 +51,7 @@ function App:run(final_handler)
 
     --self.request = request
     --self.response = response
-    self:handle(self.request, self.response, final_handler)
+    self:handle(request, response, final_handler)
 end
 
 function App:init(options)
