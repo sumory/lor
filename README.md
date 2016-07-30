@@ -68,7 +68,7 @@ A quick way to get started with lor is to utilize the executable cli tool `lord`
 $ lord -h
 lor ${version}, a Lua web framework based on OpenResty.
 
-Usage: lor COMMAND [OPTIONS]
+Usage: lord COMMAND [OPTIONS]
 
 Commands:
  new [name]             Create a new application
