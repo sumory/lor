@@ -9,7 +9,7 @@ local path = '/usr/local/lor'
 
 local usages = [[lor v]] .. version .. [[, a Lua web framework based on OpenResty.
 
-Usage: lor COMMAND [OPTIONS]
+Usage: lord COMMAND [OPTIONS]
 
 Commands:
  new [name]             Create a new application
