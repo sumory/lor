@@ -37,6 +37,12 @@ sh install.sh /opt/lua # install lor in /opt/lua/lor
 sh install.sh # install lor in /usr/local/lor
 ```
 
+or you can use [homebrew-lor](https://github.com/syhily/homebrew-lor) on Mac OSX. 
+
+```
+$ brew tap syhily/lor
+$ brew install lor
+```
 
 
 ## Features
@@ -105,13 +111,16 @@ mv lor/lib/utils/path_to_regexp_lua.lua lor/lib/utils/path_to_regexp.lua
 busted test/*.test.lua
 ```
 
+## Homebrew
 
-### Contributors
+[https://github.com/syhily/homebrew-lor](https://github.com/syhily/homebrew-lor) maintained by [@syhily](https://github.com/syhily)
+
+## Contributors
 
 - [@wanghaisheng](https://github.com/wanghaisheng)
 - [@lihuibin](https://github.com/lihuibin)
 - [@ms2008](https://github.com/ms2008)
-
+- [@syhily](https://github.com/syhily)
 
 ## License
 

@@ -63,6 +63,8 @@ end)
 ### 安装
 
 
+#### 1）使用脚本安装
+
 使用install.sh安装lor框架，强烈建议在使用install.sh安装前阅读该脚本代码。
 
 ```
@@ -96,7 +98,21 @@ drwxr-xr-x   4 root  wheel   136B  1 22 00:06 bin
 drwxr-xr-x   4 root  wheel   136B  1 21 22:40 lor
 ```
 
+#### 2）使用homebrew安装
+
+
+除使用install.sh安装外，Mac用户还可使用homebrew来安装lor，该方式由[@syhily](https://github.com/syhily)提供， 更详尽的使用方法请参见[这里](https://github.com/syhily/homebrew-lor)。
+
+```
+$ brew tap syhily/lor
+$ brew install lor
+```
+
+
+
+
 至此， `lor`框架已经安装完毕，接下来使用`lord`命令行工具快速开始一个项目骨架.
+
 
 
 
@@ -130,11 +146,18 @@ lord start
 更多使用方法，请参考[test](./test)测试用例。
 
 
+### Homebrew
+
+[https://github.com/syhily/homebrew-lor](https://github.com/syhily/homebrew-lor)由[@syhily](https://github.com/syhily)维护。
+
+
 ### 贡献者
 
 - [@wanghaisheng](https://github.com/wanghaisheng)
 - [@lihuibin](https://github.com/lihuibin)
 - [@ms2008](https://github.com/ms2008)
+- [@syhily](https://github.com/syhily)
+
 
 ### 讨论交流
 
