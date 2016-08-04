@@ -5,6 +5,7 @@ package.path = './?.lua;' .. package.path
 local generator = require("bin.scaffold.generator")
 local lor = require("bin.scaffold.launcher")
 local version = require("lor.version")
+local path = '/usr/local/lor'
 
 local usages = [[lor v]] .. version .. [[, a Lua web framework based on OpenResty.
 
@@ -42,6 +43,10 @@ elseif arg[1] == 'help' or arg[1] == '-h' then
     print(usages)
 elseif arg[1] == 'version' or arg[1] == '-v' then
     print(version) -- show lor framework version
+elseif arg[1] == 'path' then
+    print(path)
+elseif arg[1] == nil then
+    print(usages)
 else
     print("[lor] unsupported commands or options")
 end
