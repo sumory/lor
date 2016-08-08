@@ -1,4 +1,6 @@
 local pcall = pcall
+local xpcall = xpcall
+local traceback = debug.traceback
 local pairs = pairs
 local ipairs = ipairs
 local type = type
@@ -87,7 +89,12 @@ function Layer:handle_error(error, req, res, next)
         return
     end
 
-    local ok, e = pcall(function() fn(error, req, res, next) end)
+    local e
+    local ok= xpcall(function() 
+        fn(error, req, res, next) 
+    end,  function()
+        e = traceback()
+    end)
     --print(random() .. "  layer.lua - Layer:handle_error", "ok?", ok, "error:", e, "pcall_error:", e, "layer.name:", self.name)
 
     if not ok then
@@ -106,7 +113,12 @@ function Layer:handle_request(req, res, next)
     end
 
     --local trackId = random()
-    local ok, e = pcall(function() fn(req, res, next) end);
+    local e
+    local ok= xpcall(function() 
+        fn(req, res, next) 
+    end,  function()
+        e = traceback()
+    end)
     --debug(trackId .. "  layer.lua - Layer:handle_request-", "ok?", ok, "error:", e, "layer.name:", self.name, "middle_type:", self.length)
 
     if not ok then
