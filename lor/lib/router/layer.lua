@@ -78,22 +78,22 @@ function Layer:new(path, options, fn, fn_args_length)
     return instance
 end
 
-function Layer:handle_error(error, req, res, next)
-    debug("layer.lua#handel_error:", self, error)
+function Layer:handle_error(err, req, res, next)
+    debug("layer.lua#handel_error:", self, err)
     local fn = self.handle
 
     -- a property named 'length' to indicate its args length
     if self.length ~= 4 then
         debug("not match handle_error")
-        next(error)
+        next(err)
         return
     end
 
     local e
     local ok= xpcall(function() 
-        fn(error, req, res, next) 
+        fn(err, req, res, next) 
     end,  function()
-        e = traceback()
+        e = (err or "") .. "\n" .. traceback()
     end)
     --print(random() .. "  layer.lua - Layer:handle_error", "ok?", ok, "error:", e, "pcall_error:", e, "layer.name:", self.name)
 
@@ -116,8 +116,8 @@ function Layer:handle_request(req, res, next)
     local e
     local ok= xpcall(function() 
         fn(req, res, next) 
-    end,  function()
-        e = traceback()
+    end, function(msg)
+        e = (msg or "") .. "\n" .. traceback()
     end)
     --debug(trackId .. "  layer.lua - Layer:handle_request-", "ok?", ok, "error:", e, "layer.name:", self.name, "middle_type:", self.length)
 
