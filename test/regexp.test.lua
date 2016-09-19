@@ -26,7 +26,7 @@ describe("path match and parse rule test", function()
     it("method:parse_pattern should work.", function()
         local keys = {}
         local path_to_parse_pattern = "/foo/:bar/create/:id/done"
-        local dest_pattern = "/foo/([A-Za-z0-9_-]+)/create/([A-Za-z0-9_-]+)/done"
+        local dest_pattern = "/foo/([A-Za-z0-9_.-]+)/create/([A-Za-z0-9_.-]+)/done"
         local pattern = Regexp.parse_pattern(path_to_parse_pattern, keys)
         assert.is.equals(#keys, 2)
         assert.is.truthy(pattern)
