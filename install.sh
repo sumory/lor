@@ -6,7 +6,7 @@ LOR_PATH="/usr/local/bin/"
 echo "start installing lor..."
 
 if [ -n "$PACKAGE_PATH" ];then
-	PACKAGE_PATH="${PACKAGE_PATH}/lor" #add sub folder for lor
+   PACKAGE_PATH="${PACKAGE_PATH}/lor" #add sub folder for lor
    echo "use defined PATH: "${PACKAGE_PATH}
 else
    PACKAGE_PATH="/usr/local/lor"
