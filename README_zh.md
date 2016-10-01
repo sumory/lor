@@ -14,8 +14,6 @@
 - 简单示例项目[lor-example](https://github.com/lorlabs/lor-example)
 - 全站示例项目[openresty-china](https://github.com/sumory/openresty-china)
 
-当前版本：v0.1.5
-
 
 ### 文档
 
