@@ -1,4 +1,4 @@
 local lor = require("lor.lib.lor")
-local version = require("lor.version")
+local version = "0.2.0"
 lor.version = version
 return lor
