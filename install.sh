@@ -35,6 +35,10 @@ mv tmp_lor_bin $LOR_PATH/lord
 chmod 755 $LOR_PATH/lord
 
 echo "install lor package to $PACKAGE_PATH"
+
+mkdir -p ./lor
+cp -a ./lib/lor/ ./lor/
 cp -a ./* $PACKAGE_PATH/
+rm -rf ./lor
 
 echo "lor framework installed."

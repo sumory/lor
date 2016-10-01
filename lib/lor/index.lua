@@ -1,6 +1,6 @@
 local type = type
 
-local version = "0.2.2"
+local version = require("lor.version")
 local Route = require("lor.lib.router.route")
 local Router = require("lor.lib.router.router")
 local Request = require("lor.lib.request")
