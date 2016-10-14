@@ -8,8 +8,8 @@
 
 - 路由采用[Sinatra](http://www.sinatrarb.com/)风格，Sinatra是Ruby小而精的web框架.
 - API基本采用了[Express](http://expressjs.com)的思路和设计，Node.js跨界开发者可以很快上手.
-- 支持插件(middleware)，路由可分组，路由匹配支持strin或正则模式.
-- lor以后会保持核心足够精简，扩展功能依赖middleware来实现. `lor`本身也是基于middleware构建的.
+- 支持插件(middleware)，路由可分组，路由匹配支持string或正则模式.
+- lor会保持核心足够精简，扩展功能依赖middleware来实现. `lor`本身也是基于middleware构建的.
 - 推荐使用lor作为HTTP API Server，lor也已支持session/cookie/html template等功能.
 - 简单示例项目[lor-example](https://github.com/lorlabs/lor-example)
 - 全站示例项目[openresty-china](https://github.com/sumory/openresty-china)
@@ -24,7 +24,7 @@
 
 ### 快速开始
 
-**特别注意:** 在使用lor之前请首先确保OpenResty和luajit已安装，并配置到环境变量中。即在命令行直接输入`nginx -v`、`luajit -v`能正确输出。
+**特别注意:** 在使用lor之前请首先确保OpenResty已安装，并将`nginx`/`resty`命令配置到环境变量中。即在命令行直接输入`nginx -v`、`resty -v`能正确输出。
 
 一个简单示例，更复杂的示例或项目模板请使用`lord`命令生成：
 
