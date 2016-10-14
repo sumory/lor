@@ -23,7 +23,11 @@ rm -rf $PACKAGE_PATH/*
 echo "install lor cli to $LOR_PATH"
 
 echo "#!/usr/bin/env resty" > tmp_lor_bin
-echo "package.path=\"/usr/local/lor/?.lua;;\"" >> tmp_lor_bin
+echo "package.path=\""${PACKAGE_PATH}"/?.lua;;\"" >> tmp_lor_bin
+echo "if arg[1] and arg[1] == \"path\" then" >> tmp_lor_bin
+echo "    print(\"${PACKAGE_PATH}\")" >> tmp_lor_bin
+echo "    return" >> tmp_lor_bin
+echo "end" >> tmp_lor_bin
 echo "require('bin.lord')(arg)" >> tmp_lor_bin
 
 mv tmp_lor_bin $LOR_PATH/lord

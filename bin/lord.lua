@@ -15,7 +15,6 @@ Commands:
  stop                   Stops the server
  restart                Restart the server
  version                Show version of lor
- path                   Show `lor` install path
  help                   Show help tips
 ]]
 
@@ -38,8 +37,6 @@ local function exec(args)
         print(usages)
     elseif arg == 'version' or arg == '-v' then
         print(version) -- show lor framework version
-    elseif arg == 'path' then
-        print(path)
     elseif arg == nil then
         print(usages)
     else
