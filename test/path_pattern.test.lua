@@ -1,5 +1,5 @@
 expose("expose modules", function()
-    package.path = '../../?.lua;' .. package.path
+    package.path = '../lib/?.lua;' .. '../?.lua;'.. './lib/?.lua;'  .. package.path
     _G.lor = require("lor.index")
     _G.request = require("test.mock_request")
     _G.response = require("test.mock_response")

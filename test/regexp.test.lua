@@ -1,5 +1,5 @@
 expose("expose modules", function()
-    package.path = '../?.lua;' .. package.path
+    package.path = '../lib/?.lua;' .. '../?.lua;'.. './lib/?.lua;'  .. package.path
     _G.Regexp = require("lor.lib.utils.path_to_regexp")
 end)
 
