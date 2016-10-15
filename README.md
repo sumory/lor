@@ -28,6 +28,7 @@ app:run()
 
 ## Installation
 
+1） shell
 
 ```
 git clone https://github.com/sumory/lor
@@ -37,7 +38,20 @@ sh install.sh /opt/lua # install lor in /opt/lua/lor
 sh install.sh # install lor in /usr/local/lor
 ```
 
-or you can use [homebrew-lor](https://github.com/syhily/homebrew-lor) on Mac OSX. 
+2) opm
+
+`opm install` is supported from v0.2.2.
+
+```
+opm install sumory/lor
+```
+
+`lord` cli is not supported with this installation.
+
+
+3) homebrew
+
+you can use [homebrew-lor](https://github.com/syhily/homebrew-lor) on Mac OSX. 
 
 ```
 $ brew tap syhily/lor
