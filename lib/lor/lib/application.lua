@@ -42,7 +42,9 @@ function App:run(final_handler)
             view_enable = enable_view,
             view_engine = self:getconf("view engine"), -- view engine: resty-template or others...
             view_ext = self:getconf("view ext"), -- defautl is "html"
-            views = self:getconf("views") -- template files directory
+            views = self:getconf("views"), -- template files directory
+            view_func = self:getconf("view func") --template  custom  funct ion
+
         }
 
         local view = View:new(view_config)
@@ -60,7 +62,7 @@ end
 
 function App:default_configuration(options)
     options = options or {}
-    
+
     -- view and template configuration
     if options["view enable"] ~= nil and options["view enable"] == true then
         self:conf("view enable", true)
@@ -70,6 +72,7 @@ function App:default_configuration(options)
     self:conf("view engine", options["view engine"] or "tmpl")
     self:conf("view ext", options["view ext"] or "html")
     self:conf("views", options["views"] or "./app/views/")
+    self:conf("view func", options["view func"] or {})
 
     self.locals = {}
     self.locals.settings = self.setttings

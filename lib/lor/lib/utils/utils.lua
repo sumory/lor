@@ -44,4 +44,12 @@ function _M.random()
 end
 
 
+function _M.table_merge( tDest, tSrc )
+    for k, v in pairs( tSrc ) do
+        tDest[k] = v
+    end
+    return tDest
+end
+
+
 return _M
