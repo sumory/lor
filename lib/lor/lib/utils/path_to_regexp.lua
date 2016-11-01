@@ -17,15 +17,15 @@ end
 function _M.parse_pattern(path, keys, options)
     path = _M.clear_slash(path)
 
-    local new_pattern = sgsub(path, "/:([A-Za-z0-9._-]+)", function(m)
+    local new_pattern = sgsub(path, ":([A-Za-z0-9._-]+)|{([A-Za-z0-9._-]+)}", function(m)
         if m and type(m) == 'table' then
-            -- for i, v in pairs(m) do
-            -- 	ngx.say(i .. " * ".. v)
-            -- end
-            tappend(keys, m[1])
+             --for i, v in pairs(m) do
+            	--ngx.say(i .. " * ".. v)
+             --end
+             tappend(keys, sgsub(m[0], "[:{}]", ""))
         end
 
-        return "/([A-Za-z0-9._-]+)"
+        return "([A-Za-z0-9._-]+)"
     end, "io")
 
     -- 以*结尾
@@ -79,4 +79,3 @@ end
 
 
 return _M
-
