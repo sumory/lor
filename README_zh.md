@@ -1,10 +1,10 @@
-# Lor 
+# Lor
 
-<a href="./README_zh.md" style="font-size:13px">中文</a> <a href="./README.md" style="font-size:13px">English</a> 
+<a href="./README_zh.md" style="font-size:13px">中文</a> <a href="./README.md" style="font-size:13px">English</a>
 
-[![https://travis-ci.org/sumory/lor.svg?branch=master](https://travis-ci.org/sumory/lor.svg?branch=master)](https://travis-ci.org/sumory/lor) 
+[![https://travis-ci.org/sumory/lor.svg?branch=master](https://travis-ci.org/sumory/lor.svg?branch=master)](https://travis-ci.org/sumory/lor)
 
-**Lor**是一个运行在[OpenResty](http://openresty.org)上的基于Lua编写的Web框架. 
+**Lor**是一个运行在[OpenResty](http://openresty.org)上的基于Lua编写的Web框架.
 
 - 路由采用[Sinatra](http://www.sinatrarb.com/)风格，Sinatra是Ruby小而精的web框架.
 - API基本采用了[Express](http://expressjs.com)的思路和设计，Node.js跨界开发者可以很快上手.
@@ -15,7 +15,7 @@
 - 全站示例项目[openresty-china](https://github.com/sumory/openresty-china)
 
 
-当前版本：v0.2.2
+当前版本：v0.2.4
 
 
 ### 文档

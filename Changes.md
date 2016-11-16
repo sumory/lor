@@ -1,3 +1,8 @@
+### v0.2.4 2016.11.16
+
+- 支持"application/json"类型请求
+
+
 ### v0.2.2 2016.10.15
 
 - 支持opm， 可通过`opm install sumory/lor`安装
