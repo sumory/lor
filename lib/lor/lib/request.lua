@@ -16,7 +16,7 @@ function Request:new()
     local header = headers['Content-Type']
     -- the post request have Content-Type header set
     if header then
-        if sfind(header, "application/x-www-form-urlencoded", 0, true) then
+        if sfind(header, "application/x-www-form-urlencoded", 1, true) then
             ngx.req.read_body()
             local post_args = ngx.req.get_post_args()
             if post_args and type(post_args) == "table" then
@@ -24,12 +24,12 @@ function Request:new()
                     body[k] = v
                 end
             end
-        elseif sfind(header, "application/json", 0, true) then
+        elseif sfind(header, "application/json", 1, true) then
             ngx.req.read_body()
             local json_str = ngx.req.get_body_data()
             body = utils.json_decode(json_str)
         -- form-data request
-        elseif sfind(header, "multipart", 0, true) then
+        elseif sfind(header, "multipart", 1, true) then
             -- upload request, should not invoke ngx.req.read_body()
         -- parsed as raw by default
         else

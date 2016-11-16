@@ -47,7 +47,7 @@ end
 function _M.json_encode(data, empty_table_as_object)
     local json_value
     if json.encode_empty_table_as_object then
-        json.encode_empty_table_as_object(empty_table_as_object or false) -- ¿ÕµÄtableÄ¬ÈÏÎªarray
+        json.encode_empty_table_as_object(empty_table_as_object or false) -- empty table encoded as array default
     end
     if require("ffi").os ~= "Windows" then
         json.encode_sparse_array(true)
