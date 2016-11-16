@@ -1,11 +1,11 @@
-# Lor 
+# Lor
 
-<a href="./README_zh.md" style="font-size:13px">中文</a> <a href="./README.md" style="font-size:13px">English</a> 
+<a href="./README_zh.md" style="font-size:13px">中文</a> <a href="./README.md" style="font-size:13px">English</a>
 
 
 A fast and minimalist web framework based on [OpenResty](http://openresty.org).
 
-[![https://travis-ci.org/sumory/lor.svg?branch=master](https://travis-ci.org/sumory/lor.svg?branch=master)](https://travis-ci.org/sumory/lor) 
+[![https://travis-ci.org/sumory/lor.svg?branch=master](https://travis-ci.org/sumory/lor.svg?branch=master)](https://travis-ci.org/sumory/lor)
 
 
 
@@ -51,7 +51,7 @@ opm install sumory/lor
 
 3) homebrew
 
-you can use [homebrew-lor](https://github.com/syhily/homebrew-lor) on Mac OSX. 
+you can use [homebrew-lor](https://github.com/syhily/homebrew-lor) on Mac OSX.
 
 ```
 $ brew tap syhily/lor
@@ -120,8 +120,8 @@ Visit [http://localhost:8888](http://localhost:8888).
 Install [busted](http://olivinelabs.com/busted/), then run test
 
 ```
-rm -rf lor/lib/utils/path_to_regexp.lua
-mv lor/lib/utils/path_to_regexp_lua.lua lor/lib/utils/path_to_regexp.lua
+rm -rf lib/lor/lib/utils/path_to_regexp.lua
+mv lib/lor/lib/utils/path_to_regexp_lua.lua lib/lor/lib/utils/path_to_regexp.lua
 busted test/*.test.lua
 ```
 

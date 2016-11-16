@@ -4,21 +4,7 @@ local type = type
 local setmetatable = setmetatable
 local tinsert = table.insert
 local tconcat = table.concat
-
-local json = require("cjson")
-
-
-local function json_encode(data, empty_table_as_object)
-    local json_value
-    if json.encode_empty_table_as_object then
-        json.encode_empty_table_as_object(empty_table_as_object or false) -- 空的table默认为array
-    end
-    if require("ffi").os ~= "Windows" then
-        json.encode_sparse_array(true)
-    end
-    pcall(function(data) json_value = json.encode(data) end, data)
-    return json_value
-end
+local utils = require("lor.lib.utils.utils")
 
 
 local Response = {}
@@ -62,7 +48,7 @@ end
 
 function Response:json(data, empty_table_as_object)
     self:set_header('Content-Type', 'application/json; charset=utf-8')
-    self:_send(json_encode(data, empty_table_as_object))
+    self:_send(utils.json_encode(data, empty_table_as_object))
 end
 
 function Response:redirect(url, code, query)
