@@ -9,14 +9,16 @@ local function debug(...)
     end
 
     local info = { ... }
-    if info and type(info[1]) == 'function' then
-        pcall(function() info[1]() end)
-    elseif info and type(info[1]) == 'table' then
-        for i, v in pairs(info[1]) do
-            print(i, v)
+    if next(info) then
+        if type(info[1]) == 'function' then
+            pcall(function() info[1]() end)
+        elseif type(info[1]) == 'table' then
+            for i, v in pairs(info[1]) do
+                print(i, v)
+            end
+        else
+            print(...)
         end
-    elseif ... ~= nil then
-        print(...)
     else
         print("debug not works...")
     end
