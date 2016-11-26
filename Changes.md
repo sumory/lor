@@ -1,3 +1,12 @@
+### v0.2.5 2016.11.26
+
+- 升级内部集成的lua-resty-session
+    - 升级到2.13版本
+    - 给内置的session中间件添加新的update方法用于更新cookie过期时间
+- 更新`lord new`项目模板
+    - 缓存`app`对象，提高性能
+    - 调整CRUD示例
+
 ### v0.2.4 2016.11.16
 
 - 支持"application/json"类型请求
