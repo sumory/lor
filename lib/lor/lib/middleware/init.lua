@@ -11,9 +11,7 @@ local init_middleware = function(req, res, next)
     --            end
     --        end
 
-    --ngx.say(req.query.name)
-
-    res:set_header('X-Powered-By', 'Lor Framework')
+    -- res:set_header('X-Powered-By', 'Lor Framework')
     res.locals = res.locals or {}
     -- setmetatable(req, {__index = app.request})
     -- setmetatable(res, {__index = app.response})
