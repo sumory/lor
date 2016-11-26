@@ -41,8 +41,6 @@ local NginxHandle = {}
 NginxHandle.__index = NginxHandle
 
 function NginxHandle.new(necessary_dirs, nginx_conf_content, nginx_conf_file_path)
-    
-
     local instance = {
         nginx_conf_content = nginx_conf_content,
         nginx_conf_file_path = nginx_conf_file_path,
