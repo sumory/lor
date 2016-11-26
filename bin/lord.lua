@@ -11,11 +11,12 @@ Usage: lord COMMAND [OPTIONS]
 
 Commands:
  new [name]             Create a new application
- start                  Starts the server
- stop                   Stops the server
+ start                  Start the server
+ stop                   Stop the server
  restart                Restart the server
  version                Show version of lor
  help                   Show help tips
+ path                   Show install path
 ]]
 
 local function exec(args)
@@ -40,7 +41,7 @@ local function exec(args)
     elseif arg == nil then
         print(usages)
     else
-        print("[lord] unsupported commands or options")
+        print("[lord] unsupported commands or options, `lord -h` to check usages.")
     end
 
 end
