@@ -3,7 +3,7 @@ local tonumber     = tonumber
 local aes          = require "resty.aes"
 local cip          = aes.cipher
 local hashes       = aes.hash
-local ngx_var      = ngx.var
+local var          = ngx.var
 
 local CIPHER_MODES = {
     ecb    = "ecb",
@@ -22,10 +22,10 @@ local CIPHER_SIZES = {
 }
 
 local defaults = {
-    size   = CIPHER_SIZES[ngx_var.session_aes_size] or 256,
-    mode   = CIPHER_MODES[ngx_var.session_aes_mode] or "cbc",
-    hash   = hashes[ngx_var.session_aes_hash]       or "sha512",
-    rounds = tonumber(ngx_var.session_aes_rounds)   or 1
+    size   = CIPHER_SIZES[var.session_aes_size] or 256,
+    mode   = CIPHER_MODES[var.session_aes_mode] or "cbc",
+    hash   = hashes[var.session_aes_hash]       or "sha512",
+    rounds = tonumber(var.session_aes_rounds)   or 1
 }
 
 local cipher = {}
@@ -35,10 +35,10 @@ cipher.__index = cipher
 function cipher.new(config)
     local a = config.aes or defaults
     return setmetatable({
-        size   = CIPHER_MODES[a.size or defaults.size] or 256,
-        mode   = CIPHER_MODES[a.mode or defaults.mode] or "cbc",
-        hash   = hashes[a.hash or defaults.hash]       or hashes.sha512,
-        rounds = tonumber(a.rounds or defaults.rounds) or 1
+        size   = CIPHER_SIZES[a.size or defaults.size]   or 256,
+        mode   = CIPHER_MODES[a.mode or defaults.mode]   or "cbc",
+        hash   = hashes[a.hash       or defaults.hash]   or hashes.sha512,
+        rounds = tonumber(a.rounds   or defaults.rounds) or 1
     }, cipher)
 end
 

@@ -6,6 +6,7 @@ local floor        = math.floor
 local sleep        = ngx.sleep
 local null         = ngx.null
 local now          = ngx.now
+local var          = ngx.var
 
 local function enabled(val)
     if val == nil then return nil end
@@ -13,16 +14,17 @@ local function enabled(val)
 end
 
 local defaults = {
-    prefix       = ngx.var.session_redis_prefix or "sessions",
-    socket       = ngx.var.session_redis_socket,
-    host         = ngx.var.session_redis_host or "127.0.0.1",
-    port         = tonumber(ngx.var.session_redis_port) or 6379,
-    uselocking   = enabled(ngx.var.session_redis_uselocking or true),
-    spinlockwait = tonumber(ngx.var.session_redis_spinlockwait) or 10000,
-    maxlockwait  = tonumber(ngx.var.session_redis_maxlockwait) or 30,
+    prefix       = var.session_redis_prefix                 or "sessions",
+    socket       = var.session_redis_socket,
+    host         = var.session_redis_host                   or "127.0.0.1",
+    port         = tonumber(var.session_redis_port)         or 6379,
+    auth         = var.session_redis_auth,
+    uselocking   = enabled(var.session_redis_uselocking     or true),
+    spinlockwait = tonumber(var.session_redis_spinlockwait) or 10000,
+    maxlockwait  = tonumber(var.session_redis_maxlockwait)  or 30,
     pool = {
-        timeout  = tonumber(ngx.var.session_redis_pool_timeout),
-        size     = tonumber(ngx.var.session_redis_pool_size)
+        timeout  = tonumber(var.session_redis_pool_timeout),
+        size     = tonumber(var.session_redis_pool_size)
     }
 }
 
@@ -39,6 +41,7 @@ function redis.new(config)
     end
     local self = {
         redis        = red:new(),
+        auth         = r.auth or defaults.auth,
         encode       = config.encoder.encode,
         decode       = config.encoder.decode,
         delimiter    = config.cookie.delimiter,
@@ -62,11 +65,20 @@ function redis.new(config)
 end
 
 function redis:connect()
-    local socket = self.socket
-    if socket then
-        return self.redis:connect(socket)
+    local redis = self.redis
+    local ok, err
+    if self.socket then
+        ok, err = redis:connect(self.socket)
+    else
+        ok, err = redis:connect(self.host, self.port)
     end
-    return self.redis:connect(self.host, self.port)
+    if ok and self.auth then
+        ok, err = redis:get_reused_times()
+        if ok == 0 then
+            ok, err = redis:auth(self.auth)
+        end
+    end
+    return ok, err
 end
 
 function redis:set_keepalive()
