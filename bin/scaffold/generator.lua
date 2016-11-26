@@ -347,6 +347,7 @@ userRouter:get("/query/:id", function(req, res, next)
         })
     end
 
+    -- 渲染页面
     res:render("user/info", {
         id = query_id, 
         name = "user" .. query_id,
