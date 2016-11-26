@@ -3,6 +3,7 @@ local setmetatable = setmetatable
 local tonumber     = tonumber
 local concat       = table.concat
 local now          = ngx.now
+local var          = ngx.var
 local shared       = ngx.shared
 
 local function enabled(val)
@@ -11,14 +12,14 @@ local function enabled(val)
 end
 
 local defaults = {
-    store      = ngx.var.session_shm_store or "sessions",
-    uselocking = enabled(ngx.var.session_shm_uselocking or true),
+    store      = var.session_shm_store or "sessions",
+    uselocking = enabled(var.session_shm_uselocking or true),
     lock       = {
-        exptime  = tonumber(ngx.var.session_shm_lock_exptime) or 30,
-        timeout  = tonumber(ngx.var.session_shm_lock_timeout) or 5,
-        step     = tonumber(ngx.var.session_shm_lock_step) or 0.001,
-        ratio    = tonumber(ngx.var.session_shm_lock_ratio) or 2,
-        max_step = tonumber(ngx.var.session_shm_lock_max_step) or 0.5,
+        exptime  = tonumber(var.session_shm_lock_exptime)  or 30,
+        timeout  = tonumber(var.session_shm_lock_timeout)  or 5,
+        step     = tonumber(var.session_shm_lock_step)     or 0.001,
+        ratio    = tonumber(var.session_shm_lock_ratio)    or 2,
+        max_step = tonumber(var.session_shm_lock_max_step) or 0.5,
     }
 }
 

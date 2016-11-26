@@ -44,7 +44,15 @@ local session_middleware = function(sessionConfig)
                 s.data[key] = value
                 s:save()
             end,
-
+            
+            update = function() 
+                local s = Session.open({ 
+                    secret = sessionConfig.secret or "7su3k78hjqw90fvj480fsdi934j7ery3n59ljf295d" 
+                }) 
+                s.expire = ngx.time() + s.cookie.lifetime 
+                s:save() 
+            end,
+            
             get = function(key)
                 local s = Session.open({
                     secret = sessionConfig.secret or "7su3k78hjqw90fvj480fsdi934j7ery3n59ljf295d"

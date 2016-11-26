@@ -1,5 +1,6 @@
-local base64enc   = ngx.encode_base64
-local base64dec   = ngx.decode_base64
+local ngx       = ngx
+local base64enc = ngx.encode_base64
+local base64dec = ngx.decode_base64
 
 local ENCODE_CHARS = {
     ["+"] = "-",
