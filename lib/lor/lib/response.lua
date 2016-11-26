@@ -10,7 +10,6 @@ local utils = require("lor.lib.utils.utils")
 local Response = {}
 
 function Response:new()
-    ngx.header['X-Powered-By'] = 'Lor Framework'
     --ngx.status = 200
 
     local instance = {

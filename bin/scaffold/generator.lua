@@ -267,7 +267,7 @@ app:use(mw_inject_version())
 
 -- 自定义中间件2: 设置响应头
 app:use(function(req, res, next)
-    res:set_header("X-Powerd-By", "Lor framework")
+    res:set_header("X-Powered-By", "Lor framework")
     next()
 end)
 
