@@ -15,7 +15,7 @@
 - 全站示例项目[openresty-china](https://github.com/sumory/openresty-china)
 
 
-当前版本：v0.2.5
+当前版本：v0.2.6
 
 
 ### 文档

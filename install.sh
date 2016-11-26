@@ -38,6 +38,7 @@ echo "install lor package to $PACKAGE_PATH"
 mkdir -p ./lor
 cp -a ./lib/lor/* ./lor/
 cp -a ./* $PACKAGE_PATH/
+rm -rf $PACKAGE_PATH/lib
 rm -rf ./lor
 
 echo "lor framework installed."

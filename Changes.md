@@ -1,11 +1,13 @@
-### v0.2.5 2016.11.26
+### v0.2.6 2016.11.26
 
-- 升级内部集成的lua-resty-session
-    - 升级到2.13版本
-    - 给内置的session中间件添加新的update方法用于更新cookie过期时间
+- 升级内部集成的session中间件
+    - lua-resty-session升级到2.13版本
+    - 添加一个session过期参数timeout,默认为3600秒
+    - 添加一个refresh_cookie参数，用于控制否在有新请求时刷新session和cookie过期时间，默认“是”
 - 更新`lord new`项目模板
     - 缓存`app`对象，提高性能
-    - 调整CRUD示例
+    - 调整CRUD示例, 详细请参看脚手架代码中的app/routes/user.lua
+- 删除默认响应头X-Powered-By
 
 ### v0.2.4 2016.11.16
 
