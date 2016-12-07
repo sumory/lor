@@ -167,11 +167,13 @@ lord start
 
 ### 贡献者
 
+- [@ms2008](https://github.com/ms2008)
 - [@wanghaisheng](https://github.com/wanghaisheng)
 - [@lihuibin](https://github.com/lihuibin)
-- [@ms2008](https://github.com/ms2008)
 - [@syhily](https://github.com/syhily)
 - [@vinsonzou](https://github.com/vinsonzou)
+- [@lhmwzy](https://github.com/lhmwzy)
+- [@hanxi](https://github.com/hanxi)
 
 ### 讨论交流
 
