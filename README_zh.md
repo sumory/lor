@@ -59,6 +59,8 @@ app:erroruse(function(err, req, res, next)
     -- err是错误对象
     res:status(500):send("服务器内发生未知错误")
 end)
+
+app:run()
 ```
 
 ### 安装
