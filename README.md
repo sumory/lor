@@ -1,11 +1,10 @@
 # Lor
 
+[![https://travis-ci.org/sumory/lor.svg?branch=master](https://travis-ci.org/sumory/lor.svg?branch=master)](https://travis-ci.org/sumory/lor)  [![GitHub release](https://img.shields.io/github/release/sumory/lor.svg)](https://github.com/sumory/lor/releases/latest) [![license](https://img.shields.io/github/license/sumory/lor.svg)](https://github.com/sumory/lor/blob/master/LICENSE)
+
 <a href="./README_zh.md" style="font-size:13px">中文</a> <a href="./README.md" style="font-size:13px">English</a>
 
-
 A fast and minimalist web framework based on [OpenResty](http://openresty.org).
-
-[![https://travis-ci.org/sumory/lor.svg?branch=master](https://travis-ci.org/sumory/lor.svg?branch=master)](https://travis-ci.org/sumory/lor)
 
 
 
@@ -28,7 +27,7 @@ app:run()
 
 ## Installation
 
-1） shell
+1) shell
 
 ```
 git clone https://github.com/sumory/lor

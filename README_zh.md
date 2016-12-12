@@ -1,8 +1,8 @@
 # Lor
 
-<a href="./README_zh.md" style="font-size:13px">中文</a> <a href="./README.md" style="font-size:13px">English</a>
+[![https://travis-ci.org/sumory/lor.svg?branch=master](https://travis-ci.org/sumory/lor.svg?branch=master)](https://travis-ci.org/sumory/lor)  [![GitHub release](https://img.shields.io/github/release/sumory/lor.svg)](https://github.com/sumory/lor/releases/latest) [![license](https://img.shields.io/github/license/sumory/lor.svg)](https://github.com/sumory/lor/blob/master/LICENSE)
 
-[![https://travis-ci.org/sumory/lor.svg?branch=master](https://travis-ci.org/sumory/lor.svg?branch=master)](https://travis-ci.org/sumory/lor)
+<a href="./README_zh.md" style="font-size:13px">中文</a> <a href="./README.md" style="font-size:13px">English</a>
 
 **Lor**是一个运行在[OpenResty](http://openresty.org)上的基于Lua编写的Web框架.
 
@@ -13,9 +13,6 @@
 - 推荐使用lor作为HTTP API Server，lor也已支持session/cookie/html template等功能.
 - 简单示例项目[lor-example](https://github.com/lorlabs/lor-example)
 - 全站示例项目[openresty-china](https://github.com/sumory/openresty-china)
-
-
-当前版本：v0.2.6
 
 
 ### 文档
