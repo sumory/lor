@@ -14,7 +14,7 @@ local debug = require("lor.lib.debug")
 
 local Route = {}
 
-function Route:new(path)
+function Route:new(path, http_method)
     local instance = {}
     instance.path = path
     instance.stack = {}
@@ -35,7 +35,7 @@ function Route:new(path)
             end
         end
     })
-    instance:initMethod()
+    instance:initMethod(http_method)
 
     debug("route.lua#new:", instance)
     return instance
@@ -98,7 +98,15 @@ function Route:dispatch(req, res, done)
 end
 
 
-function Route:initMethod()
+function Route:initMethod(http_method)
+      if http_method and http_method ~= "" then
+          self[http_method] = function(self, fn)
+		    local layer = Layer:new("/", {is_end = true}, fn, 3)
+			layer.method = http_method
+			self.methods[http_method] = true
+			tinsert(self.stack, layer)
+	  end
+--[[
     for http_method, _ in pairs(supported_http_methods) do
         self[http_method] = function(self, fn)
             local layer = Layer:new("/", {
@@ -117,6 +125,7 @@ function Route:initMethod()
             debug("route.lua# now the route(" ..  self.name .. ") stack is~~~~~~~~~~~~\n")
         end
     end
+--]]	
 end
 
 
