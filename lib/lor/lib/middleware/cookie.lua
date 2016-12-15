@@ -6,10 +6,18 @@ local ck = require("resty.cookie")
 -- you're recommended to define your own `cookie` middleware.
 
 -- usage example:
---    app:get("/cookie", function(req, res, next)
---        res.cookie.set({key = "c2", value = "c2_value"})
---        res.cookie.set("c1", "c1_value")
---    end)
+--      local ok, err = req.cookie.set({
+-- 		    key = "qq",
+-- 		    value =  '4==||==hello zhang==||==123456',
+-- 		    path = "/",
+-- 		    domain = "new.cn",
+-- 		    secure = false, --设置后浏览器只有访问https才会把cookie带过来,否则浏览器请求时不带cookie参数
+-- 		    httponly = true, --设置后js 无法读取
+-- 		     --expires =  ngx.cookie_time(os.time() + 3600),
+-- 		    max_age = 3600, --用秒来设置cookie的生存期。
+-- 		    samesite = "Strict",  --或者 Lax 指a域名下收到的cookie 不能通过b域名的表单带过来
+-- 		    extension = "a4334aebaece"  --设置好像没起什么作用 
+-- 		})
 
 local cookie_middleware = function(cookieConfig)
     return function(req, res, next)
@@ -56,19 +64,19 @@ local cookie_middleware = function(cookieConfig)
 			    end,
 			                 
 			    get_all = function ()
-			        local _cookie = COOKIE;
-			        local fields, err = _cookie:get_all();
+			        local _cookie = COOKIE
+			        local fields, err = _cookie:get_all()
 			                       
-			        local t = {};
+			        local t = {}
 			        if not fields then  
-					    return nil;
+					    return nil
 					else 
 					    for k, v in pairs(fields) do 
 					        if k and v then
-						        t[k] = v;
+						        t[k] = v
 						    end
 						end 
-				        return t;
+				        return t
 				     end  
 			     end 
 		    }
@@ -79,3 +87,4 @@ local cookie_middleware = function(cookieConfig)
 end
 
 return cookie_middleware
+
