@@ -280,15 +280,15 @@ end
 function Router:init()
     for http_method, _ in pairs(supported_http_methods) do
         self[http_method] = function(s, path, fn)
-		   local route = s:app_route(path, {
-               is_end = true,
-               is_start = false
-           }, http_method)
+            local route = s:app_route(path, {
+                is_end = true,
+                is_start = false
+            }, http_method)
 
-		   -- 参数应该明确指定为route，不得省略，否则group_router.test.lua使用lor:Router()语法时无法传递route
-		   route[http_method](route, fn)
-		   return s
-		end
+	        -- 参数应该明确指定为route，不得省略，否则group_router.test.lua使用lor:Router()语法时无法传递route
+            route[http_method](route, fn)
+            return s
+  	    end
     end
 end
 
