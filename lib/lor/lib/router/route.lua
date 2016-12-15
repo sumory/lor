@@ -105,27 +105,27 @@ function Route:initMethod(http_method)
 			layer.method = http_method
 			self.methods[http_method] = true
 			tinsert(self.stack, layer)
-	  end
---[[
-    for http_method, _ in pairs(supported_http_methods) do
-        self[http_method] = function(self, fn)
-            local layer = Layer:new("/", {
-                is_end = true
-            }, fn, 3)
-            layer.method = http_method
-            self.methods[http_method] = true
-            tinsert(self.stack, layer)
+	      end
+     else
+           for http_method, _ in pairs(supported_http_methods) do
+               self[http_method] = function(self, fn)
+                  local layer = Layer:new("/", {
+                       is_end = true
+                   }, fn, 3)
+                layer.method = http_method
+                self.methods[http_method] = true
+                tinsert(self.stack, layer)
 
-            debug("route.lua# now the route(" ..  self.name .. ") stack is:")
-            debug(function()
-                for i, v in ipairs(self.stack) do
-                    print(i, v)
-                end
-            end)
-            debug("route.lua# now the route(" ..  self.name .. ") stack is~~~~~~~~~~~~\n")
-        end
+                  debug("route.lua# now the route(" ..  self.name .. ") stack is:")
+                  debug(function()
+                  for i, v in ipairs(self.stack) do
+                     print(i, v)
+                  end
+                 end)
+                 debug("route.lua# now the route(" ..  self.name .. ") stack is~~~~~~~~~~~~\n")
+               end
+            end
     end
---]]	
 end
 
 
