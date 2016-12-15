@@ -125,18 +125,11 @@ end
 function App:init_method()
     for http_method, _ in pairs(supported_http_methods) do
         self[http_method] = function(self, path, fn)
-            local route = self.router:app_route(path,{is_end = true, is_start = true}, http_method)
-			route[http_method](route, fn) -- like route:get(fn)
-			return self
-		  
-		   --[[
 		    debug("\napp:" .. http_method, path, "start init##############################")
-            local route = self.router:app_route(path)
-             route[http_method](route, fn) -- like route:get(fn)
-             debug("app:" .. http_method, path, "end init################################\n")
-            
-			 return self
-			--]]
+            local route = self.router:app_route(path, {is_end = true, is_start = true}, http_method)
+			route[http_method](route, fn) -- like route:get(fn)
+			debug("app:" .. http_method, path, "end init################################\n")
+			return self
         end
     end
 end
