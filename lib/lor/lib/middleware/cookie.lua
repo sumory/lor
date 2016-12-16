@@ -28,7 +28,7 @@ local cookie_middleware = function(cookieConfig)
             res._cookie = nil
         else  
             req.cookie = { 
-                  set = function(...)
+                set = function(...)
                     local _cookie = COOKIE
                     if not _cookie then
                         return  ngx.log(ngx.ERR, "response#none _cookie found to write") 
@@ -64,21 +64,21 @@ local cookie_middleware = function(cookieConfig)
                 end,
                              
                 get_all = function ()
-                    local _cookie = COOKIE;
-                    local fields, err = _cookie:get_all();
+                    local _cookie = COOKIE
+                    local fields, err = _cookie:get_all()
                                    
-                    local t = {};
+                    local t = {}
                     if not fields then  
-                        return nil;
+                        return nil
                     else 
                         for k, v in pairs(fields) do 
                             if k and v then
-                                t[k] = v;
+                                t[k] = v
                             end
                         end 
-                        return t;
-                     end  
-                 end 
+                        return t
+                    end  
+                end 
             }
         end
         
