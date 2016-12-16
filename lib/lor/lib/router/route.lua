@@ -101,7 +101,7 @@ end
 function Route:initMethod(http_method)
     if http_method and http_method ~= "" then
         self[http_method] = function(self, fn)
-             local layer = Layer:new("/", {is_end = true}, fn, 3)
+            local layer = Layer:new("/", {is_end = true}, fn, 3)
             layer.method = http_method
             self.methods[http_method] = true
             tinsert(self.stack, layer)
