@@ -288,7 +288,7 @@ function Router:init()
             -- 参数应该明确指定为route，不得省略，否则group_router.test.lua使用lor:Router()语法时无法传递route
             route[http_method](route, fn)
             return s
-          end
+        end
     end
 end
 
