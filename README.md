@@ -137,6 +137,7 @@ busted test/*.test.lua
 - [@vinsonzou](https://github.com/vinsonzou)
 - [@lhmwzy](https://github.com/lhmwzy)
 - [@hanxi](https://github.com/hanxi)
+- [@诗兄](https://github.com/269724033)
 
 ## License
 
