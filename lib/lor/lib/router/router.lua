@@ -259,34 +259,9 @@ end
 
 -- invoked by app:route, add ^ before pattern
 -- add an empty route pointing to next layer
-function Router:app_route(path)
-    local route = Route:new(path)
-    local layer = Layer:new(path, {
-        is_end = true,
-        is_start = true
-    }, route, 3) -- important: a magick to supply route:dispatch
-    layer.route = route
-
-    tinsert(self.stack, layer)
-
-    debug("router.lua#route now the router(" .. self.name .. ") stack is:")
-    debug(function()
-        for i, v in ipairs(self.stack) do
-            print(i, v)
-        end
-    end)
-    debug("router.lua#route now the router(" .. self.name .. ") stack is++++++\n")
-
-    return route
-end
-
--- add an empty route pointing to next layer
-function Router:route(path)
-    local route = Route:new(path)
-    local layer = Layer:new(path, {
-        is_end = true,
-        is_start = false
-    }, route, 3)
+function Router:app_route(path, options, http_method) 
+    local route = Route:new(path, http_method)
+    local layer = Layer:new(path, options, route, 3) -- important: a magick to supply route:dispatch
     layer.route = route
 
     tinsert(self.stack, layer)
@@ -305,13 +280,16 @@ end
 function Router:init()
     for http_method, _ in pairs(supported_http_methods) do
         self[http_method] = function(s, path, fn)
-            local route = s:route(path)
+            local route = s:app_route(path, {
+                is_end = true,
+                is_start = false
+            }, http_method)
+
             -- 参数应该明确指定为route，不得省略，否则group_router.test.lua使用lor:Router()语法时无法传递route
             route[http_method](route, fn)
             return s
         end
     end
 end
-
 
 return Router
