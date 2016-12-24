@@ -5,7 +5,7 @@ local pairs = pairs
 local ipairs = ipairs
 local type = type
 local setmetatable = setmetatable
-local ostime = os.time
+local ostime = ngx.time
 local pathRegexp = require("lor.lib.utils.path_to_regexp")
 local utils = require("lor.lib.utils.utils")
 local random = utils.random
@@ -90,8 +90,8 @@ function Layer:handle_error(err, req, res, next)
     end
 
     local e
-    local ok = xpcall(function() 
-        fn(err, req, res, next) 
+    local ok = xpcall(function()
+        fn(err, req, res, next)
     end,  function()
         e = (err or "") .. "\n" .. traceback()
     end)
@@ -115,7 +115,7 @@ function Layer:handle_request(req, res, next)
     --local trackId = random()
     local e
     local ok, ee = xpcall(function() -- add `ee` for final handler logic
-        fn(req, res, next) 
+        fn(req, res, next)
     end, function(msg)
         e = (msg or "") .. "\n" .. traceback()
     end)
