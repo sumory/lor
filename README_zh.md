@@ -172,6 +172,7 @@ lord start
 - [@lhmwzy](https://github.com/lhmwzy)
 - [@hanxi](https://github.com/hanxi)
 - [@诗兄](https://github.com/269724033)
+- [@hetz](https://github.com/hetz)
 
 ### 讨论交流
 
