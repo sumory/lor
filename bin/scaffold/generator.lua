@@ -251,6 +251,7 @@ local app = lor()
 app:conf("view enable", true)
 app:conf("view engine", "tmpl")
 app:conf("view ext", "html")
+app:conf("view layout", "")
 app:conf("views", "./app/views")
 
 -- session和cookie支持，如果不需要可注释以下配置
