@@ -42,6 +42,7 @@ function App:run(final_handler)
             view_enable = enable_view,
             view_engine = self:getconf("view engine"), -- view engine: resty-template or others...
             view_ext = self:getconf("view ext"), -- defautl is "html"
+            view_layout = self:getconf("view layout"), -- defautl is ""
             views = self:getconf("views") -- template files directory
         }
 
@@ -69,6 +70,7 @@ function App:default_configuration(options)
     end
     self:conf("view engine", options["view engine"] or "tmpl")
     self:conf("view ext", options["view ext"] or "html")
+    self:conf("view layout", options["view layout"] or "")
     self:conf("views", options["views"] or "./app/views/")
 
     self.locals = {}
