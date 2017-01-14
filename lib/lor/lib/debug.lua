@@ -12,36 +12,36 @@ local getmetatable = getmetatable
 function serialize(t)
     local mark = {}
     local assign = {}
- 
-    local function ser_table(tbl,parent)
+
+    local function ser_table(tbl, parent)
         mark[tbl] = parent
         local tmp = {}
-        for k,v in pairs(tbl) do
-            local key = type(k)=="number" and "["..k.."]" or k
-            if type(v)=="table" then
-                if getmetatable(v) and type(v.__tostring)=="function" then
-                    tinsert(tmp, key.."="..tostring(v))
+        for k, v in pairs(tbl) do
+            local key = (type(k) == "number" and "\"" .. k .. "\"" or k)
+            if type(v) == "table" then
+                if getmetatable(v) and type(v.__tostring) == "function" then
+                    tinsert(tmp, key .. "=" .. tostring(v))
                 else
-                    local dotkey = parent..(type(k)=="number" and key or "."..key)
+                    local dotkey = parent .. (type(k) == "number" and key or "." .. key)
                     if mark[v] then
-                        tinsert(assign,dotkey.."="..mark[v])
+                        tinsert(assign, dotkey .. ":" .. mark[v])
                     else
-                        tinsert(tmp, key.."="..ser_table(v,dotkey))
+                        tinsert(tmp, key .. ":" .. ser_table(v,dotkey))
                     end
                 end
             else
-                if type(v)=="string" then
+                if type(v) == "string" then
                     v = sformat("%q", v)
                 end
-                tinsert(tmp, key.."="..tostring(v))
+                tinsert(tmp, key .. ":" .. tostring(v))
             end
         end
-        return "{"..tconcat(tmp,",").."}"
+        return "{" .. tconcat(tmp, ",") .. "}"
     end
- 
-    return ser_table(t,"")
+
+    return ser_table(t, "")
 end
- 
+
 local function debug(...)
     if not LOR_FRAMEWORK_DEBUG then
         return
