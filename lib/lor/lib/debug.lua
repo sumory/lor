@@ -9,7 +9,7 @@ local tinsert = table.insert
 local getmetatable = getmetatable
 
 
-function serialize(t)
+local function serialize(t)
     local mark = {}
     local assign = {}
 
@@ -26,7 +26,7 @@ function serialize(t)
                     if mark[v] then
                         tinsert(assign, dotkey .. ":" .. mark[v])
                     else
-                        tinsert(tmp, key .. ":" .. ser_table(v,dotkey))
+                        tinsert(tmp, key .. ":" .. ser_table(v, dotkey))
                     end
                 end
             else
