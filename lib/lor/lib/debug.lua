@@ -17,10 +17,10 @@ function serialize(t)
         mark[tbl] = parent
         local tmp = {}
         for k, v in pairs(tbl) do
-            local key = (type(k) == "number" and "\"" .. k .. "\"" or k)
+            local key = (type(k) == "number" and "\"[" .. k .. "]\"" or k)
             if type(v) == "table" then
                 if getmetatable(v) and type(v.__tostring) == "function" then
-                    tinsert(tmp, key .. "=" .. tostring(v))
+                    tinsert(tmp, key .. ":" .. tostring(v))
                 else
                     local dotkey = parent .. (type(k) == "number" and key or "." .. key)
                     if mark[v] then
