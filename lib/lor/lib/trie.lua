@@ -233,10 +233,17 @@ function Trie:fallback_lookup(fallback_stack, segments, params)
     local parent = fallback.colon_node
     local matched = Matched:new()
 
+    print("into fallback:", parent.id, parent.name, segments[segment_index])
     if parent.name ~= "" then -- fallback to the colon node and fill param if matched
         matched.params[parent.name] = segments[segment_index]
     end
-    matched.params = mixin(matched.params, params) -- mixin params parsed before
+    mixin(params, matched.params) -- mixin params parsed before
+
+    print("print params start =========")
+    for i, v in pairs(params) do
+        print(i .. " " .. v)
+    end
+    print("print params stop ============")
 
     local flag = true
     for i, s in ipairs(segments) do
@@ -362,6 +369,7 @@ function Trie:match(path)
         parent = node
 
         if parent.name ~= "" then
+            print("set val:", parent.id, parent.name, s)
             matched.params[parent.name] = s
         end
     end
@@ -374,13 +382,21 @@ function Trie:match(path)
     local depth = 0
     local exit = false
     print("before while：", matched.node, exit, matched.node and matched.node.id)
+    local params = matched.params or {}
+
+    print("before retry start =========")
+    for i, v in pairs(params) do
+        print(i .. " " .. v)
+    end
+    print("before retry stop ============")
+
     while not matched.node and not exit do
         depth = depth + 1
         if depth > self.max_fallback_depth then
             error("fallback retry to lookup reaches the limit: " .. self.max_fallback_depth)
         end
-        exit = self:fallback_lookup(fallback_stack, segments, matched.params or {})
-        print("in while：", exit)
+        exit = self:fallback_lookup(fallback_stack, segments, params)
+        print("in while：", exit, exit and exit.node and exit.node.id)
         if exit then
             matched = exit
             break
@@ -392,6 +408,7 @@ function Trie:match(path)
     end
 
     print("after while：", matched.node, exit)
+    matched.params = params
     for i, v in pairs(matched.params) do
         print(i .. " " .. v)
     end
