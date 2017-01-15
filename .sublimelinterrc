@@ -4,7 +4,7 @@
             "@disable": false,
             "args": [],
             "std": "ngx_lua",
-            "excludes": ["test/*", "resty", "bin"],
+            "excludes": ["test/*", "resty", "bin", "*_spec.lua"],
             "globals": ["LOR_FRAMEWORK_DEBUG"],
             "ignore": [
                 "channel"
