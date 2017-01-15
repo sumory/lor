@@ -1,9 +1,11 @@
-local tinsert = table.insert
 local pairs = pairs
 local ipairs = ipairs
 local type = type
 local setmetatable = setmetatable
 local getmetatable = getmetatable
+local tinsert = table.insert
+local string_format = string.format
+
 
 local utils = require("lor.lib.utils.utils")
 local is_table_empty = utils.is_table_empty
@@ -11,10 +13,8 @@ local random = utils.random
 local mixin = utils.mixin
 
 local supported_http_methods = require("lor.lib.methods")
-local Route = require("lor.lib.router.route")
-local Layer = require("lor.lib.router.layer")
 local debug = require("lor.lib.debug")
-
+local Trie = require("lor.lib.trie")
 
 local function clone(object)
     local lookup_table = {}
@@ -65,6 +65,36 @@ local function restore(fn, obj)
     end
 end
 
+local function compose_func(matched, method)
+    if not matched or type(pipeline) ~= "table" then
+        return nil
+    end
+
+    local exact_node = matched.node
+    local pipeline = matched.pipeline or {}
+    if not exact_node or not pipeline then
+        return nil
+    end
+
+    local stack = {}
+    for i, p in ipairs(pipeline) do
+        local middlewares = p.middlewares
+        local handlers = p.handlers
+        if middlewares then
+            for _, middleware in ipairs(middlewares) do
+                tinsert(stack, middleware)
+            end
+        end
+
+        if p.id == exact_node.id and handlers and handlers[method] then
+            for _, handler in ipairs(handlers[method]) do
+                tinsert(stack, handler)
+            end
+        end
+    end
+
+    return stack
+end
 
 local Router = {}
 
@@ -72,9 +102,16 @@ function Router:new(options)
     local opts = options or {}
     local router = {}
 
-    router.name =  "origin-router-" .. random()
+    router.name =  "router-" .. random()
     router.group_router = opts.group_router -- is a group router
-    router.stack = {} -- layer array
+    router.trie = Trie:new({
+        ignore_case = opts.ignore_case,
+        tsr = opts.tsr
+    })
+    router.middleware_trie = Trie:new({
+        ignore_case = opts.ignore_case,
+        tsr = opts.tsr
+    })
 
     self:init()
     setmetatable(router, {
@@ -82,7 +119,7 @@ function Router:new(options)
         __call = self._call,
         __tostring = function(s)
             local ok, result = pcall(function()
-                return "(name:" .. s.name .. "\tstack_length:" .. #s.stack .. ")"
+                return string_format("name: %s, group_router: %s", s.name, s.group_router)
             end)
             if ok then
                 return result
@@ -96,16 +133,15 @@ function Router:new(options)
     return router
 end
 
-
-
--- a magick for usage like `lor:Router()`, generate a new router for different routes group
+--- a magick for usage like `lor:Router()`
+-- generate a new router for different routes group
 function Router:_call()
     local new_router =  clone(self)
     new_router.name = self.name .. ":group-router-" .. random()
     return new_router
 end
 
--- a magick to convert `router()` to `router:handle()`
+--- a magick to convert `router()` to `router:handle()`
 -- so a router() could be regarded as a `middleware`
 function Router:call()
     return function(req, res, next)
@@ -115,178 +151,82 @@ end
 
 -- dispatch a request
 function Router:handle(req, res, out)
-    debug("index.lua#handle")
+    debug("index.lua#handle start")
     local idx = 1
-    local stack = self.stack
+    local path = req.path
+    local method = req.method
     local done = restore(out, req)
 
+    local stack = nil
+    local matched = self.trie:match(path)
+    debug(matched.node==nil)
+    local matched_node = matched.node
+    if not method or not matched_node then
+        return done("404! not found.")
+    else
+        local matched_handlers = matched_node.handlers and matched_node.handlers[method]
+        if not matched_handlers or #matched_handlers <= 0 then
+            return done("Oh! no handler to process method: " .. method)
+        end
+
+        stack = compose_func(matched, method)
+        if not stack or #stack <= 0 then
+            return done("Oh! no handlers found.")
+        end
+    end
+
+    local stack_len = #stack
+    req:set_found(true)
+    req.params = matched.params or {}
+
     local function next(err)
-        local layer_error = err
-        debug("\nindex.lua#next..., layer_error:", layer_error, "stack_len:", #stack, "idx:", idx)
+        debug("\nindex.lua#next...,", "stack_len:", #stack, "idx:", idx)
+        if err then
+            debug("\nindex.lua#next...,", "err:", err)
+            return done(err)
+        end
 
-        if idx > #stack then
-            done(layer_error)
+        if idx > stack_len then
+            debug("\nindex.lua#next...,", "stack_len:", #stack, "idx:", idx)
             return
         end
 
-        local path = req.path
-        if not path then
-            done(layer_error)
-            return
-        end
-
-        -- to find the next matched layer
-        local layer, match, route
-        while (not match and idx <= #stack)
-        do
-            layer = stack[idx]
-            idx = idx + 1
-
-            match = layer_match(layer, path)
-            route = layer.route
-
-            -- lua has no `continue` keyword, such a pain
-            if not match then
-                -- to continue
-            else
-                if not route then
-                    -- to continue
-                else
-                    if layer_error then
-                        match = false
-                        -- to continue
-                    else
-
-                        local method = req.method
-                        local has_method = route:_handles_method(method)
-                        if not has_method then
-                            match = false
-                            -- to continue
-                        end
-                    end
-                end
-            end
-        end
-
-        if not match then
-            -- debug("no match")
-            done(layer_error)
-            return
-        end
-
-        -- store route
-        if route then
-            req.route = route
-            req:set_found(true) -- to indicate that this req is not a 404 request.
-        end
-
-        if match then
-            debug("match and merge_params")
-            local merged_params = merge_params(layer.params, req.params)
-            if merged_params and ( not is_table_empty(merged_params)) then
-                req.params = merged_params
-            end
-        end
-
-
-        if route then
-            debug("[1]index.lua#next has route->handle_request", "layer.name", layer.name, "match:", match, idx)
-            layer:handle_request(req, res, next)
-        end
-
-        if layer_error then
-            debug("[2]index.lua#next no route and layer_error->handle_error", "layer.name", layer.name, "layer.length", layer.length,"match:", match, idx)
-            layer:handle_error(layer_error, req, res, next)
-        elseif route then
-            debug("[3]index.lua#next hasroute and not layer_error->next()", "layer.name", layer.name, "layer.length", layer.length,"match:", match, idx)
-            next()
-        else
-            debug("[4]index.lua#next no route->handle_request", "layer.name", layer.name, "layer.length", layer.length,"match:", match, idx)
-            layer:handle_request(req, res, next)
-        end
+        local handler = stack[idx]
+        debug("\nindex.lua#next...,", "handler:", handler.id)
+        handler.func(req, res, next)
     end
     -- end of next function
 
-    -- setup next layer
-    req.next = next
-
-    -- debug("index.lua#next", next)
     next()
+    debug("index.lua#handle end")
 end
 
 function Router:use(path, fn, fn_args_length)
     local layer
     if type(fn) == "function" then -- fn is a function
-        layer = Layer:new(path, {
-            is_end = false,
-            is_start = true
-        }, fn, fn_args_length)
+        local node = self.trie:add_node(path)
+        node:use(fn)
     else -- fn is a group router
-        layer = Layer:new(path, {
-            is_end = false,
-            is_start = true
-        }, fn.call(fn), fn_args_length)
-
-        local group_router_stack = fn.stack
-        if group_router_stack and not fn.is_repatterned then
-            fn.is_repatterned = true -- fixbug: fn.is_repatternd to remember, avoid 404 error when "lua_code_cache on"
-            for i, v in ipairs(group_router_stack) do
-                v.pattern = utils.clear_slash("^/" .. path .. v.pattern)
-            end
-        end
-
-        debug("router.lua#use-inner now the group router(" .. fn.name .. ") stack is:")
-        debug(function()
-            for i, v in ipairs(fn.stack) do
-                print(i, v)
-            end
-        end)
-        debug("router.lua#use-inner now the group router(" .. fn.name .. ") stack is------\n")
+        error("not implemented...")
     end
-
-    tinsert(self.stack, layer)
-
-    debug("router.lua#use now the router(" .. self.name .. ") stack is:")
-    debug(function()
-        for i, v in ipairs(self.stack) do
-            print(i, v)
-        end
-    end)
-    debug("router.lua#use now the router(" .. self.name .. ") stack is------\n")
 
     return self
 end
 
 -- invoked by app:route, add ^ before pattern
 -- add an empty route pointing to next layer
-function Router:app_route(path, options, http_method) 
-    local route = Route:new(path, http_method)
-    local layer = Layer:new(path, options, route, 3) -- important: a magick to supply route:dispatch
-    layer.route = route
-
-    tinsert(self.stack, layer)
-
-    debug("router.lua#route now the router(" .. self.name .. ") stack is:")
-    debug(function()
-        for i, v in ipairs(self.stack) do
-            print(i, v)
-        end
-    end)
-    debug("router.lua#route now the router(" .. self.name .. ") stack is++++++\n")
-
+function Router:app_route(http_method, path, fn)
+    debug(string_format("router#app_route[%s], method:%s path:%s", self.name, http_method, path))
+    local node = self.trie:add_node(path)
+    node:handle(http_method, fn)
     return route
 end
 
 function Router:init()
     for http_method, _ in pairs(supported_http_methods) do
         self[http_method] = function(s, path, fn)
-            local route = s:app_route(path, {
-                is_end = true,
-                is_start = false
-            }, http_method)
-
-            -- 参数应该明确指定为route，不得省略，否则group_router.test.lua使用lor:Router()语法时无法传递route
-            route[http_method](route, fn)
+            local node = s.trie:add_node(path)
+            node:handle(http_method, fn)
             return s
         end
     end

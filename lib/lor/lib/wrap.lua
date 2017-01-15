@@ -4,13 +4,11 @@ local type = type
 local setmetatable = setmetatable
 local tostring = tostring
 
-
 local _M = {}
 
-function _M:new(create_app, Router, Route, Request, Response)
+function _M:new(create_app, Router, Request, Response)
     local instance = {}
     instance.router = Router
-    instance.route = Route
     instance.request = Request
     instance.response = Response
     instance.fn = create_app
@@ -36,10 +34,6 @@ function _M:Router(options)
     return self.router:new(options)
 end
 
-function _M:Route(path)
-    return self.route:new(path)
-end
-
 function _M:Request()
     return self.request:new()
 end
@@ -47,6 +41,5 @@ end
 function _M:Response()
     return self.response:new()
 end
-
 
 return _M

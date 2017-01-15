@@ -1,7 +1,6 @@
 local type = type
 
 local version = require("lor.version")
-local Route = require("lor.lib.router.route")
 local Router = require("lor.lib.router.router")
 local Request = require("lor.lib.request")
 local Response = require("lor.lib.response")
@@ -21,7 +20,7 @@ local createApplication = function(options)
     return app
 end
 
-local lor = Wrap:new(createApplication, Router, Route, Request, Response)
+local lor = Wrap:new(createApplication, Router, Request, Response)
 lor.version = version
 
 return lor

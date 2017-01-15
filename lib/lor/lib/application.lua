@@ -2,6 +2,7 @@ local pairs = pairs
 local ipairs = ipairs
 local type = type
 local setmetatable = setmetatable
+local string_format = string.format
 
 local Router = require("lor.lib.router.router")
 local Request = require("lor.lib.request")
@@ -17,16 +18,12 @@ function App:new()
     local instance = {}
     instance.cache = {}
     instance.settings = {}
-    instance.router = Router:new({})
+    instance.router = Router:new()
 
     setmetatable(instance, {
         __index = self,
         __call = self.handle
     })
-
-    -- default middlewares
-    -- instance.router:use("/", middleware_params, 3)
-    -- instance.router:use("/", middleware_init, 3)
 
     instance:init_method()
     return instance
@@ -50,8 +47,6 @@ function App:run(final_handler)
         response.view = view
     end
 
-    --self.request = request
-    --self.response = response
     self:handle(request, response, final_handler)
 end
 
@@ -61,7 +56,7 @@ end
 
 function App:default_configuration(options)
     options = options or {}
-    
+
     -- view and template configuration
     if options["view enable"] ~= nil and options["view enable"] == true then
         self:conf("view enable", true)
@@ -79,7 +74,6 @@ end
 
 -- dispatch `req, res` into the pipeline.
 function App:handle(req, res, callback)
-    debug("app.lua#handle start------------------------------------->")
     local router = self.router
     local done = callback or function(req, res)
         return function(err)
@@ -90,15 +84,14 @@ function App:handle(req, res, callback)
     end
 
     if not router then
-        done()
-        return
+        return done()
     end
 
     router:handle(req, res, done)
 end
 
 function App:use(path, fn)
-    debug("application.lua#use", path)
+
     self:inner_use(3, path, fn)
 end
 
@@ -110,12 +103,13 @@ end
 -- shoule be private
 function App:inner_use(fn_args_length, path, fn)
     local router = self.router
+    debug(string_format("application.lua#use, fn_args_length:%d path:%s", fn_args_length, path))
 
     if path and fn and type(path) == "string" then
         router:use(path, fn, fn_args_length)
     elseif path and not fn then
         fn = path
-        path = "/"
+        path = ""
         router:use(path, fn, fn_args_length)
     else
         -- todo: error usage
@@ -127,24 +121,15 @@ end
 function App:init_method()
     for http_method, _ in pairs(supported_http_methods) do
         self[http_method] = function(self, path, fn)
-            debug("\napp:" .. http_method, path, "start init##############################")
-            local route = self.router:app_route(path, {
-                is_end = true, 
-                is_start = true
-            }, http_method)
-           
-            route[http_method](route, fn) -- like route:get(fn)
-            debug("app:" .. http_method, path, "end init################################\n")
+            self.router:app_route(http_method, path, fn)
             return self
         end
     end
 end
 
 function App:all(path, fn)
-    local route = self.router:app_route(path)
-
     for http_method, _ in pairs(supported_http_methods) do
-        route[http_method](route, fn)
+        self.router:app_route(http_method, path, fn)
     end
 
     return self
