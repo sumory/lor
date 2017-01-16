@@ -7,6 +7,7 @@ local type = type
 local setmetatable = setmetatable
 local getmetatable = getmetatable
 local tinsert = table.insert
+local table_concat = table.concat
 local string_format = string.format
 
 local utils = require("lor.lib.utils.utils")
@@ -156,7 +157,7 @@ end
 -- dispatch a request
 function Router:handle(req, res, out)
     debug("index.lua#handle start")
-    local idx = 0
+
     local path = req.path
     local method = req.method
     local done = restore(out, req)
@@ -165,16 +166,17 @@ function Router:handle(req, res, out)
     local matched = self.trie:match(path)
     local matched_node = matched.node
     if not method or not matched_node then
-        return done("404! not found.")
+        if res.status then res:status(404) end
+        return self:error_handle("404! not found.", req, res, self.trie.root, done)
     else
         local matched_handlers = matched_node.handlers and matched_node.handlers[method]
         if not matched_handlers or #matched_handlers <= 0 then
-            return done("Oh! no handler to process method: " .. method)
+            return self:error_handle("Oh! no handler to process method: " .. method, req, res, self.trie.root, done)
         end
 
         stack = compose_func(matched, method)
         if not stack or #stack <= 0 then
-            return done("Oh! no handlers found.")
+            return self:error_handle("Oh! no handlers found.", req, res, self.trie.root, done)
         end
     end
 
@@ -183,6 +185,7 @@ function Router:handle(req, res, out)
     req.params = matched.params or {}
 
     debug("start next, stack_len:", #stack, "params_len:", #req.params)
+    local idx = 0
     local function next(err)
         debug("\nindex.lua#next...,", "stack_len:", #stack, "idx:", idx)
         if err then
@@ -197,18 +200,22 @@ function Router:handle(req, res, out)
 
         idx = idx + 1
         local handler = stack[idx]
+        if not handler then
+            return done(err)
+        end
         debug("\nindex.lua#next...,", "handler:", handler.id)
 
-        local e
-        local ok, ee = xpcall(function() -- add `ee` for final handler logic
+        local err_msg, err_stack
+        local ok, ee = xpcall(function()
             handler.func(req, res, next)
         end, function(msg)
-            e = (msg or "") .. "\n" .. traceback()
+            err_msg = msg or ""
+            err_stack = traceback() or ""
         end)
 
         if not ok then
-            debug("handler func:call error ---> to error_handle,", ok, e, ee)
-            return self:error_handle(e or ee, req, res, stack[idx].node, done)
+            debug("handler func:call error ---> to error_handle,", ok, "err_msg:", err_msg, "err_stack:", err_stack)
+            return self:error_handle(err_msg, err_stack, req, res, handler.node, done)
         end
     end
     -- end of next function
@@ -218,12 +225,12 @@ function Router:handle(req, res, out)
 end
 
 -- dispatch an error
-function Router:error_handle(err, req, res, node, done)
+function Router:error_handle(err_msg, err_stack, req, res, node, done)
     debug("index.lua#error_handle start")
     local stack = compose_error_handler(node)
     if not stack or #stack <= 0 then
         print("no error handlers found.")
-        return done(err)
+        return done(err_msg .. err_stack)
     end
 
     debug("start error_handle, stack_len:", #stack)
@@ -237,23 +244,28 @@ function Router:error_handle(err, req, res, node, done)
 
         idx = idx + 1
         local error_handler = stack[idx]
+        if not error_handler then
+            done(err)
+        end
         debug("index.lua#next...,", "error_handler:", error_handler.id)
 
-        local e
         local ok, ee = xpcall(function() -- add `ee` for final handler logic
+                              print("####################", error_handler.action_type)
             error_handler.func(err, req, res, next)
         end, function(msg)
-            e = (msg or "") .. "\n" .. traceback()
+
+            err_msg = msg or ""
+            err_stack = err_stack .. "\n" .. traceback()
         end)
 
         if not ok then
-            debug("error_handler func:call error", ok, e, ee)
-            return done(e or ee)
+            debug("error_handler func:call error", error_handler.id, ok, "ee:", ee, "err:", err,  "err_msg:", err_msg, "err_stack:", err_stack)
+            return done(err_msg .. "\n" .. err_stack)
         end
     end
     -- end of next function
 
-    next(err)
+    next(err_msg)
     debug("index.lua#error_handle end")
 end
 
