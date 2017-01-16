@@ -105,6 +105,7 @@ function Node:use(...)
 end
 
 function Node:error_use(...)
+    print("node----error use", self.id)
     local middlewares = {...}
     if not next(middlewares) then
         error("error middleware should not be nil or empty")

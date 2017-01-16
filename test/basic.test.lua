@@ -68,7 +68,6 @@ describe("basic test for common usages", function()
         req.path ="/user/123/create"
         req.method = "get"
         app:handle(req, res)
-        --json_view(app.router.trie)
         assert.is.equals(count, 5)
     end)
 

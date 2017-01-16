@@ -425,6 +425,32 @@ function Trie:remove_nested_property(node)
     if node.parent then
         node.parent = nil
     end
+    if node.handlers then
+        for _, h in pairs(node.handlers) do
+            if h then
+                for _, action in ipairs(h) do
+                    action.func = nil
+                    action.node = nil
+                end
+            end
+        end
+    end
+    if node.middlewares then
+        for _, m in pairs(node.middlewares) do
+            if m then
+                m.func = nil
+                m.node = nil
+            end
+        end
+    end
+    if node.error_middlewares then
+        for _, m in pairs(node.error_middlewares) do
+            if m then
+                m.func = nil
+                m.node = nil
+            end
+        end
+    end
 
     if node.colon_child then
         if node.colon_child.handlers then
@@ -439,6 +465,14 @@ function Trie:remove_nested_property(node)
         end
         if node.colon_child.middlewares then
             for _, m in pairs(node.colon_child.middlewares) do
+                if m then
+                    m.func = nil
+                    m.node = nil
+                end
+            end
+        end
+        if node.colon_child.error_middlewares then
+            for _, m in pairs(node.colon_child.error_middlewares) do
                 if m then
                     m.func = nil
                     m.node = nil
@@ -464,6 +498,14 @@ function Trie:remove_nested_property(node)
             end
             if c.middlewares then
                 for _, m in pairs(c.middlewares) do
+                    if m then
+                        m.func = nil
+                        m.node = nil
+                    end
+                end
+            end
+            if c.error_middlewares then
+                for _, m in pairs(c.error_middlewares) do
                     if m then
                         m.func = nil
                         m.node = nil

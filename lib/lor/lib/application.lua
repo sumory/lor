@@ -77,6 +77,7 @@ function App:handle(req, res, callback)
     local router = self.router
     local done = callback or function(req, res)
         return function(err)
+            print("final callback invoked:", err)
             if err then
                 res:status(500):send("unknown error.")
             end
@@ -108,7 +109,7 @@ function App:inner_use(fn_args_length, path, fn)
         router:use(path, fn, fn_args_length)
     elseif path and not fn then
         fn = path
-        path = ""
+        path = nil
         router:use(path, fn, fn_args_length)
     else
         -- todo: error usage

@@ -84,24 +84,18 @@ local function compose_func(matched, method)
 end
 
 local function compose_error_handler(node)
-    if not node then 
-        print("node node when coposing error handler")
+    if not node then
         return nil
     end
 
     local stack = {}
-    for _, middleware in ipairs(node.error_middlewares) do
-        tinsert(stack, middleware)
-    end
-
-    while node.parent do
-        for _, middleware in ipairs(node.parent.error_middlewares) do
+    while node do
+        for _, middleware in ipairs(node.error_middlewares) do
             tinsert(stack, middleware)
         end
         node = node.parent
     end
 
-    print("error_middlewares stack len:", #stack)
     return stack
 end
 
@@ -234,6 +228,7 @@ function Router:error_handle(err, req, res, node, done)
 
     debug("start error_handle, stack_len:", #stack)
     local idx = 0
+    local stack_len = #stack
     local function next(err)
         if idx > stack_len then
             debug("error_handle#next... end,", "stack_len:", #stack, "idx:", idx)
@@ -258,13 +253,18 @@ function Router:error_handle(err, req, res, node, done)
     end
     -- end of next function
 
-    next()
+    next(err)
     debug("index.lua#error_handle end")
 end
 
 function Router:use(path, fn, fn_args_length)
     if type(fn) == "function" then -- fn is a function
-        local node = self.trie:add_node(path)
+        local node
+        if not path then
+            node = self.trie.root
+        else
+            node = self.trie:add_node(path)
+        end
         if fn_args_length == 3 then
             node:use(fn)
         elseif fn_args_length == 4 then
