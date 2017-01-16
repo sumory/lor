@@ -376,7 +376,6 @@ function Trie:match(path)
 
     if flag and parent.endpoint then
         matched.node = parent
-        matched.pipeline = get_pipeline(parent)
     end
 
     local depth = 0
@@ -411,6 +410,10 @@ function Trie:match(path)
     matched.params = params
     for i, v in pairs(matched.params) do
         print(i .. " " .. v)
+    end
+
+    if matched.node then
+        matched.pipeline = get_pipeline(matched.node)
     end
     return matched
 end

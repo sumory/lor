@@ -8,8 +8,9 @@ local string_lower = string.lower
 local utils = require("lor.lib.utils.utils")
 local supported_http_methods = require("lor.lib.methods")
 local ActionHolder = require("lor.lib.holder").ActionHolder
-local error_handler_tip = "handler must be `function` that matches `function(req, res, next) ... end`"
-local error_middlware_tip = "middlware must be `function` that matches `function(req, res, next) ... end`"
+local handler_error_tip = "handler must be `function` that matches `function(req, res, next) ... end`"
+local middlware_error_tip = "middlware must be `function` that matches `function(req, res, next) ... end`"
+local error_middlware_error_tip = "error middlware must be `function` that matches `function(err, req, res, next) ... end`"
 
 local function check_method(method)
     if not method then return false end
@@ -43,6 +44,7 @@ function Node:new(root)
         colon_child= nil,
         handlers = {},
         middlewares = {},
+        error_middlewares = {},
         regex = nil
     }
     setmetatable(instance, { __index = self })
@@ -70,32 +72,67 @@ end
 
 function Node:use(...)
     local middlewares = {...}
-    if next(middlewares) then
-        for _, h in ipairs(middlewares) do
-            if type(h) == "function" then
-                local action = ActionHolder:new(h, self, "middleware")
-                table_insert(self.middlewares, action)
-                empty = false
-            elseif type(h) == "table" then
-                for _, hh in ipairs(h) do
-                    if type(hh) == "function" then
-                        local action = ActionHolder:new(hh, self, "middleware")
-                        table_insert(self.middlewares, action)
-                        empty = false
-                    else
-                        error(error_middlware_tip)
-                    end
-                end
-            else
-                error(error_middlware_tip)
-            end
-        end
-    else
+    if not next(middlewares) then
         error("middleware should not be nil or empty")
+    end
+
+    local empty = true
+    for _, h in ipairs(middlewares) do
+        if type(h) == "function" then
+            local action = ActionHolder:new(h, self, "middleware")
+            table_insert(self.middlewares, action)
+            empty = false
+        elseif type(h) == "table" then
+            for _, hh in ipairs(h) do
+                if type(hh) == "function" then
+                    local action = ActionHolder:new(hh, self, "middleware")
+                    table_insert(self.middlewares, action)
+                    empty = false
+                else
+                    error(middlware_error_tip)
+                end
+            end
+        else
+            error(middlware_error_tip)
+        end
     end
 
     if empty then
         error("middleware should not be empty")
+    end
+
+    return self
+end
+
+function Node:error_use(...)
+    local middlewares = {...}
+    if not next(middlewares) then
+        error("error middleware should not be nil or empty")
+    end
+
+    local empty = true
+    for _, h in ipairs(middlewares) do
+        if type(h) == "function" then
+            local action = ActionHolder:new(h, self, "error_middleware")
+            table_insert(self.error_middlewares, action)
+            empty = false
+        elseif type(h) == "table" then
+            for _, hh in ipairs(h) do
+                if type(hh) == "function" then
+                    local action = ActionHolder:new(hh, self, "error_middleware")
+                    table_insert(self.error_middlewares, action)
+                    empty = false
+                else
+                    error(error_middlware_error_tip)
+                end
+            end
+        else
+            error(error_middlware_error_tip)
+        end
+    end
+
+    if empty then
+        error("error middleware should not be empty")
     end
 
     return self
@@ -117,28 +154,28 @@ function Node:handle(method, ...)
 
     local empty = true
     local handlers = {...}
-    if next(handlers) then
-        for _, h in ipairs(handlers) do
-            if type(h) == "function" then
-                local action = ActionHolder:new(h, self, "handler")
-                table_insert(self.handlers[method], action)
-                empty = false
-            elseif type(h) == "table" then
-                for _, hh in ipairs(h) do
-                    if type(hh) == "function" then
-                        local action = ActionHolder:new(hh, self, "handler")
-                        table_insert(self.handlers[method], action)
-                        empty = false
-                    else
-                        error(error_handler_tip)
-                    end
-                end
-            else
-                error(error_handler_tip)
-            end
-        end
-    else
+    if not next(handlers) then
         error("handler should not be nil or empty")
+    end
+
+    for _, h in ipairs(handlers) do
+        if type(h) == "function" then
+            local action = ActionHolder:new(h, self, "handler")
+            table_insert(self.handlers[method], action)
+            empty = false
+        elseif type(h) == "table" then
+            for _, hh in ipairs(h) do
+                if type(hh) == "function" then
+                    local action = ActionHolder:new(hh, self, "handler")
+                    table_insert(self.handlers[method], action)
+                    empty = false
+                else
+                    error(handler_error_tip)
+                end
+            end
+        else
+            error(handler_error_tip)
+        end
     end
 
     if empty then
@@ -197,6 +234,5 @@ function Node:remove_nested_property(node)
         end
     end
 end
-
 
 return Node

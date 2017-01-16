@@ -1,20 +1,21 @@
 local pairs = pairs
 local ipairs = ipairs
+local pcall = pcall
+local xpcall = xpcall
+local traceback = debug.traceback
 local type = type
 local setmetatable = setmetatable
 local getmetatable = getmetatable
 local tinsert = table.insert
 local string_format = string.format
 
-
 local utils = require("lor.lib.utils.utils")
-local is_table_empty = utils.is_table_empty
-local random = utils.random
-local mixin = utils.mixin
-
 local supported_http_methods = require("lor.lib.methods")
 local debug = require("lor.lib.debug")
 local Trie = require("lor.lib.trie")
+local is_table_empty = utils.is_table_empty
+local random = utils.random
+local mixin = utils.mixin
 
 local function clone(object)
     local lookup_table = {}
@@ -34,25 +35,12 @@ local function clone(object)
     return _copy(object)
 end
 
-local function layer_match(layer, path)
-    local is_match = layer:match(path)
-    debug("index.lua - is_match:", is_match, "path:", path, layer)
-    return is_match
-end
-
-local function merge_params(params, parent)
-    local obj = mixin({}, parent)
-    local result =  mixin(obj, params)
-    return result
-end
-
 local function restore(fn, obj)
     local origin = {
         path = obj['path'],
         query = obj['query'],
         next = obj['next'],
         locals = obj['locals'],
-        -- params = obj['params']
     }
 
     return function(err)
@@ -60,13 +48,12 @@ local function restore(fn, obj)
         obj['query'] = origin.query
         obj['next'] = origin.next
         obj['locals'] = origin.locals
-        -- obj['params'] = origin.params -- maybe overrided by layer.params, so no need to keep
         fn(err)
     end
 end
 
 local function compose_func(matched, method)
-    if not matched or type(pipeline) ~= "table" then
+    if not matched or type(matched.pipeline) ~= "table" then
         return nil
     end
 
@@ -95,6 +82,29 @@ local function compose_func(matched, method)
 
     return stack
 end
+
+local function compose_error_handler(node)
+    if not node then 
+        print("node node when coposing error handler")
+        return nil
+    end
+
+    local stack = {}
+    for _, middleware in ipairs(node.error_middlewares) do
+        tinsert(stack, middleware)
+    end
+
+    while node.parent do
+        for _, middleware in ipairs(node.parent.error_middlewares) do
+            tinsert(stack, middleware)
+        end
+        node = node.parent
+    end
+
+    print("error_middlewares stack len:", #stack)
+    return stack
+end
+
 
 local Router = {}
 
@@ -152,14 +162,13 @@ end
 -- dispatch a request
 function Router:handle(req, res, out)
     debug("index.lua#handle start")
-    local idx = 1
+    local idx = 0
     local path = req.path
     local method = req.method
     local done = restore(out, req)
 
     local stack = nil
     local matched = self.trie:match(path)
-    debug(matched.node==nil)
     local matched_node = matched.node
     if not method or not matched_node then
         return done("404! not found.")
@@ -179,21 +188,34 @@ function Router:handle(req, res, out)
     req:set_found(true)
     req.params = matched.params or {}
 
+    debug("start next, stack_len:", #stack, "params_len:", #req.params)
     local function next(err)
         debug("\nindex.lua#next...,", "stack_len:", #stack, "idx:", idx)
         if err then
-            debug("\nindex.lua#next...,", "err:", err)
-            return done(err)
+            debug("\nindex.lua#next ---> to error_handle,", "err:", err)
+            return self:error_handle(err, req, res, stack[idx].node, done)
         end
 
         if idx > stack_len then
-            debug("\nindex.lua#next...,", "stack_len:", #stack, "idx:", idx)
-            return
+            debug("\nindex.lua#next...,", "stack_len:", #stack, "idx:", idx, "err:", err)
+            return done(err) -- err is nil or not
         end
 
+        idx = idx + 1
         local handler = stack[idx]
         debug("\nindex.lua#next...,", "handler:", handler.id)
-        handler.func(req, res, next)
+
+        local e
+        local ok, ee = xpcall(function() -- add `ee` for final handler logic
+            handler.func(req, res, next)
+        end, function(msg)
+            e = (msg or "") .. "\n" .. traceback()
+        end)
+
+        if not ok then
+            debug("handler func:call error ---> to error_handle,", ok, e, ee)
+            return self:error_handle(e or ee, req, res, stack[idx].node, done)
+        end
     end
     -- end of next function
 
@@ -201,11 +223,53 @@ function Router:handle(req, res, out)
     debug("index.lua#handle end")
 end
 
+-- dispatch an error
+function Router:error_handle(err, req, res, node, done)
+    debug("index.lua#error_handle start")
+    local stack = compose_error_handler(node)
+    if not stack or #stack <= 0 then
+        print("no error handlers found.")
+        return done(err)
+    end
+
+    debug("start error_handle, stack_len:", #stack)
+    local idx = 0
+    local function next(err)
+        if idx > stack_len then
+            debug("error_handle#next... end,", "stack_len:", #stack, "idx:", idx)
+            return done(err)
+        end
+
+        idx = idx + 1
+        local error_handler = stack[idx]
+        debug("index.lua#next...,", "error_handler:", error_handler.id)
+
+        local e
+        local ok, ee = xpcall(function() -- add `ee` for final handler logic
+            error_handler.func(err, req, res, next)
+        end, function(msg)
+            e = (msg or "") .. "\n" .. traceback()
+        end)
+
+        if not ok then
+            debug("error_handler func:call error", ok, e, ee)
+            return done(e or ee)
+        end
+    end
+    -- end of next function
+
+    next()
+    debug("index.lua#error_handle end")
+end
+
 function Router:use(path, fn, fn_args_length)
-    local layer
     if type(fn) == "function" then -- fn is a function
         local node = self.trie:add_node(path)
-        node:use(fn)
+        if fn_args_length == 3 then
+            node:use(fn)
+        elseif fn_args_length == 4 then
+            node:error_use(fn)
+        end
     else -- fn is a group router
         error("not implemented...")
     end
@@ -213,10 +277,7 @@ function Router:use(path, fn, fn_args_length)
     return self
 end
 
--- invoked by app:route, add ^ before pattern
--- add an empty route pointing to next layer
 function Router:app_route(http_method, path, fn)
-    debug(string_format("router#app_route[%s], method:%s path:%s", self.name, http_method, path))
     local node = self.trie:add_node(path)
     node:handle(http_method, fn)
     return route

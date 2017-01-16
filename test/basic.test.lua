@@ -4,9 +4,6 @@ expose("expose modules", function()
     _G.request = require("test.mock_request")
     _G.response = require("test.mock_response")
 
-    _G.Trie = require("lor.lib.trie")
-    _G.Node = require("lor.lib.node")
-
     _G.json_view = function(t)
         local cjson
         pcall(function() cjson = require("cjson") end)
@@ -68,34 +65,30 @@ describe("basic test for common usages", function()
             count = 4
         end)
 
-
-
-        req.url = "http://sumory.com/user/123/create"
         req.path ="/user/123/create"
         req.method = "get"
         app:handle(req, res)
-        json_view(app.router.trie)
-        ---assert.is.equals(count, 5)
+        --json_view(app.router.trie)
+        assert.is.equals(count, 5)
     end)
 
-    -- it("error middleware should work.", function()
-    --     local origin_error_msg, error_msg = "this is an error", ""
-    --     app:use("/user", function(req, res, next)
-    --         next()
-    --     end)
+    it("error middleware should work.", function()
+        local origin_error_msg, error_msg = "this is an error", ""
+        app:use("/user", function(req, res, next)
+            next()
+        end)
 
-    --     app:get("/user/123/create", function(req, res, next)
-    --         next(origin_error_msg) -- let other handlers continue...
-    --     end)
+        app:get("/user/123/create", function(req, res, next)
+            next(origin_error_msg) -- let other handlers continue...
+        end)
 
-    --     app:erroruse(function(err, req, res, next)
-    --         error_msg = err
-    --     end)
+        app:erroruse(function(err, req, res, next)
+            error_msg = err
+        end)
 
-    --     req.url = "/user/123/create"
-    --     req.path = req.url
-    --     req.method = "get"
-    --     app:handle(req, res)
-    --     assert.is.equals(error_msg, origin_error_msg)
-    -- end)
+        req.path = "/user/123/create"
+        req.method = "get"
+        app:handle(req, res)
+        assert.is.equals(error_msg, origin_error_msg)
+    end)
 end)

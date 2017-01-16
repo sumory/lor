@@ -86,6 +86,7 @@ describe("complex use cases: ", function()
         assert.is.equals("n", m3.params["p1"])
         assert.is.equals("e", m3.params["p2"])
         assert.is.equals("f", m3.params["p3"])
+        print(t:gen_graph())
     end)
 end)
 

@@ -91,7 +91,6 @@ function App:handle(req, res, callback)
 end
 
 function App:use(path, fn)
-
     self:inner_use(3, path, fn)
 end
 
