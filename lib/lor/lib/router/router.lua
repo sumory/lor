@@ -2,10 +2,10 @@ local pairs = pairs
 local ipairs = ipairs
 local pcall = pcall
 local xpcall = xpcall
-local traceback = debug.traceback
 local type = type
 local setmetatable = setmetatable
 local getmetatable = getmetatable
+local traceback = debug.traceback
 local tinsert = table.insert
 local table_concat = table.concat
 local string_format = string.format
@@ -18,23 +18,6 @@ local is_table_empty = utils.is_table_empty
 local random = utils.random
 local mixin = utils.mixin
 
-local function clone(object)
-    local lookup_table = {}
-    local function _copy(object)
-        if type(object) ~= "table" then
-            return object
-        elseif lookup_table[object] then
-            return lookup_table[object]
-        end
-        local new_object = {}
-        lookup_table[object] = new_object
-        for key, value in pairs(object) do
-            new_object[_copy(key)] = _copy(value)
-        end
-        return setmetatable(new_object, getmetatable(object))
-    end
-    return _copy(object)
-end
 
 local function restore(fn, obj)
     local origin = {
@@ -108,12 +91,7 @@ function Router:new(options)
     local router = {}
 
     router.name =  "router-" .. random()
-    router.group_router = opts.group_router -- is a group router
     router.trie = Trie:new({
-        ignore_case = opts.ignore_case,
-        tsr = opts.tsr
-    })
-    router.middleware_trie = Trie:new({
         ignore_case = opts.ignore_case,
         tsr = opts.tsr
     })
@@ -121,10 +99,9 @@ function Router:new(options)
     self:init()
     setmetatable(router, {
         __index = self,
-        __call = self._call,
         __tostring = function(s)
             local ok, result = pcall(function()
-                return string_format("name: %s, group_router: %s", s.name, s.group_router)
+                return string_format("name: %s", s.name)
             end)
             if ok then
                 return result
@@ -136,14 +113,6 @@ function Router:new(options)
 
     debug("router.lua#new:", router)
     return router
-end
-
---- a magick for usage like `lor:Router()`
--- generate a new router for different routes group
-function Router:_call()
-    local new_router =  clone(self)
-    new_router.name = self.name .. ":group-router-" .. random()
-    return new_router
 end
 
 --- a magick to convert `router()` to `router:handle()`
@@ -187,14 +156,14 @@ function Router:handle(req, res, out)
     debug("start next, stack_len:", #stack, "params_len:", #req.params)
     local idx = 0
     local function next(err)
-        debug("\nindex.lua#next...,", "stack_len:", #stack, "idx:", idx)
+        debug("index.lua#next...,", "stack_len:", #stack, "idx:", idx)
         if err then
-            debug("\nindex.lua#next ---> to error_handle,", "err:", err)
+            debug("index.lua#next ---> to error_handle,", "err:", err)
             return self:error_handle(err, req, res, stack[idx].node, done)
         end
 
         if idx > stack_len then
-            debug("\nindex.lua#next...,", "stack_len:", #stack, "idx:", idx, "err:", err)
+            debug("index.lua#next...,", "stack_len:", #stack, "idx:", idx, "err:", err)
             return done(err) -- err is nil or not
         end
 
@@ -203,19 +172,27 @@ function Router:handle(req, res, out)
         if not handler then
             return done(err)
         end
-        debug("\nindex.lua#next...,", "handler:", handler.id)
+        debug("index.lua#next...,", "handler:", handler.id)
 
-        local err_msg, err_stack
+        local err_msg
         local ok, ee = xpcall(function()
             handler.func(req, res, next)
         end, function(msg)
-            err_msg = msg or ""
-            err_stack = traceback() or ""
+            if msg then
+                if type(msg) == "string" then
+                    err_msg = msg
+                elseif type(msg) == "table" then
+                    err_msg = "[ERROR]" .. table_concat(msg, "|") .. "[/ERROR]"
+                end
+            else
+                err_msg = ""
+            end
+            err_msg = err_msg .. "\n" .. traceback()
         end)
 
         if not ok then
-            debug("handler func:call error ---> to error_handle,", ok, "err_msg:", err_msg, "err_stack:", err_stack)
-            return self:error_handle(err_msg, err_stack, req, res, handler.node, done)
+            --debug("handler func:call error ---> to error_handle,", ok, "err_msg:", err_msg)
+            return self:error_handle(err_msg, req, res, handler.node, done)
         end
     end
     -- end of next function
@@ -225,42 +202,48 @@ function Router:handle(req, res, out)
 end
 
 -- dispatch an error
-function Router:error_handle(err_msg, err_stack, req, res, node, done)
+function Router:error_handle(err_msg, req, res, node, done)
     debug("index.lua#error_handle start")
     local stack = compose_error_handler(node)
     if not stack or #stack <= 0 then
-        print("no error handlers found.")
-        return done(err_msg .. err_stack)
+        return done(err_msg)
     end
 
-    debug("start error_handle, stack_len:", #stack)
+    debug("index.lua#error_handle next begin, stack_len:", #stack)
     local idx = 0
     local stack_len = #stack
     local function next(err)
-        if idx > stack_len then
-            debug("error_handle#next... end,", "stack_len:", #stack, "idx:", idx)
+        if idx >= stack_len then
+            debug("index.lua#error_handle next end,", "stack_len:", #stack, "idx:", idx)
             return done(err)
         end
 
         idx = idx + 1
         local error_handler = stack[idx]
         if not error_handler then
-            done(err)
+            return done(err)
         end
-        debug("index.lua#next...,", "error_handler:", error_handler.id)
+        debug("index.lua#error_handle next,", "statck idnex:", idx, "error_handler:", error_handler.id)
 
-        local ok, ee = xpcall(function() -- add `ee` for final handler logic
-                              print("####################", error_handler.action_type)
+        local ok, ee = xpcall(function()
             error_handler.func(err, req, res, next)
         end, function(msg)
+            if msg then
+                if type(msg) == "string" then
+                    err_msg = msg
+                elseif type(msg) == "table" then
+                    err_msg = "[ERROR]" .. table_concat(msg, "|") .. "[/ERROR]"
+                end
+            else
+                err_msg = ""
+            end
 
-            err_msg = msg or ""
-            err_stack = err_stack .. "\n" .. traceback()
+            err_msg = string_format("%s\n[ERROR in ErrorMiddleware#%s(%s)] %s \n%s", err, idx, error_handler.id, err_msg, traceback())
         end)
 
         if not ok then
-            debug("error_handler func:call error", error_handler.id, ok, "ee:", ee, "err:", err,  "err_msg:", err_msg, "err_stack:", err_stack)
-            return done(err_msg .. "\n" .. err_stack)
+            -- debug("index.lua#error_handle next func:call error", error_handler.id, ok, "ee:", ee, "err:", err,  "err_msg:", err_msg)
+            return done(err_msg)
         end
     end
     -- end of next function
@@ -282,11 +265,38 @@ function Router:use(path, fn, fn_args_length)
         elseif fn_args_length == 4 then
             node:error_use(fn)
         end
-    else -- fn is a group router
-        error("not implemented...")
+    elseif fn and fn.is_group == true then -- fn is a group router
+        if fn_args_length ~= 3 then
+            error("illegal param, fn_args_length should be 3")
+        end
+
+        path = path or "" -- if path is nil, then mount it on `root`
+        self:merge_group(path, fn)
     end
 
     return self
+end
+
+function Router:merge_group(prefix, group)
+    local apis = group:get_apis()
+    if apis and #apis > 0 then
+        for uri, api_methods in pairs(apis) do
+            if type(api_methods) == "table" and #api_methods > 0 then
+                local path = utils.clear_slash(prefix .. "/" .. uri)
+                local node = self.trie:add_node(path)
+                if not node then
+                    return error("cann't define node on router trie, path:" .. path)
+                end
+
+                for method, func in pairs(api_methods) do
+                    local m = string_lower(method)
+                    if supported_http_methods[m] == true then
+                        node:handle(m, func)
+                    end
+                end
+            end
+        end
+    end
 end
 
 function Router:app_route(http_method, path, fn)

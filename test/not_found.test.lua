@@ -5,43 +5,38 @@ expose("expose modules", function()
     _G.response = require("test.mock_response")
 end)
 
+setup(function()
+end)
+
+teardown(function()
+end)
+
+before_each(function()
+    lor = _G.lor
+    app = lor({
+        debug = false
+    })
+    Request = _G.request
+    Response = _G.response
+    req = Request:new()
+    res = Response:new()
+end)
+
+after_each(function()
+    lor = nil
+    app = nil
+    Request = nil
+    Response = nil
+    req = nil
+    res = nil
+end)
+
 describe("not found test", function()
-    setup(function()
-    end)
-
-    teardown(function()
-    end)
-
-    before_each(function()
-        lor = _G.lor
-        app = lor({
-            debug = false
-        })
-        Request = _G.request
-        Response = _G.response
-        req = Request:new()
-        res = Response:new()
-    end)
-
-    after_each(function()
-        lor = nil
-        app = nil
-        Request = nil
-        Response = nil
-        req = nil
-        res = nil
-    end)
-
-    it("objects or modules should not be nil.", function()
-        assert.is.truthy(lor)
-        assert.is.truthy(app)
-    end)
-
-
     it("test case 1", function()
         local count = 0
         local errorMsg = "an error occurs."
         local userRouter = lor:Router()
+        print("-------", userRouter.id, type(userRouter.get))
 
         userRouter:get("/find/:id", function(req, res, next)
             count = 1
@@ -65,27 +60,20 @@ describe("not found test", function()
         end)
 
         app:erroruse("/user", function(err, req, res, next)
-            --print("user error middleware", err)
-            --if err then -- double check
             count = err
             req.params.id = "22222"
-            --end
             next(err) -- 继续传递，只会被下一个erroruse覆盖
         end)
 
         app:erroruse(function(err, req, res, next)
             --print("common error middleware", err)
             if err then -- double check
-            count = err
-            req.params.id = "11111111"
+                count = err
+                req.params.id = "11111111"
             end
         end)
 
-
-        -- start mock test
-
-        req.url = "/user/find/456"
-        req.path = req.url
+        req.path = "/user/find/456"
         req.method = "get"
         app:handle(req, res)
         assert.is.equals(req.params.id, "11111111")
@@ -113,28 +101,22 @@ describe("not found test", function()
 
         app:use("/user", userRouter())
 
-
         app:use(function(req, res, next)
             if req:is_found() ~= true then
                 count = 404
             end
         end)
 
-
         app:erroruse(function(err, req, res, next)
             count = 500
         end)
 
-
-        -- start mock test
-        req.url = "/user/find/456"
-        req.path = req.url
+        req.path = "/user/find/456"
         req.method = "get"
         app:handle(req, res)
         assert.is_not.equals(404, count)-- should not be 404
 
-        req.url = "/notfound"
-        req.path = req.url
+        req.path = "/notfound"
         req.method = "post"
         app:handle(req, res, function(err)
             if err then

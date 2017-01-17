@@ -96,7 +96,6 @@ function App:use(path, fn)
 end
 
 function App:erroruse(path, fn)
-    debug("application.lua#error middleware")
     self:inner_use(4, path, fn)
 end
 

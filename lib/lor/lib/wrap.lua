@@ -6,9 +6,10 @@ local tostring = tostring
 
 local _M = {}
 
-function _M:new(create_app, Router, Request, Response)
+function _M:new(create_app, Router, Group, Request, Response)
     local instance = {}
     instance.router = Router
+    instance.group = Group
     instance.request = Request
     instance.response = Response
     instance.fn = create_app
@@ -22,16 +23,14 @@ function _M:new(create_app, Router, Request, Response)
     return instance
 end
 
--- Generally, this shouled only be used for `lor` framework itself.
+-- Generally, this shouled only be used by `lor` framework itself.
 function _M:create_app(options)
     self.app = self.fn(options)
     return self.app
 end
 
 function _M:Router(options)
-    options = options or {}
-    options.group_router = true
-    return self.router:new(options)
+    return self.group:new(options)
 end
 
 function _M:Request()
