@@ -31,98 +31,108 @@ after_each(function()
     res = nil
 end)
 
-describe("not found test", function()
+describe("not found test, error middleware and final handler should be reached correctly.", function()
     it("test case 1", function()
         local count = 0
         local errorMsg = "an error occurs."
-        local userRouter = lor:Router()
-        print("-------", userRouter.id, type(userRouter.get))
 
+        local userRouter = lor:Router()
         userRouter:get("/find/:id", function(req, res, next)
             count = 1
             error(errorMsg)
         end)
-
-        userRouter:post("/create/:id", function(req, res, next)
-            count = 2
-            next(errorMsg) -- has one param, so this will pass to an error middleware
-        end)
-
-        userRouter:post("/edit/:id", function(req, res, next)
-            count = 3
-        end)
-
         app:use("/user", userRouter())
-
-
-        app:use(function(req, res, next)
-            count = 404
-        end)
 
         app:erroruse("/user", function(err, req, res, next)
             count = err
-            req.params.id = "22222"
-            next(err) -- 继续传递，只会被下一个erroruse覆盖
+            req.params.id = "2222"
+            next(err)
         end)
 
         app:erroruse(function(err, req, res, next)
-            --print("common error middleware", err)
-            if err then -- double check
-                count = err
-                req.params.id = "11111111"
-            end
+            count = err
+            req.params.id = "1111"
         end)
 
         req.path = "/user/find/456"
         req.method = "get"
         app:handle(req, res)
-        assert.is.equals(req.params.id, "11111111")
-        assert.is.truthy(string.match(count, errorMsg))
-
-        req.url = "/notfound"
-        req.path = req.url
-        req.method = "post"
-        app:handle(req, res, function(err)
-            if err then
-                print(err)
-            end
-        end)
-        assert.is.equals(404, count)
+        assert.is.equals(req.params.id, "1111")
+        assert.is.equals(true, string.find(count, errorMsg) > 1)
     end)
 
     it("test case 2", function()
         local count = 0
         local errorMsg = "an error occurs."
-        local userRouter = lor:Router()
 
+        local userRouter = lor:Router()
         userRouter:get("/find/:id", function(req, res, next)
             count = 1
+            error(errorMsg)
         end)
-
         app:use("/user", userRouter())
 
-        app:use(function(req, res, next)
-            if req:is_found() ~= true then
-                count = 404
-            end
+        app:erroruse("/user", function(err, req, res, next)
+            count = err
+            req.params.id = "2222"
+            next(err)
         end)
 
         app:erroruse(function(err, req, res, next)
-            count = 500
+            count = "stop exec final handler"
+            req.params.id = "1111"
+            -- next(err) -- not invoke it, the final handler will not be reached!
         end)
 
-        req.path = "/user/find/456"
-        req.method = "get"
-        app:handle(req, res)
-        assert.is_not.equals(404, count)-- should not be 404
-
+        req.params.id = nil --empty it
         req.path = "/notfound"
         req.method = "post"
         app:handle(req, res, function(err)
             if err then
-                print(err)
+                count = "not found error catched"
             end
         end)
-        assert.is.equals(1, count)
+
+        assert.is.equals(404, res.http_status)
+        assert.is.equals(req.params.id, "1111")
+        assert.is.equals("stop exec final handler", count)
+    end)
+
+    it("test case 3", function()
+        local count = 0
+        local errorMsg = "an error occurs."
+
+        local userRouter = lor:Router()
+        userRouter:get("/find/:id", function(req, res, next)
+            count = 1
+            error(errorMsg)
+        end)
+        app:use("/user", userRouter())
+
+        app:erroruse("/user", function(err, req, res, next)
+            count = err
+            req.params.id = "2222"
+            next(err)
+        end)
+
+        app:erroruse(function(err, req, res, next)
+            count = "stop exec final handler"
+            req.params.id = "1111"
+            next(err) -- invoke it, the final handler will be reached!
+        end)
+
+        req.params.id = nil --empty it
+        req.path = "/notfound"
+        req.method = "post"
+        app:handle(req, res, function(err)
+            req.params.id = "3333"
+            if err then
+                count = "not found error catched"
+            end
+        end)
+        --print(app.router.trie:gen_graph())
+        assert.is.equals(404, res.http_status)
+        assert.is.equals(req.params.id, "3333")
+        assert.is.equals("not found error catched", count)
     end)
 end)

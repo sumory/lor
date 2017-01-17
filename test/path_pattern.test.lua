@@ -65,29 +65,6 @@ describe("next function usages test", function()
             assert.is_not_nil(err)
             count = 999
         end)
-
---        print("middleware has been initialized.")
---
---        print("testRouter's stack:")
---        local s1 = testRouter.stack
---        for i, v in ipairs(s1) do
---            print(i, v)
---        end
---
---        print("app.router's stack:")
---        local s2 = app.router.stack
---        for i, v in ipairs(s2) do
---            print(i, v)
---        end
-
---        1	(name:layer-898	path:/	length:3	 layer.route.name:<nil>	pattern:/	is_end:false)
---        2	(name:layer-71	path:/user/	length:3	 layer.route.name:<nil>	pattern:/user/	is_end:false)
---        3	(name:layer-901	path:/user/:id/view	length:3	 layer.route.name:<nil>	pattern:/user/([A-Za-z0-9_]+)/view/	is_end:false)
---        4	(name:layer-438	path:/user/123/view	length:3	 layer.route.name:route-898	pattern:/user/123/view$	is_end:true)
---        5	(name:layer-250	path:/book	length:3	 layer.route.name:route-670	pattern:/book$	is_end:true)
---        6	(name:layer-711	path:/test	length:3	 layer.route.name:<nil>	pattern:/test/	is_end:false)
---        7	(name:layer-231	path:/	length:4	 layer.route.name:<nil>	pattern:/	is_end:false)
-
     end)
 
     after_each(function()
@@ -98,7 +75,6 @@ describe("next function usages test", function()
         req = nil
         res = nil
     end)
-
 
     it("test case 1", function()
         req.path = "/user/123/view"

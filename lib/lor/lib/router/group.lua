@@ -38,24 +38,17 @@ function Group:new()
     group.id = random()
     group.name =  "group-" .. group.id
     group.is_group = true
-    group._apis = {}
+    group.apis = {}
+    self:build_method()
 
     setmetatable(group, {
         __index = self,
         __call = self._call,
         __tostring = function(s)
-            local ok, result = pcall(function()
-                return string_format("name: %s", s.name)
-            end)
-            if ok then
-                return result
-            else
-                return "group.tostring() error"
-            end
+            return s.name
         end
     })
 
-    group:build_method()
     debug("group.lua#new:", group)
     return group
 end
@@ -70,7 +63,7 @@ function Group:_call()
 end
 
 function Group:get_apis()
-    return self._apis
+    return self.apis
 end
 
 function Group:set_api(path, method, func)
@@ -80,15 +73,17 @@ function Group:set_api(path, method, func)
 
     if type(path) ~= "string" or type(method) ~= "string" or type(func) ~= "function" then
         return error("params type error.")
-    end 
+    end
 
     method = string_lower(method)
-    if not supported_http_methods[method] then 
+    if not supported_http_methods[method] then
         return error(string_format("[%s] method is not supported yet.", method))
     end
-    
-    self._apis[path] = self._apis[path] or {}
-    self._apis[path][method] = func
+
+    self.apis[path] = self.apis[path] or {}
+
+    self.apis[path][method] = func
+    print("-------->", path, method, #(self.apis))
 end
 
 function Group:build_method()

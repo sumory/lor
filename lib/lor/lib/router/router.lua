@@ -9,6 +9,7 @@ local traceback = debug.traceback
 local tinsert = table.insert
 local table_concat = table.concat
 local string_format = string.format
+local string_lower = string.lower
 
 local utils = require("lor.lib.utils.utils")
 local supported_http_methods = require("lor.lib.methods")
@@ -278,11 +279,15 @@ function Router:use(path, fn, fn_args_length)
 end
 
 function Router:merge_group(prefix, group)
+    print("++++++++merge", prefix)
     local apis = group:get_apis()
-    if apis and #apis > 0 then
+
+    if apis then
         for uri, api_methods in pairs(apis) do
-            if type(api_methods) == "table" and #api_methods > 0 then
+            print("++++++++merge", group.name, uri)
+            if type(api_methods) == "table" then
                 local path = utils.clear_slash(prefix .. "/" .. uri)
+                print("++++++++", path)
                 local node = self.trie:add_node(path)
                 if not node then
                     return error("cann't define node on router trie, path:" .. path)
