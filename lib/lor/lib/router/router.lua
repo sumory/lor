@@ -152,9 +152,10 @@ function Router:handle(req, res, out)
 
     local stack_len = #stack
     req:set_found(true)
-    req.params = matched.params or {}
+    local parsed_params = matched.params or {} -- origin params, parsed
+    req.params = parsed_params
 
-    debug("start next, stack_len:", #stack, "params_len:", #req.params)
+    debug("start next, stack_len:", #stack, "parsed_params_len:", #parsed_params)
     local idx = 0
     local function next(err)
         debug("index.lua#next...,", "stack_len:", #stack, "idx:", idx)
@@ -178,6 +179,7 @@ function Router:handle(req, res, out)
         local err_msg
         local ok, ee = xpcall(function()
             handler.func(req, res, next)
+            req.params = utils.mixin(parsed_params, req.params)
         end, function(msg)
             if msg then
                 if type(msg) == "string" then
