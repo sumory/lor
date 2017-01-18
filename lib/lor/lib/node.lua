@@ -4,6 +4,7 @@ local next = next
 local ipairs = ipairs
 local table_insert = table.insert
 local string_lower = string.lower
+local string_format = string.format
 
 local utils = require("lor.lib.utils.utils")
 local supported_http_methods = require("lor.lib.methods")
@@ -47,7 +48,19 @@ function Node:new(root)
         error_middlewares = {},
         regex = nil
     }
-    setmetatable(instance, { __index = self })
+    setmetatable(instance, {
+        __index = self,
+        __tostring = function(s)
+            local ok, result = pcall(function()
+                return string_format("name: %s", s.name)
+            end)
+            if ok then
+                return result
+            else
+                return "node.tostring() error"
+            end
+        end
+    })
     return instance
 end
 

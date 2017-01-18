@@ -165,7 +165,12 @@ function Trie:new(opts)
     trie.ignore_case = opts.ignore_case or trie.ignore_case
     trie.tsr = not (opts.tsr == false)
 
-    setmetatable(trie, { __index = self })
+    setmetatable(trie, {
+        __index = self,
+        __tostring = function(s)
+            return "trie"
+        end
+    })
     return trie
 end
 
