@@ -129,7 +129,7 @@ function Router:handle(req, res, out)
     debug("index.lua#handle start")
 
     local path = req.path
-    local method = req.method
+    local method = req.method and string_lower(req.method)
     local done = restore(out, req)
 
     local stack = nil
