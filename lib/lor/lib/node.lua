@@ -52,7 +52,7 @@ function Node:new(root)
         __index = self,
         __tostring = function(s)
             local ok, result = pcall(function()
-                return string_format("name: %s", s.name)
+                return string_format("name: %s", s.id)
             end)
             if ok then
                 return result
