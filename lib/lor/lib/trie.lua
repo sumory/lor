@@ -331,7 +331,7 @@ function Trie:match(path)
         error("`path` is not start with prefix /: " .. path)
     end
 
-    if self.tsr then
+    if self.tsr and path ~="/" then
         path = utils.trim_suffix_slash(path)
     end
 
@@ -348,7 +348,6 @@ function Trie:match(path)
         end
     end
 
-    --print("segments:", table_concat(segments, "|"))
     local flag = true
     local matched = Matched:new()
     local parent = self.root
