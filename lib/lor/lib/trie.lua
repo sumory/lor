@@ -552,7 +552,7 @@ function Trie:gen_graph()
             for _, v in ipairs(children) do
                 if v.key == "" then
                     --table_insert(res, node.id .. "-->" .. v.val.id .. "[*EMPTY*]")
-                    local text = {node.id, "-->", v.val.id, "(<center>", "[*EMPTY*]", "<br/>", v.val.id, "</center>)"}
+                    local text = {node.id, "-->", v.val.id, "(<center>", "*EMPTY*", "<br/>", v.val.id, "</center>)"}
                     table_insert(res, table_concat(text, ""))
                 else
                     local text = {node.id, "-->", v.val.id, "(<center>", v.key, "<br/>", v.val.id, "</center>)"}

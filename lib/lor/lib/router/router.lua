@@ -129,12 +129,18 @@ function Router:handle(req, res, out)
     debug("index.lua#handle start")
 
     local path = req.path
+    if not path or path == "" then
+        path = ""
+    end
     local method = req.method and string_lower(req.method)
     local done = restore(out, req)
 
     local stack = nil
     local matched = self.trie:match(path)
     local matched_node = matched.node
+
+    
+
     if not method or not matched_node then
         if res.status then res:status(404) end
         return self:error_handle("404! not found.", req, res, self.trie.root, done)

@@ -77,7 +77,7 @@ function App:handle(req, res, callback)
     local router = self.router
     local done = callback or function(req, res)
         return function(err)
-            print("final callback invoked:", err)
+            --print("final callback invoked:", err)
             if err then
                 res:status(500):send("unknown error.")
             end
@@ -88,7 +88,11 @@ function App:handle(req, res, callback)
         return done()
     end
 
-    router:handle(req, res, done)
+    local ok, ee = xpcall(function()
+        router:handle(req, res, done)
+    end, function(msg)
+        done(msg)
+    end)
 end
 
 function App:use(path, fn)
