@@ -111,7 +111,6 @@ opm install sumory/lor
 
 #### 3）使用homebrew安装
 
-
 除使用install.sh安装外，Mac用户还可使用homebrew来安装lor，该方式由[@syhily](https://github.com/syhily)提供， 更详尽的使用方法请参见[这里](https://github.com/syhily/homebrew-lor)。
 
 ```
@@ -120,12 +119,7 @@ $ brew install lor
 ```
 
 
-
-
 至此， `lor`框架已经安装完毕，接下来使用`lord`命令行工具快速开始一个项目骨架.
-
-
-
 
 
 ### 使用
