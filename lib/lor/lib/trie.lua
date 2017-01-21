@@ -331,7 +331,11 @@ function Trie:match(path)
         error("`path` is not start with prefix /: " .. path)
     end
 
+    local need_try_empty = false
     if self.tsr and path ~="/" then
+        if utils.end_with(path, "/") then
+            need_try_empty = true
+        end
         path = utils.trim_suffix_slash(path)
     end
 
@@ -346,6 +350,10 @@ function Trie:match(path)
             table_insert(segments, segment)
             start_pos = i + 1
         end
+    end
+
+    if need_try_empty then
+        table_insert(segments, "")
     end
 
     local flag = true
@@ -371,7 +379,6 @@ function Trie:match(path)
         end
 
         parent = node
-
         if parent.name ~= "" then
             print("set val:", parent.id, parent.name, s)
             matched.params[parent.name] = s
