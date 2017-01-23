@@ -3,7 +3,6 @@ package.path = './?.lua;' .. package.path
 local generator = require("bin.scaffold.generator")
 local lor = require("bin.scaffold.launcher")
 local version = require("lor.version")
-local path = '/usr/local/lor'
 
 local usages = [[lor v]] .. version .. [[, a Lua web framework based on OpenResty.
 
@@ -11,7 +10,7 @@ Usage: lord COMMAND [OPTIONS]
 
 Commands:
  new [name]             Create a new application
- start                  Start the server
+ start                  Start running app server
  stop                   Stop the server
  restart                Restart the server
  version                Show version of lor
@@ -43,7 +42,6 @@ local function exec(args)
     else
         print("[lord] unsupported commands or options, `lord -h` to check usages.")
     end
-
 end
 
 return exec
