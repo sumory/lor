@@ -9,3 +9,4 @@ snippets.lua
 *.rock
 *.rockspec
 lor-*
+.DS_Store
