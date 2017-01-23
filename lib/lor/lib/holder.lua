@@ -34,7 +34,6 @@ function Matched:new()
     local instance = {
         node = nil,
         params = {},
-        tsr = "",
         pipeline = {},
     }
     setmetatable(instance, { __index = self })

@@ -1,6 +1,6 @@
 local pairs = pairs
-local ipairs = ipairs
 local type = type
+local xpcall = xpcall
 local setmetatable = setmetatable
 local string_format = string.format
 
@@ -11,6 +11,12 @@ local View = require("lor.lib.view")
 local supported_http_methods = require("lor.lib.methods")
 local debug = require("lor.lib.debug")
 
+local router_conf = {
+    strict_route = true,
+    ignore_case = true,
+    max_uri_segments = true,
+    max_fallback_depth = true
+}
 
 local App = {}
 
@@ -88,7 +94,7 @@ function App:handle(req, res, callback)
         return done()
     end
 
-    local ok, ee = xpcall(function()
+    xpcall(function()
         router:handle(req, res, done)
     end, function(msg)
         done(msg)
@@ -99,14 +105,21 @@ function App:use(path, fn)
     self:inner_use(3, path, fn)
 end
 
+-- just a mirror for `erroruse`
+function App:erruse(path, fn)
+    self:erroruse(path, fn)
+end
+
 function App:erroruse(path, fn)
     self:inner_use(4, path, fn)
 end
 
--- shoule be private
+-- should be private
 function App:inner_use(fn_args_length, path, fn)
     local router = self.router
     debug(string_format("application.lua#use, fn_args_length:%d path:%s", fn_args_length, path))
+
+    print(fn_args_length, path, fn)
 
     if path and fn and type(path) == "string" then
         router:use(path, fn, fn_args_length)
@@ -115,7 +128,7 @@ function App:inner_use(fn_args_length, path, fn)
         path = nil
         router:use(path, fn, fn_args_length)
     else
-        -- todo: error usage
+        error("error usage for `middleware`")
     end
 
     return self
@@ -123,9 +136,9 @@ end
 
 function App:init_method()
     for http_method, _ in pairs(supported_http_methods) do
-        self[http_method] = function(self, path, fn)
-            self.router:app_route(http_method, path, fn)
-            return self
+        self[http_method] = function(_self, path, fn)
+            _self.router:app_route(http_method, path, fn)
+            return _self
         end
     end
 end
@@ -140,6 +153,11 @@ end
 
 function App:conf(setting, val)
     self.settings[setting] = val
+
+    if router_conf[setting] == true then
+        self.router:conf(setting, val)
+    end
+
     return self
 end
 

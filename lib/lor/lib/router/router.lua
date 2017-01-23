@@ -4,7 +4,6 @@ local pcall = pcall
 local xpcall = xpcall
 local type = type
 local setmetatable = setmetatable
-local getmetatable = getmetatable
 local traceback = debug.traceback
 local tinsert = table.insert
 local table_concat = table.concat
@@ -15,10 +14,23 @@ local utils = require("lor.lib.utils.utils")
 local supported_http_methods = require("lor.lib.methods")
 local debug = require("lor.lib.debug")
 local Trie = require("lor.lib.trie")
-local is_table_empty = utils.is_table_empty
 local random = utils.random
 local mixin = utils.mixin
 
+local allowed_conf = {
+    strict_route = {
+        t = "boolean"
+    },
+    ignore_case = {
+        t = "boolean"
+    },
+    max_uri_segments = {
+        t = "number"
+    },
+    max_fallback_depth = {
+        t = "number"
+    },
+}
 
 local function restore(fn, obj)
     local origin = {
@@ -49,7 +61,7 @@ local function compose_func(matched, method)
     end
 
     local stack = {}
-    for i, p in ipairs(pipeline) do
+    for _, p in ipairs(pipeline) do
         local middlewares = p.middlewares
         local handlers = p.handlers
         if middlewares then
@@ -94,7 +106,9 @@ function Router:new(options)
     router.name =  "router-" .. random()
     router.trie = Trie:new({
         ignore_case = opts.ignore_case,
-        tsr = opts.tsr
+        strict_route = opts.strict_route,
+        max_uri_segments = opts.max_uri_segments,
+        max_fallback_depth = opts.max_fallback_depth
     })
 
     self:init()
@@ -138,8 +152,6 @@ function Router:handle(req, res, out)
     local stack = nil
     local matched = self.trie:match(path)
     local matched_node = matched.node
-
-    
 
     if not method or not matched_node then
         if res.status then res:status(404) end
@@ -185,7 +197,7 @@ function Router:handle(req, res, out)
         local err_msg
         local ok, ee = xpcall(function()
             handler.func(req, res, next)
-            req.params = utils.mixin(parsed_params, req.params)
+            req.params = mixin(parsed_params, req.params)
         end, function(msg)
             if msg then
                 if type(msg) == "string" then
@@ -204,7 +216,6 @@ function Router:handle(req, res, out)
             return self:error_handle(err_msg, req, res, handler.node, done)
         end
     end
-    -- end of next function
 
     next()
     debug("index.lua#handle end")
@@ -310,12 +321,14 @@ function Router:merge_group(prefix, group)
             end
         end
     end
+
+    return self
 end
 
 function Router:app_route(http_method, path, fn)
     local node = self.trie:add_node(path)
     node:handle(http_method, fn)
-    return route
+    return self
 end
 
 function Router:init()
@@ -326,6 +339,25 @@ function Router:init()
             return s
         end
     end
+end
+
+function Router:conf(setting, val)
+    local allow = allowed_conf[setting]
+    if allow then
+        if allow.t == "boolean" then
+
+            if val == "true" or val == true then
+                self.trie[setting] = true
+            elseif val == "false" or val == false then
+                self.trie[setting] = false
+            end
+        elseif allow.t == "number" then
+            val = tonumber(val)
+            self.trie[setting] = val or self[setting]
+        end
+    end
+
+    return self
 end
 
 return Router

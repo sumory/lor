@@ -5,6 +5,7 @@ local string_find = string.find
 local string_sub = string.sub
 local string_gsub = string.gsub
 local string_len = string.len
+local string_format = string.format
 local table_insert = table.insert
 local table_remove = table.remove
 local table_concat = table.concat
@@ -155,22 +156,36 @@ local Trie = {}
 function Trie:new(opts)
     opts = opts or {}
     local trie = {
-        max_fallback_depth = 1000, -- a limit to avoid dead `while` or attack for fallback lookup
-        ignore_case = true, -- should ignore case or not
-        tsr = true, -- should trim right slashes or not
+        -- limit to avoid dead `while` or attack for fallback lookup
+        max_fallback_depth = 100, 
+
+        -- limit to avoid uri attack. e.g. a long uri, /a/b/c/d/e/f/g/h/i/j/k...
+        max_uri_segments = 100,
+        
+        -- should ignore case or not
+        ignore_case = true, 
+
+        -- [true]: "test.com/" is not the same with "test.com".
+        -- [false]: "test.com/" will match "test.com/" first, then try to math "test.com" if not exists 
+        strict_route = true,
+
+        -- the root node of this trie structure
         root = Node:new(true)
     }
 
     trie.max_fallback_depth = tonumber(opts.max_fallback_depth) or trie.max_fallback_depth
+    trie.max_uri_segments = tonumber(opts.max_uri_segments) or trie.max_uri_segments
     trie.ignore_case = opts.ignore_case or trie.ignore_case
-    trie.tsr = not (opts.tsr == false)
+    trie.strict_route = not (opts.strict_route == false)
 
     setmetatable(trie, {
         __index = self,
         __tostring = function(s)
-            return "trie"
+            return string_format("Trie, ignore_case:%s strict_route:%s max_uri_segments:%d max_fallback_depth:%d",
+                s.ignore_case, s.strict_route, s.max_uri_segments, s.max_fallback_depth)
         end
     })
+
     return trie
 end
 
@@ -192,42 +207,16 @@ function Trie:add_node(pattern)
     return node
 end
 
---- deprecated
-function Trie:_priority_match(parent, segment, priority)
-    if not priority or priority == 0 then -- children优先
-        local child = parent:find_child(segment)
-        if child then return child end
-
-        child = parent.colon_child
-        if child and child.regex and not utils.is_match(segment, child.regex) then
-            child = nil -- illegal & not mathed regrex
-
-        end
-
-        return child
-    elseif priority == 1 then -- colon child优先
-        local child = parent.colon_child
-        if child and child.regex and not utils.is_match(segment, child.regex) then
-            child = parent:find_child(segment)
-        end
-
-        return child
-    else
-        return nil
-    end
-end
-
 --- get matched colon node
 function Trie:get_colon_node(parent, segment)
     local child = parent.colon_child
     if child and child.regex and not utils.is_match(segment, child.regex) then
         child = nil -- illegal & not mathed regrex
     end
-
     return child
 end
 
---- retry to fallback to lookup the colon nodes in stack
+--- retry to fallback to lookup the colon nodes in `stack`
 function Trie:fallback_lookup(fallback_stack, segments, params)
     if #fallback_stack == 0 then
         return false
@@ -257,13 +246,13 @@ function Trie:fallback_lookup(fallback_stack, segments, params)
         else
             print(segment_index, parent.id, s)
             local cd = parent.children
-            for j, c in ipairs(cd) do
+            for _, c in ipairs(cd) do
                 print("--->", c.val.id)
             end
 
-            local node, colon_node, is_same = self:_match(parent, s)
+            local node, colon_node, is_same = self:find_matched_child(parent, s)
             if self.ignore_case and node == nil then
-                node, colon_node, is_same = self:_match(parent, string_lower(s))
+                node, colon_node, is_same = self:find_matched_child(parent, string_lower(s))
             end
 
             print(segment_index, node and node.id, colon_node and colon_node.id, is_same)
@@ -300,9 +289,8 @@ function Trie:fallback_lookup(fallback_stack, segments, params)
     end
 end
 
---- 优先查找完全匹配， 其次查找colon node
--- 若有colon node需返回， 并标注返回的前两个值是否都是colon node
-function Trie:_match(parent, segment)
+--- find exactly mathed node and colon node
+function Trie:find_matched_child(parent, segment)
     local child = parent:find_child(segment)
     local colon_node = self:get_colon_node(parent, segment)
 
@@ -326,19 +314,28 @@ function Trie:match(path)
         error("`path` should not be nil or empty")
     end
 
+    path = utils.slim_path(path)
+
     local first = string_sub(path, 1, 1)
     if first ~= '/' then
         error("`path` is not start with prefix /: " .. path)
     end
 
-    local need_try_empty = false
-    if self.tsr and path ~="/" then
-        if utils.end_with(path, "/") then
-            need_try_empty = true
-        end
-        path = utils.trim_suffix_slash(path)
+    if path == "/" then -- special case: regard "test.com/" as "test.com"
+        path = ""
     end
 
+    local matched = self:_match(path)
+    if not matched.node and self.strict_route ~= true then
+        if string_sub(path, -1) == '/' then -- retry to find path without last slash
+            matched = self:_match(string_sub(path, 1, -2))
+        end
+    end
+
+    return matched
+end
+
+function Trie:_match(path)
     local start_pos = 2
     local end_pos = string_len(path) + 1
     local segments = {}
@@ -352,18 +349,14 @@ function Trie:match(path)
         end
     end
 
-    if need_try_empty then
-        table_insert(segments, "")
-    end
-
-    local flag = true
+    local flag = true -- whether to continue to find matched node or not
     local matched = Matched:new()
     local parent = self.root
     local fallback_stack = {}
     for i, s in ipairs(segments) do
-        local node, colon_node, is_same = self:_match(parent, s)
+        local node, colon_node, is_same = self:find_matched_child(parent, s)
         if self.ignore_case and node == nil then
-            node, colon_node, is_same = self:_match(parent, string_lower(s))
+            node, colon_node, is_same = self:find_matched_child(parent, string_lower(s))
         end
 
         if colon_node and not is_same then
@@ -380,7 +373,6 @@ function Trie:match(path)
 
         parent = node
         if parent.name ~= "" then
-            print("set val:", parent.id, parent.name, s)
             matched.params[parent.name] = s
         end
     end
@@ -389,43 +381,34 @@ function Trie:match(path)
         matched.node = parent
     end
 
-    local depth = 0
-    local exit = false
-    print("before while：", matched.node, exit, matched.node and matched.node.id)
     local params = matched.params or {}
+    if not matched.node then
+        local depth = 0
+        local exit = false
 
-    print("before retry start =========")
-    for i, v in pairs(params) do
-        print(i .. " " .. v)
-    end
-    print("before retry stop ============")
+        while not exit do
+            depth = depth + 1
+            if depth > self.max_fallback_depth then
+                error("fallback lookup reaches the limit: " .. self.max_fallback_depth)
+            end
 
-    while not matched.node and not exit do
-        depth = depth + 1
-        if depth > self.max_fallback_depth then
-            error("fallback retry to lookup reaches the limit: " .. self.max_fallback_depth)
-        end
-        exit = self:fallback_lookup(fallback_stack, segments, params)
-        print("in while：", exit, exit and exit.node and exit.node.id)
-        if exit then
-            matched = exit
-            break
-        end
+            exit = self:fallback_lookup(fallback_stack, segments, params)
+            if exit then
+                matched = exit
+                break
+            end
 
-        if #fallback_stack == 0 then
-            break
+            if #fallback_stack == 0 then
+                break
+            end
         end
     end
 
-    print("after while：", matched.node, exit)
     matched.params = params
-    for i, v in pairs(matched.params) do
-        print(i .. " " .. v)
-    end
-
     if matched.node then
         matched.pipeline = get_pipeline(matched.node)
     end
+
     return matched
 end
 
@@ -530,19 +513,11 @@ function Trie:remove_nested_property(node)
 end
 
 --- only for dev purpose: graph preview
--- must not be invoked in runtime, example show as following:
--- graph TD
---     B["root"];
---     B-->C[/user];
---     B-->D(/admin);
---     B-->E(/book);
---     C-->c1[/user/add];
---     D-->d1[/admin/get];
---     D-->d2(/admin/alert);
---     D-->d3(/admin/share);
+-- must not be invoked in runtime
 function Trie:gen_graph()
-    self:remove_nested_property(self.root)
-    local result = {"graph TD",  self.root.id .. "((root))"}
+    local cloned_trie = utils.clone(self)
+    cloned_trie:remove_nested_property(cloned_trie.root)
+    local result = {"graph TD",  cloned_trie.root.id .. "((root))"}
 
     local function recursive_draw(node, res)
         if node.is_root then node.key = "root" end
@@ -569,7 +544,7 @@ function Trie:gen_graph()
         end
     end
 
-    recursive_draw(self.root, result)
+    recursive_draw(cloned_trie.root, result)
     return table.concat(result, "\n")
 end
 

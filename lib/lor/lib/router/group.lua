@@ -9,25 +9,9 @@ local supported_http_methods = require("lor.lib.methods")
 local debug = require("lor.lib.debug")
 local utils = require("lor.lib.utils.utils")
 local random = utils.random
+local clone = utils.clone
 
 
-local function clone(object)
-    local lookup_table = {}
-    local function _copy(object)
-        if type(object) ~= "table" then
-            return object
-        elseif lookup_table[object] then
-            return lookup_table[object]
-        end
-        local new_object = {}
-        lookup_table[object] = new_object
-        for key, value in pairs(object) do
-            new_object[_copy(key)] = _copy(value)
-        end
-        return setmetatable(new_object, getmetatable(object))
-    end
-    return _copy(object)
-end
 
 
 local Group = {}

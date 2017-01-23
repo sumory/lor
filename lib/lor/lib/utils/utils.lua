@@ -1,5 +1,6 @@
 local type = type
 local pairs = pairs
+local setmetatable = setmetatable
 local mrandom = math.random
 local sreverse = string.reverse
 local sfind = string.find
@@ -9,6 +10,24 @@ local table_insert = table.insert
 local json = require("cjson")
 
 local _M = {}
+
+function _M.clone(o)
+    local lookup_table = {}
+    local function _copy(object)
+        if type(object) ~= "table" then
+            return object
+        elseif lookup_table[object] then
+            return lookup_table[object]
+        end
+        local new_object = {}
+        lookup_table[object] = new_object
+        for key, value in pairs(object) do
+            new_object[_copy(key)] = _copy(value)
+        end
+        return setmetatable(new_object, getmetatable(object))
+    end
+    return _copy(o)
+end
 
 function _M.clear_slash(s)
     local r, _ = sgsub(s, "(/+)", "/")
