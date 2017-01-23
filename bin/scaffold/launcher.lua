@@ -58,7 +58,7 @@ function Lor.start()
     end
 
     local result = handler:start(env)
-    if result == 0 then
+    if result == 0 or result == true or result == "true" then
         if env ~= 'test' then
             print("app in " .. env .. " was succesfully started on port " .. ngx_config.PORT)
         end
@@ -75,7 +75,7 @@ function Lor.stop()
     local result = handler:stop(env)
 
     if env ~= 'test' then
-        if result == 0 then
+        if result == 0 or result == true or result == "true" then
             print("app in " .. env .. " was succesfully stopped.")
         else
             print("ERROR: Could not stop app (are you sure it is running?).")
@@ -90,13 +90,12 @@ function Lor.reload()
     local result = handler:reload(env)
 
     if env ~= 'test' then
-        if result == 0 then
+        if result == 0 or result == true or result == "true" then
             print("app in " .. env .. " was succesfully reloaded.")
         else
             print("ERROR: Could not reloaded app.")
         end
     end
 end
-
 
 return Lor
