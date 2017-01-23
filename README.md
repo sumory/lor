@@ -29,12 +29,16 @@ app:run()
 
 1) shell
 
-```
+```shell
 git clone https://github.com/sumory/lor
 cd lor
-sh install.sh /opt/lua # install lor in /opt/lua/lor
-# or
-sh install.sh # install lor in /usr/local/lor
+make install
+```
+
+`LOR_HOME` and `LORD_BIN` are supported by `Makefile`, so the following command could be used to customize installation:
+
+```
+make install LOR_HOME=/path/to/lor LORD_BIN=/path/to/lord
 ```
 
 2) opm
@@ -46,7 +50,6 @@ opm install sumory/lor
 ```
 
 `lord` cli is not supported with this installation.
-
 
 3) homebrew
 
@@ -68,13 +71,10 @@ $ brew install lor
 - Easy to build HTTP APIs, web site, or single page applications
 
 
-
 ## Docs & Community
 
 - [Website and Documentation](http://lor.sumory.com).
 - [Github Organization](https://github.com/lorlabs) for Official Middleware & Modules.
-
-
 
 
 ## Quick Start
@@ -98,20 +98,19 @@ Commands:
  help                   Show help tips
 ```
 
-Create the app:
+Create app:
 
 ```
 $ lord new lor_demo
 ```
 
-Start the server:
+Start server:
 
 ```
-$ cd lor_demo & lord start
+$ cd lor_demo && lord start
 ```
 
 Visit [http://localhost:8888](http://localhost:8888).
-
 
 
 ## Tests
@@ -119,8 +118,7 @@ Visit [http://localhost:8888](http://localhost:8888).
 Install [busted](http://olivinelabs.com/busted/), then run test
 
 ```
-busted test/*.test.lua
-busted spec/*.lua
+busted spec/*
 ```
 
 ## Homebrew

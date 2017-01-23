@@ -6,27 +6,30 @@
 
 **Lor**是一个运行在[OpenResty](http://openresty.org)上的基于Lua编写的Web框架.
 
-- 路由采用[Sinatra](http://www.sinatrarb.com/)风格，Sinatra是Ruby小而精的web框架.
-- API基本采用了[Express](http://expressjs.com)的思路和设计，Node.js跨界开发者可以很快上手.
-- 支持插件(middleware)，路由可分组，路由匹配支持string或正则模式.
-- lor会保持核心足够精简，扩展功能依赖middleware来实现. `lor`本身也是基于middleware构建的.
-- 推荐使用lor作为HTTP API Server，lor也已支持session/cookie/html template等功能.
-- 简单示例项目[lor-example](https://github.com/lorlabs/lor-example)
-- 全站示例项目[openresty-china](https://github.com/sumory/openresty-china)
+- 路由采用[Sinatra](http://www.sinatrarb.com/)风格，结构清晰，易于编码和维护.
+- API借鉴了[Express](http://expressjs.com)的思路和设计，Node.js跨界开发者可以很快上手.
+- 支持多种路由，路由可分组，路由匹配支持正则模式.
+- 支持middleware机制，可在任意路由上挂载中间件.
+- 可作为HTTP API Server，也可用于构建传统的Web应用.
 
 
 ### 文档
 
 [http://lor.sumory.com](http://lor.sumory.com)
 
+#### 示例项目
+
+- 简单示例项目[lor-example](https://github.com/lorlabs/lor-example)
+- 全站示例项目[openresty-china](https://github.com/sumory/openresty-china)
+
 
 ### 快速开始
 
-**特别注意:** 在使用lor之前请首先确保OpenResty已安装，并将`nginx`/`resty`命令配置到环境变量中。即在命令行直接输入`nginx -v`、`resty -v`能正确输出。
+**特别注意:** 在使用lor之前请首先确保OpenResty已安装，并将`nginx`/`resty`命令配置到环境变量中。即在命令行直接输入`nginx -v`、`resty -v`能正确执行。
 
-一个简单示例，更复杂的示例或项目模板请使用`lord`命令生成：
+一个简单示例(更复杂的示例或项目模板请使用`lord`命令生成)：
 
-```
+```lua
 local lor = require("lor.index")
 local app = lor()
 
@@ -44,17 +47,14 @@ app:get("/query/:id", function(req, res, next)
     })
 end)
 
--- 404 error
-app:use(function(req, res, next)
-    if req:is_found() ~= true then
-        res:status(404):send("sorry, not found.")
-    end
-end)
-
 -- 错误处理插件，可根据需要定义多个
 app:erroruse(function(err, req, res, next)
     -- err是错误对象
-    res:status(500):send("服务器内发生未知错误")
+    ngx.log(ngx.ERR, err)
+    if req:is_found() ~= true then
+        return res:status(404):send("sorry, not found.")
+    end
+    res:status(500):send("server error")
 end)
 
 app:run()
@@ -65,38 +65,31 @@ app:run()
 
 #### 1）使用脚本安装(推荐)
 
-使用install.sh安装lor框架，强烈建议在使用install.sh安装前阅读该脚本代码。
+使用Makefile安装lor框架:
 
-```
-# 把lor安装到/opt/lua/lor目录下
-sh install.sh /opt/lua
-# 或者安装到默认目录/usr/local/lor下
-sh install.sh
+```shell
+git clone https://github.com/sumory/lor
+cd lor
+make install
 ```
 
-执行以上命令后lor的命令行工具`lord`就被安装在了`/usr/local/bin`下, 通过`which lord`查看:
+默认`lor`的运行时lua文件会被安装到`/usr/local/lor`下， 命令行工具`lord`被安装在`/usr/local/bin`下。
+
+如果希望自定义安装目录， 可参考如下命令自定义路径：
+
+```shell
+make install LOR_HOME=/path/to/lor LORD_BIN=/path/to/lord
+```
+
+执行**默认安装**后, lor的命令行工具`lord`就被安装在了`/usr/local/bin`下, 通过`which lord`查看:
 
 ```
 $ which lord
 /usr/local/bin/lord
 ```
 
-`lor`的运行时包安装在了指定目录下, 若安装在`/opt/lua/lor`，通过`ll /opt/lua/lor`查看:
+`lor`的运行时包安装在了指定目录下, 可通过`lord path`命令查看。
 
-```
-$ ll /opt/lua/lor
-total 56
-drwxr-xr-x  14 root  wheel   476B  1 22 01:18 .
-drwxrwxrwt  14 root  wheel   476B  1 22 01:18 ..
--rw-r--r--   1 root  wheel     0B  1 19 23:48 CHANGELOG.md
--rw-r--r--   1 root  wheel   1.0K  1 19 23:48 LICENSE
--rw-r--r--   1 root  wheel     0B  1 19 23:48 Makefile
--rw-r--r--   1 root  wheel   1.9K  1 21 20:59 README-zh.md
--rw-r--r--   1 root  wheel   870B  1 21 20:59 README.md
-drwxr-xr-x   4 root  wheel   136B  1 22 00:06 bin
--rw-r--r--   1 root  wheel   1.0K  1 21 22:37 install.sh
-drwxr-xr-x   4 root  wheel   136B  1 21 22:40 lor
-```
 
 #### 2）使用opm安装
 
@@ -111,13 +104,12 @@ opm install sumory/lor
 
 #### 3）使用homebrew安装
 
-除使用install.sh安装外，Mac用户还可使用homebrew来安装lor，该方式由[@syhily](https://github.com/syhily)提供， 更详尽的使用方法请参见[这里](https://github.com/syhily/homebrew-lor)。
+除使用以上方式安装外, Mac用户还可使用homebrew来安装lor, 该方式由[@syhily](https://github.com/syhily)提供， 更详尽的使用方法请参见[这里](https://github.com/syhily/homebrew-lor)。
 
 ```
 $ brew tap syhily/lor
 $ brew install lor
 ```
-
 
 至此， `lor`框架已经安装完毕，接下来使用`lord`命令行工具快速开始一个项目骨架.
 
@@ -146,15 +138,13 @@ cd lor_demo
 lord start
 ```
 
-之后访问[http://localhost:8888/](http://localhost:8888/)，即可。
+之后访问[http://localhost:8888/](http://localhost:8888/)， 即可。
 
-更多使用方法，请参考[test](./test)测试用例。
-
+更多使用方法，请参考[use cases](./spec/cases)测试用例。
 
 ### Homebrew
 
 [https://github.com/syhily/homebrew-lor](https://github.com/syhily/homebrew-lor)由[@syhily](https://github.com/syhily)维护。
-
 
 ### 贡献者
 
@@ -170,8 +160,7 @@ lord start
 
 ### 讨论交流
 
-目前有一个QQ群用于在线讨论: 522410959
-
+有一个QQ群用于在线讨论: 522410959
 
 ### License
 
