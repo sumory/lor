@@ -33,9 +33,7 @@ install:
   #- luarocks make
 
 script:
-  - rm -rf lib/lor/lib/utils/path_to_regexp.lua
-  - mv lib/lor/lib/utils/path_to_regexp_lua.lua lib/lor/lib/utils/path_to_regexp.lua
-  - busted test/*.test.lua
+  - busted spec/*
 
 notifications:
   email:
