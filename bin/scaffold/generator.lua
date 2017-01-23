@@ -274,8 +274,10 @@ end)
 
 router(app) -- 业务路由处理
 
--- 404 error
-app:use(function(req, res, next)
+-- 错误处理插件，可根据需要定义多个
+app:erroruse(function(err, req, res, next)
+    ngx.log(ngx.ERR, err)
+
     if req:is_found() ~= true then
         if string_find(req.headers["Accept"], "application/json") then
             res:status(404):json({
@@ -285,20 +287,15 @@ app:use(function(req, res, next)
         else
             res:status(404):send("404! sorry, not found. " .. (req.path or ""))
         end
-    end
-end)
-
--- 错误处理插件，可根据需要定义多个
-app:erroruse(function(err, req, res, next)
-    ngx.log(ngx.ERR, err)
-
-    if string_find(req.headers["Accept"], "application/json") then
-        res:status(500):json({
-            success = false,
-            msg = "500! unknown error."
-        })
     else
-        res:status(500):send("unknown error")
+        if string_find(req.headers["Accept"], "application/json") then
+            res:status(500):json({
+                success = false,
+                msg = "500! unknown error."
+            })
+        else
+            res:status(500):send("unknown error")
+        end
     end
 end)
 
