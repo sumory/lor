@@ -321,8 +321,8 @@ function Trie:match(path)
         error("`path` is not start with prefix /: " .. path)
     end
 
-    if path == "/" then -- special case: regard "test.com/" as "test.com"
-        path = ""
+    if path == "" then -- special case: regard "test.com" as "test.com/"
+        path = "/"
     end
 
     local matched = self:_match(path)
