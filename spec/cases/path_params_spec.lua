@@ -42,17 +42,12 @@ describe("test about variables parsed from path", function()
         it("test case 2.", function()
             app:use("/user", function(req, res, next)
                 assert.is.equals("3", req.params.id)
-                print("********** 1")
                 next()
-                print("********** 4")
-                print("___________************")
             end)
 
             app:get("/user/:id/visit", function(req, res, next)
-                print("********** 2")
                 req.params.id = 5
                 next()
-                print("********** 3")
             end)
 
             req.path = "/user/3/visit"
@@ -142,7 +137,7 @@ describe("test about variables parsed from path", function()
             end)
 
             app:post("/todo/delete/:id", function(req, res, next)
-                print(req.params.id)
+                --print(req.params.id)
             end)
 
             req.path = "/todo/delete/33"

@@ -33,8 +33,8 @@ describe("for debug cases: ", function()
         local n7 = t:add_node("/a/m")
 
         local m3 = t:match("/a/n/e/f/g")
-        json_view(t)
-        print(t:gen_graph())
+        --json_view(t)
+        --print(t:gen_graph())
 
         assert.are.same(n1, m3.node)
         assert.is.equals("n", m3.params["p1"])

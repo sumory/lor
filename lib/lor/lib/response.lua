@@ -1,11 +1,9 @@
 local pairs = pairs
-local ipairs = ipairs
 local type = type
 local setmetatable = setmetatable
 local tinsert = table.insert
 local tconcat = table.concat
 local utils = require("lor.lib.utils.utils")
-
 
 local Response = {}
 
@@ -106,8 +104,6 @@ function Response:send(text)
     self:set_header('Content-Type', 'text/plain; charset=UTF-8')
     self:_send(text)
 end
-
-
 
 --~=============================================================
 

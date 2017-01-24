@@ -59,10 +59,10 @@ describe("`handler` test cases: ", function()
             n1:handle("get", function(req, res, next) end) -- define handler repeatly
         end)
 
-        _G.LOR_FRAMEWORK_DEBUG = true
-        _debug(n1)
-        json_view(t)
-        print(t:gen_graph())
+        -- _G.LOR_FRAMEWORK_DEBUG = true
+        --_debug(n1)
+        --json_view(t)
+        --print(t:gen_graph())
     end)
 end)
 

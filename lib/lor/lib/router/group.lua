@@ -1,5 +1,4 @@
 local setmetatable = setmetatable
-local getmetatable = getmetatable
 local pairs = pairs
 local type = type
 local string_format = string.format
@@ -10,9 +9,6 @@ local debug = require("lor.lib.debug")
 local utils = require("lor.lib.utils.utils")
 local random = utils.random
 local clone = utils.clone
-
-
-
 
 local Group = {}
 
@@ -33,7 +29,6 @@ function Group:new()
         end
     })
 
-    debug("group.lua#new:", group)
     return group
 end
 
@@ -65,9 +60,7 @@ function Group:set_api(path, method, func)
     end
 
     self.apis[path] = self.apis[path] or {}
-
     self.apis[path][method] = func
-    print("-------->", path, method, #(self.apis))
 end
 
 function Group:build_method()

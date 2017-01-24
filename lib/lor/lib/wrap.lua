@@ -1,8 +1,4 @@
-local error = error
-local pairs = pairs
-local type = type
 local setmetatable = setmetatable
-local tostring = tostring
 
 local _M = {}
 

@@ -10,7 +10,6 @@ local table_insert = table.insert
 local table_remove = table.remove
 local table_concat = table.concat
 
-local debug = require("lor.lib.debug")
 local utils = require("lor.lib.utils.utils")
 local holder = require("lor.lib.holder")
 local Node = require("lor.lib.node")
@@ -227,38 +226,22 @@ function Trie:fallback_lookup(fallback_stack, segments, params)
     local parent = fallback.colon_node
     local matched = Matched:new()
 
-    print("into fallback:", parent.id, parent.name, segments[segment_index])
     if parent.name ~= "" then -- fallback to the colon node and fill param if matched
         matched.params[parent.name] = segments[segment_index]
     end
     mixin(params, matched.params) -- mixin params parsed before
-
-    print("print params start =========")
-    for i, v in pairs(params) do
-        print(i .. " " .. v)
-    end
-    print("print params stop ============")
 
     local flag = true
     for i, s in ipairs(segments) do
         if i <= segment_index then -- mind: should use <= not <
             -- continue
         else
-            print(segment_index, parent.id, s)
-            local cd = parent.children
-            for _, c in ipairs(cd) do
-                print("--->", c.val.id)
-            end
-
             local node, colon_node, is_same = self:find_matched_child(parent, s)
             if self.ignore_case and node == nil then
                 node, colon_node, is_same = self:find_matched_child(parent, string_lower(s))
             end
 
-            print(segment_index, node and node.id, colon_node and colon_node.id, is_same)
-
             if colon_node and not is_same then
-                print("colon_node:", segment_index,  colon_node.id)
                 -- save colon node to fallback stack
                 table_insert(fallback_stack, {
                     segment_index = i,
@@ -281,10 +264,8 @@ function Trie:fallback_lookup(fallback_stack, segments, params)
     end
 
     if matched.node then
-        print("return matched")
         return matched
     else
-        print("return final false")
         return false
     end
 end

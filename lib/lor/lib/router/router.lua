@@ -126,7 +126,6 @@ function Router:new(options)
         end
     })
 
-    debug("router.lua#new:", router)
     return router
 end
 
@@ -140,8 +139,6 @@ end
 
 -- dispatch a request
 function Router:handle(req, res, out)
-    debug("index.lua#handle start")
-
     local path = req.path
     if not path or path == "" then
         path = ""
@@ -173,17 +170,13 @@ function Router:handle(req, res, out)
     local parsed_params = matched.params or {} -- origin params, parsed
     req.params = parsed_params
 
-    debug("start next, stack_len:", #stack, "parsed_params_len:", #parsed_params)
     local idx = 0
     local function next(err)
-        debug("index.lua#next...,", "stack_len:", #stack, "idx:", idx)
         if err then
-            debug("index.lua#next ---> to error_handle,", "err:", err)
             return self:error_handle(err, req, res, stack[idx].node, done)
         end
 
         if idx > stack_len then
-            debug("index.lua#next...,", "stack_len:", #stack, "idx:", idx, "err:", err)
             return done(err) -- err is nil or not
         end
 
@@ -192,7 +185,6 @@ function Router:handle(req, res, out)
         if not handler then
             return done(err)
         end
-        debug("index.lua#next...,", "handler:", handler.id)
 
         local err_msg
         local ok, ee = xpcall(function()
@@ -218,23 +210,19 @@ function Router:handle(req, res, out)
     end
 
     next()
-    debug("index.lua#handle end")
 end
 
 -- dispatch an error
 function Router:error_handle(err_msg, req, res, node, done)
-    debug("index.lua#error_handle start")
     local stack = compose_error_handler(node)
     if not stack or #stack <= 0 then
         return done(err_msg)
     end
 
-    debug("index.lua#error_handle next begin, stack_len:", #stack)
     local idx = 0
     local stack_len = #stack
     local function next(err)
         if idx >= stack_len then
-            debug("index.lua#error_handle next end,", "stack_len:", #stack, "idx:", idx)
             return done(err)
         end
 
@@ -243,7 +231,6 @@ function Router:error_handle(err_msg, req, res, node, done)
         if not error_handler then
             return done(err)
         end
-        debug("index.lua#error_handle next,", "statck idnex:", idx, "error_handler:", error_handler.id)
 
         local ok, ee = xpcall(function()
             error_handler.func(err, req, res, next)
@@ -262,14 +249,11 @@ function Router:error_handle(err_msg, req, res, node, done)
         end)
 
         if not ok then
-            -- debug("index.lua#error_handle next func:call error", error_handler.id, ok, "ee:", ee, "err:", err,  "err_msg:", err_msg)
             return done(err_msg)
         end
     end
-    -- end of next function
 
     next(err_msg)
-    debug("index.lua#error_handle end")
 end
 
 function Router:use(path, fn, fn_args_length)
@@ -298,15 +282,12 @@ function Router:use(path, fn, fn_args_length)
 end
 
 function Router:merge_group(prefix, group)
-    print("++++++++merge", prefix)
     local apis = group:get_apis()
 
     if apis then
         for uri, api_methods in pairs(apis) do
-            print("++++++++merge", group.name, uri)
             if type(api_methods) == "table" then
                 local path = utils.clear_slash(prefix .. "/" .. uri)
-                print("++++++++", path)
                 local node = self.trie:add_node(path)
                 if not node then
                     return error("cann't define node on router trie, path:" .. path)

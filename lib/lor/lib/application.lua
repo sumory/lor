@@ -2,14 +2,12 @@ local pairs = pairs
 local type = type
 local xpcall = xpcall
 local setmetatable = setmetatable
-local string_format = string.format
 
 local Router = require("lor.lib.router.router")
 local Request = require("lor.lib.request")
 local Response = require("lor.lib.response")
 local View = require("lor.lib.view")
 local supported_http_methods = require("lor.lib.methods")
-local debug = require("lor.lib.debug")
 
 local router_conf = {
     strict_route = true,
@@ -117,9 +115,6 @@ end
 -- should be private
 function App:inner_use(fn_args_length, path, fn)
     local router = self.router
-    debug(string_format("application.lua#use, fn_args_length:%d path:%s", fn_args_length, path))
-
-    print(fn_args_length, path, fn)
 
     if path and fn and type(path) == "string" then
         router:use(path, fn, fn_args_length)

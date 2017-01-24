@@ -1,7 +1,5 @@
-local error = error
 local sfind = string.find
 local pairs = pairs
-local ipairs = ipairs
 local type = type
 local setmetatable = setmetatable
 local utils = require("lor.lib.utils.utils")

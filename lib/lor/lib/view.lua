@@ -1,4 +1,3 @@
-local error = error
 local pairs = pairs
 local type = type
 local setmetatable = setmetatable
@@ -6,12 +5,10 @@ local tostring = tostring
 local template = require "resty.template"
 local template_new = template.new
 
-
 local View = {}
 
 function View:new(view_config)
     local instance = {}
-
     instance.view_enable = view_config.view_enable
     if instance.view_enable then
         if ngx.var.template_root then
