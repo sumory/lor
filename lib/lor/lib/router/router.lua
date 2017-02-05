@@ -144,7 +144,7 @@ function Router:handle(req, res, out)
         path = ""
     end
     local method = req.method and string_lower(req.method)
-    local done = restore(out, req)
+    local done = out
 
     local stack = nil
     local matched = self.trie:match(path)

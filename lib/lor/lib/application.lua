@@ -79,12 +79,10 @@ end
 -- dispatch `req, res` into the pipeline.
 function App:handle(req, res, callback)
     local router = self.router
-    local done = callback or function(req, res)
-        return function(err)
-            --print("final callback invoked:", err)
-            if err then
-                res:status(500):send("unknown error.")
-            end
+    local done = callback or function(err)
+        if err then
+            if ngx then ngx.log(ngx.ERR, err) end
+            res:status(500):send("unknown error.")
         end
     end
 
@@ -92,11 +90,16 @@ function App:handle(req, res, callback)
         return done()
     end
 
-    xpcall(function()
+    local err_msg
+    local ok, e = xpcall(function()
         router:handle(req, res, done)
     end, function(msg)
-        done(msg)
+        err_msg = msg
     end)
+
+    if not ok then
+        done(err_msg)
+    end
 end
 
 function App:use(path, fn)

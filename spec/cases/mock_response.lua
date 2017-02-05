@@ -30,6 +30,7 @@ end
 
 function Response:status(code)
     self.http_status = code
+    return self
 end
 
 return Response
