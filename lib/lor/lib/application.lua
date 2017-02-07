@@ -173,5 +173,9 @@ function App:disable(setting)
     return self
 end
 
+--- only for dev
+function App:gen_graph()
+    return self.router.trie:gen_graph()
+end
 
 return App
