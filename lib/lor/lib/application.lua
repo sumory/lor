@@ -134,16 +134,16 @@ end
 
 function App:init_method()
     for http_method, _ in pairs(supported_http_methods) do
-        self[http_method] = function(_self, path, fn)
-            _self.router:app_route(http_method, path, fn)
+        self[http_method] = function(_self, path, ...) -- funcs...
+            _self.router:app_route(http_method, path, ...)
             return _self
         end
     end
 end
 
-function App:all(path, fn)
+function App:all(path, ...)
     for http_method, _ in pairs(supported_http_methods) do
-        self.router:app_route(http_method, path, fn)
+        self.router:app_route(http_method, path, ...)
     end
 
     return self

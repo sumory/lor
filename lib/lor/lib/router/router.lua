@@ -306,17 +306,17 @@ function Router:merge_group(prefix, group)
     return self
 end
 
-function Router:app_route(http_method, path, fn)
+function Router:app_route(http_method, path, ...)
     local node = self.trie:add_node(path)
-    node:handle(http_method, fn)
+    node:handle(http_method, ...)
     return self
 end
 
 function Router:init()
     for http_method, _ in pairs(supported_http_methods) do
-        self[http_method] = function(s, path, fn)
+        self[http_method] = function(s, path, ...)
             local node = s.trie:add_node(path)
-            node:handle(http_method, fn)
+            node:handle(http_method, ...)
             return s
         end
     end
