@@ -18,6 +18,7 @@ http {
     include ./mime.types;
 
     {{LUA_PACKAGE_PATH}}
+    lua_code_cache on;
 
     server {
         # List port
