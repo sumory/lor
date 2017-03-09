@@ -157,6 +157,7 @@ lord start
 - [@hanxi](https://github.com/hanxi)
 - [@诗兄](https://github.com/269724033)
 - [@hetz](https://github.com/hetz)
+- [@XadillaX](https://github.com/XadillaX)
 
 ### 讨论交流
 
