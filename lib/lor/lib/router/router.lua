@@ -12,8 +12,8 @@ local string_lower = string.lower
 
 local utils = require("lor.lib.utils.utils")
 local supported_http_methods = require("lor.lib.methods")
-local debug = require("lor.lib.debug")
 local Trie = require("lor.lib.trie")
+local tonumber = tonumber
 local random = utils.random
 local mixin = utils.mixin
 
@@ -146,7 +146,7 @@ function Router:handle(req, res, out)
     local method = req.method and string_lower(req.method)
     local done = out
 
-    local stack = nil
+    local stack
     local matched = self.trie:match(path)
     local matched_node = matched.node
 
