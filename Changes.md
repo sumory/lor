@@ -1,3 +1,9 @@
+### v0.3.1 2017.04.16
+
+- 支持路由中包含`~`字符（from [@XadillaX](https://github.com/XadillaX))
+- 支持组路由(group router)的多级路由写法
+- 支持组路由下直接挂载中间件(see [issues#40](https://github.com/sumory/lor/issues/40))
+
 ### v0.3.0 2017.02.11
 
 此版本为性能优化和内部实现重构版本，API使用上保持与之前版本兼容，详细描述如下：
