@@ -59,6 +59,10 @@ describe("path match test", function()
     it("test case 3", function()
         req.path = "/test/find/all/1"
         req.method = "get"
+        app:erroruse(function(err, req, res, next) -- 404 error
+            assert.is.truthy(err)
+            assert.is.equals(false, req:is_found())
+        end)
         app:handle(req, res)
         assert.is.equals(1, match)
         assert.is.equals(0, count)
