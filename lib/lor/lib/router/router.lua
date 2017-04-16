@@ -288,7 +288,13 @@ function Router:merge_group(prefix, group)
     if apis then
         for uri, api_methods in pairs(apis) do
             if type(api_methods) == "table" then
-                local path = utils.clear_slash(prefix .. "/" .. uri)
+                local path
+                if uri == "" then -- for group index route
+                    path = utils.clear_slash(prefix)
+                else
+                    path = utils.clear_slash(prefix .. "/" .. uri)
+                end
+
                 local node = self.trie:add_node(path)
                 if not node then
                     return error("cann't define node on router trie, path:" .. path)
