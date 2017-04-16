@@ -3,6 +3,7 @@ local ipairs = ipairs
 local pcall = pcall
 local xpcall = xpcall
 local type = type
+local error = error
 local setmetatable = setmetatable
 local traceback = debug.traceback
 local tinsert = table.insert
@@ -287,21 +288,27 @@ function Router:merge_group(prefix, group)
     if apis then
         for uri, api_methods in pairs(apis) do
             if type(api_methods) == "table" then
-                local path = utils.clear_slash(prefix .. "/" .. uri)
+                local path
+                if uri == "" then -- for group index route
+                    path = utils.clear_slash(prefix)
+                else
+                    path = utils.clear_slash(prefix .. "/" .. uri)
+                end
+
                 local node = self.trie:add_node(path)
                 if not node then
                     return error("cann't define node on router trie, path:" .. path)
                 end
 
-                for method, func in pairs(api_methods) do
+                for method, handlers in pairs(api_methods) do
                     local m = string_lower(method)
                     if supported_http_methods[m] == true then
-                        node:handle(m, func)
-                    end
+                        node:handle(m, handlers)
+                    end -- supported method
                 end
             end
         end
-    end
+    end -- ugly arrow style for missing `continue`
 
     return self
 end
