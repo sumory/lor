@@ -1,14 +1,18 @@
 local setmetatable = setmetatable
 local pairs = pairs
 local type = type
+local error = error
+local next = next
 local string_format = string.format
 local string_lower = string.lower
+local table_insert = table.insert
 
 local supported_http_methods = require("lor.lib.methods")
 local debug = require("lor.lib.debug")
 local utils = require("lor.lib.utils.utils")
 local random = utils.random
 local clone = utils.clone
+local handler_error_tip = "handler must be `function` that matches `function(req, res, next) ... end`"
 
 local Group = {}
 
@@ -45,13 +49,35 @@ function Group:get_apis()
     return self.apis
 end
 
-function Group:set_api(path, method, func)
-    if not path or not method or not func then
-        return error("params should not be nil.")
+function Group:set_api(path, method, ...)
+    if not path or not method then
+        return error("`path` & `method` should not be nil.")
     end
 
-    if type(path) ~= "string" or type(method) ~= "string" or type(func) ~= "function" then
+    local handlers = {...}
+    if not next(handlers) then
+        return error("handler should not be nil or empty")
+    end
+
+    if type(path) ~= "string" or type(method) ~= "string" or type(handlers) ~= "table" then
         return error("params type error.")
+    end
+
+    local extended_handlers = {}
+    for _, h in ipairs(handlers) do
+        if type(h) == "function" then
+            table_insert(extended_handlers, h)
+        elseif type(h) == "table" then
+            for _, hh in ipairs(h) do
+                if type(hh) == "function" then
+                    table_insert(extended_handlers, hh)
+                else
+                    error(handler_error_tip)
+                end
+            end
+        else
+            error(handler_error_tip)
+        end
     end
 
     method = string_lower(method)
@@ -60,14 +86,14 @@ function Group:set_api(path, method, func)
     end
 
     self.apis[path] = self.apis[path] or {}
-    self.apis[path][method] = func
+    self.apis[path][method] = extended_handlers
 end
 
 function Group:build_method()
     for m, _ in pairs(supported_http_methods) do
         m = string_lower(m)
-        Group[m] = function(myself, path, func)
-            Group.set_api(myself, path, m, func)
+        Group[m] = function(myself, path, ...)
+            Group.set_api(myself, path, m, ...)
         end
     end
 end

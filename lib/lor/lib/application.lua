@@ -82,7 +82,7 @@ function App:handle(req, res, callback)
     local done = callback or function(err)
         if err then
             if ngx then ngx.log(ngx.ERR, err) end
-            res:status(500):send("unknown error.")
+            res:status(500):send("internal error! please check log.")
         end
     end
 
