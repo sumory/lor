@@ -53,14 +53,17 @@ local session_middleware = function(config)
         -- local session = Session.new(config)
         req.session = {
             set = function(key, value)
-                local s = Session:open({
-                    secret = config.secret
-                })
+                local s = req.session_opened
+                if not s then
+                    s = Session:open({
+                        secret = config.secret
+                    })
+                    s.cookie.persistent = true
+                    s.cookie.lifetime = config.timeout
+                    req.session_opened = s
+                end
 
                 s.data[key] = value
-
-                s.cookie.persistent = true
-                s.cookie.lifetime = config.timeout
                 s.expires = ngx_time() + config.timeout
                 s:save()
             end,
