@@ -14,99 +14,80 @@ local Session = require("resty.session")
 --        local k = req.query.k
 --        local v = req.query.v
 --        if k then
---            req.session.set(k,v)
+--            req.session.set({k=k, v=v})
+--            -- req.session.set(v)
 --            res:send("session saved: " .. k .. "->" .. v)
 --        else
 --            res:send("null session key")
 --        end
 --    end)
 --
---    app:get("/session/get/:key", function(req, res, next)
---        local k = req.params.key
---        if not k then
---            res:send("please input session key")
+--    local cjson = require "cjson"
+--
+--    app:get("/session/get", function(req, res, next)
+--        local val = req.session.get()
+--        if not val then
+--            res:send("session data: no session data")
 --        else
---            res:send("session data: " .. req.session.get(k))
+--            res:send("session data: " .. cjson.encode(val))
 --        end
 --    end)
 --
 --    app:get("/session/destroy", function(req, res, next)
 --        req.session.destroy()
 --    end)
+--
+--    -- login logout
+--    app:get("/auth/login", function(req, res, next)
+--        local name = req.query.name
+--        local passwd = req.query.passwd
+--
+--        -- check name and passwd
+--
+--        -- check pass, set session
+--        req.session.set(name)
+--        res:send("login success")
+--    end)
+--
+--    app:get("/auth/get_current_user", function(req, res, next)
+--        local val = req.session.get()
+--        if not val then
+--            res:send("not login")
+--        else
+--            res:send("user data: " .. val)
+--        end
+--    end)
+--
+--    app:get("/auth/logout", function(req, res, next)
+--        req.session.destroy()
+--        res:send("logout success")
+--    end)
+
+-- parameter config in server.lua
 local session_middleware = function(config)
-    config = config or {}
-    if config.refresh_cookie ~= false then
-        config.refresh_cookie = true
-    end
-
-    if not config.timeout or type(config.timeout) ~= "number" then
-        config.timeout = 3600 -- default session timeout is 3600 seconds
-    end
-
-    if not config.secret then
-        config.secret = "7su3k78hjqw90fvj480fsdi934j7ery3n59ljf295d"
-    end
-
     return function(req, res, next)
-        -- local config = config or {}
-        -- config.storage = config.storage or "cookie" -- default is “cookie”
-        -- local session = Session.new(config)
         req.session = {
-            set = function(key, value)
-                local s = Session:open({
-                    secret = config.secret
-                })
-
-                s.data[key] = value
-
-                s.cookie.persistent = true
-                s.cookie.lifetime = config.timeout
-                s.expires = ngx_time() + config.timeout
+            set = function(value)
+                local s = Session.start(config)
+                s.data['_uid'] = value
                 s:save()
             end,
-            
-            update = function() 
-                local s = Session:start({ 
-                    secret = config.secret
-                })
 
-                s.cookie.persistent = true
-                s.expires = ngx_time() + config.timeout
-                s.cookie.lifetime = config.timeout
-                s:save() 
-            end,
-            
-            get = function(key)
-                local s = Session:open({
-                    secret = config.secret
-                })
+            get = function()
+                local s = Session.open(config)
 
-                s.cookie.persistent = true
-                s.cookie.lifetime = config.timeout
-                s.expires = ngx_time() + config.timeout
-                return s.data[key]
+                if not s.data['_uid'] then
+                    return nil
+                end
+                s:save()
+                return s.data['_uid']
             end,
 
             destroy = function()
-                local s = Session.start({
-                    secret = config.secret
-                })
+                local s = Session.start(config)
                 s:destroy()
             end
         }
-
-        local e, ok
-        ok = xpcall(function() 
-            if config and config.refresh_cookie == true then
-                req.session.update()
-            end
-        end, function()
-            e = traceback()
-        end)
-
-        if not ok then
-            ngx.log(ngx.ERR, "[session middleware]refresh cookie error, ", e)
-        end
 
         next()
     end
