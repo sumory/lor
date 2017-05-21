@@ -14,22 +14,30 @@ local Session = require("resty.session")
 --        local k = req.query.k
 --        local v = req.query.v
 --        if k then
---            req.session.set({k=k, v=v})
---            -- req.session.set(v)
+--            -- set k, v in a table
+--            req.session.set("kv", {k=k, v=v})
+--            -- also
+--            -- req.session.set(k, v)
 --            res:send("session saved: " .. k .. "->" .. v)
 --        else
 --            res:send("null session key")
 --        end
 --    end)
 --
---    local cjson = require "cjson"
---
---    app:get("/session/get", function(req, res, next)
---        local val = req.session.get()
---        if not val then
---            res:send("session data: no session data")
+--    app:get("/session/get/:key", function(req, res, next)
+--        local cjson = require "cjson"
+--        local k = req.params.key
+--        if not k then
+--            res:send("please input session key")
 --        else
---            res:send("session data: " .. cjson.encode(val))
+--            local v = req.session.get(k)
+--            if not v then
+--                res:send("session data: no session data")
+--            elseif type(v) == "table" then
+--                res:send("session data: " .. cjson.encode(v))
+--            else
+--                res:send("session data: " .. tostring(v))
+--            end
 --        end
 --    end)
 --
@@ -45,12 +53,12 @@ local Session = require("resty.session")
 --        -- check name and passwd
 --
 --        -- check pass, set session
---        req.session.set(name)
+--        req.session.set("name", name)
 --        res:send("login success")
 --    end)
 --
 --    app:get("/auth/get_current_user", function(req, res, next)
---        local val = req.session.get()
+--        local val = req.session.get("name")
 --        if not val then
 --            res:send("not login")
 --        else
@@ -67,20 +75,20 @@ local Session = require("resty.session")
 local session_middleware = function(config)
     return function(req, res, next)
         req.session = {
-            set = function(value)
+            set = function(key, value)
                 local s = Session.start(config)
-                s.data['_uid'] = value
+                s.data[key] = value
                 s:save()
             end,
 
-            get = function()
+            get = function(key)
                 local s = Session.open(config)
 
-                if not s.data['_uid'] then
+                if not s.data[key] then
                     return nil
                 end
                 s:save()
-                return s.data['_uid']
+                return s.data[key]
             end,
 
             destroy = function()
