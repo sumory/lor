@@ -258,9 +258,91 @@ app:conf("views", "./app/views")
 local mw_cookie = require("lor.lib.middleware.cookie")
 local mw_session = require("lor.lib.middleware.session")
 app:use(mw_cookie())
-app:use(mw_session({
-    timeout = 3600 -- default session timeout is 3600 seconds
-}))
+
+-- session存储在cookie, 共享内存, redis中, config in lua
+-- cookie as default
+local session_config = {
+    secret = "7su3k78hjqw90fvj480fsdi934j7ery3n59ljf295d",
+    storage = "cookie",
+    cookie = {
+        persistent = true,
+        lifetime = 3600,        -- 3600 seconds
+    }
+}
+
+--[=[ shm: Lua Shared Dictionary
+you will also need a storage configured for that in nginx.conf:
+http {
+    lua_shared_dict sessions 10m;
+}
+
+local session_config = {
+    secret = "7su3k78hjqw90fvj480fsdi934j7ery3n59ljf295d",
+    storage = "shm",
+    cookie = {
+        persistent = true,
+        lifetime = 3600,
+    },
+    shm = {
+        store = 'sessions',
+    }
+}
+]=]
+
+--[=[ redis
+local session_config = {
+    secret = "7su3k78hjqw90fvj480fsdi934j7ery3n59ljf295d",
+    storage = "redis",
+    cookie = {
+        persistent=true,
+        lifetime=3600,
+    },
+    redis = {
+        prefix='sessions',
+        host='127.0.0.1',
+        port=6379,
+        auth='111111',
+        pool={
+            timeout=5,
+            size=50
+        }
+    }
+}
+]=]
+
+app:use(mw_session(session_config))
+
+-- 也可以将session的配置放在nginx.conf文件中:
+-- app:use(mw_session())
+--
+-- http {
+--
+--     #lua_shared_dict sessions 10m;
+--
+--     server {
+--         # config for session: https://github.com/bungle/lua-resty-session
+--         set $session_secret            623q4hR325t36VsCD3g567922IC0073T;
+--         set $session_cookie_persistent on;
+--         set $session_cookie_lifetime   3600;
+--
+--         # session storage in cookie
+--         set $session_storage           cookie;
+--
+--         # session storage in shm
+--         #set $session_storage           shm;
+--         #set $session_shm_store         sessions;
+--
+--         # session storage in redis
+--         #set $session_storage            redis;
+--         #set $session_redis_prefix       sessions;
+--         #set $session_redis_host         127.0.0.1;
+--         #set $session_redis_port         6379;
+--         #set $session_redis_auth         111111;
+--         #set $session_redis_pool_timeout 5;
+--         #set $session_redis_pool_size    50;
+--     }
+-- }
+
 
 -- 自定义中间件1: 注入一些全局变量供模板渲染使用
 local mw_inject_version = require("app.middleware.inject_app_info")
