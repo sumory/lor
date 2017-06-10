@@ -51,5 +51,4 @@ function View:render(view_file, data)
     end
 end
 
-
 return View

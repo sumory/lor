@@ -9,7 +9,6 @@ local Response = {}
 
 function Response:new()
     --ngx.status = 200
-
     local instance = {
         http_status = nil,
         headers = {},

@@ -1,3 +1,13 @@
+### v0.3.2 2017.06.10
+
+- 关于内置session插件的更改
+    - 修复session过期时间bug
+    - 移除lua-resty-session依赖
+    - 内置session插件替换为基于cookie的简单实现
+    - 接口仍然保持与之前版本兼容
+    - 关于session处理，仍然建议根据具体业务需求和安全考量自行实现
+- 支持URI中含有字符'-'
+
 ### v0.3.1 2017.04.16
 
 - 支持路由中包含`~`字符（from [@XadillaX](https://github.com/XadillaX))

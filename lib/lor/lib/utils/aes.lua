@@ -1,3 +1,4 @@
+-- from lua-resty-session
 local setmetatable = setmetatable
 local tonumber     = tonumber
 local aes          = require "resty.aes"
@@ -33,7 +34,7 @@ local cipher = {}
 cipher.__index = cipher
 
 function cipher.new(config)
-    local a = config.aes or defaults
+    local a = config and config.aes or defaults
     return setmetatable({
         size   = CIPHER_SIZES[a.size or defaults.size]   or 256,
         mode   = CIPHER_MODES[a.mode or defaults.mode]   or "cbc",

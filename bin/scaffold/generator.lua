@@ -259,6 +259,7 @@ local mw_cookie = require("lor.lib.middleware.cookie")
 local mw_session = require("lor.lib.middleware.session")
 app:use(mw_cookie())
 app:use(mw_session({
+    secret = "session aes secret which you should set",
     timeout = 3600 -- default session timeout is 3600 seconds
 }))
 
@@ -291,10 +292,10 @@ app:erroruse(function(err, req, res, next)
         if string_find(req.headers["Accept"], "application/json") then
             res:status(500):json({
                 success = false,
-                msg = "500! unknown error."
+                msg = "500! internal error, please check the log."
             })
         else
-            res:status(500):send("unknown error")
+            res:status(500):send("internal error, please check the log.")
         end
     end
 end)

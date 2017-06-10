@@ -19,7 +19,7 @@ function _M:new(create_app, Router, Group, Request, Response)
     return instance
 end
 
--- Generally, this shouled only be used by `lor` framework itself.
+-- Generally, this should only be used by `lor` framework itself.
 function _M:create_app(options)
     self.app = self.fn(options)
     return self.app
