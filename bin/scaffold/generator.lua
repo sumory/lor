@@ -180,7 +180,7 @@ a {
 
 <div class="lor">
 <a href="#" class="name">
-{{name}} 
+{{name}}
 {% if locals.app_version then %}
     <span class="version">{{locals.app_version}}</span>
 {% end %}
@@ -259,7 +259,9 @@ local mw_cookie = require("lor.lib.middleware.cookie")
 local mw_session = require("lor.lib.middleware.session")
 app:use(mw_cookie())
 app:use(mw_session({
-    secret = "session aes secret which you should set",
+    session_key = "__app__", -- the key injected in cookie
+    session_aes_key = "aes_key_for_session", -- should set by yourself
+    session_aes_secret = "aes_secret_for_session", -- should set by yourself
     timeout = 3600 -- default session timeout is 3600 seconds
 }))
 
@@ -348,7 +350,7 @@ userRouter:get("/query/:id", function(req, res, next)
 
     -- 渲染页面
     res:render("user/info", {
-        id = query_id, 
+        id = query_id,
         name = "user" .. query_id,
         desc = "User Information"
     })
@@ -385,7 +387,7 @@ userRouter:post("/post", function(req, res, next)
     local content_type = req.headers['Content-Type']
 
     -- 如果请求类型为form表单或json请求体
-    if string.find(content_type, "application/x-www-form-urlencoded",1, true) or 
+    if string.find(content_type, "application/x-www-form-urlencoded",1, true) or
         string.find(content_type, "application/json",1, true) then
         local id = req.body.id -- 从请求体取参数
         local name = req.body.name -- 从请求体取参数
@@ -401,7 +403,7 @@ userRouter:post("/post", function(req, res, next)
             success = true,
             data = {
                 id = id,
-                name = name, 
+                name = name,
                 desc = "succeed to create new user" .. id
             }
         })
