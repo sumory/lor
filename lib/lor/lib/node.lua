@@ -12,6 +12,20 @@ local ActionHolder = require("lor.lib.holder").ActionHolder
 local handler_error_tip = "handler must be `function` that matches `function(req, res, next) ... end`"
 local middlware_error_tip = "middlware must be `function` that matches `function(req, res, next) ... end`"
 local error_middlware_error_tip = "error middlware must be `function` that matches `function(err, req, res, next) ... end`"
+local node_count = 0
+
+local function gen_node_id()
+    local prefix = "node-"
+    local worker_part = "dw"
+    if ngx and ngx.worker then
+        worker_part = ngx.worker.id()
+    end
+    node_count = node_count + 1 -- simply count for lua vm level
+    local unique_part = node_count
+    local random_part = utils.random()
+    node_id = prefix .. worker_part  .. "-" .. unique_part .. "-" .. random_part
+    return node_id
+end
 
 local function check_method(method)
     if not method then return false end
@@ -33,7 +47,7 @@ function Node:new(root)
     end
 
     local instance = {
-        id = "node-" .. utils.random(),
+        id = gen_node_id(),
         is_root = is_root,
         name = "",
         allow = "",
