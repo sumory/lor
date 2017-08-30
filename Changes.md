@@ -1,3 +1,13 @@
+### v0.3.4 2017.08.30
+
+- 修复默认session插件的`session_aes_secret`长度问题
+    - 此问题存在于OpenResty v1.11.2.5版本及可能之后的版本中
+    - lua-resty-string v0.10开始AES salt必须是[8个字符](https://github.com/openresty/lua-resty-string/commit/69df3dcc2230364a54761a0d5a65327c6a4e256a)
+- 使用内置的session插件时`session_aes_secret`不再是必须配置
+    - 若不填则默认为`12345678`
+    - 若不足8个字符则以`0`补足
+    - 若超过8个字符则只使用前8个
+
 ### v0.3.3 2017.08.05
 
 - 使用严格的路由节点id策略,避免潜在冲突
