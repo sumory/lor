@@ -261,7 +261,6 @@ app:use(mw_cookie())
 app:use(mw_session({
     session_key = "__app__", -- the key injected in cookie
     session_aes_key = "aes_key_for_session", -- should set by yourself
-    session_aes_secret = "aes_secret_for_session", -- should set by yourself
     timeout = 3600 -- default session timeout is 3600 seconds
 }))
 

@@ -1,5 +1,7 @@
 local type, xpcall = type, xpcall
 local traceback = debug.traceback
+local string_sub = string.sub
+local string_len = string.len
 local http_time = ngx.http_time
 local ngx_time = ngx.time
 local ck = require("resty.cookie")
@@ -44,25 +46,31 @@ local session_middleware = function(config)
         config.timeout = 3600 -- default session timeout is 3600 seconds
     end
     
+    
+    local err_tip = "session_aes_key should be set for session middleware"
     -- backward compatibility for lor < v0.3.2
-    config.session_aes_key = config.session_aes_key or "custom_session_aes_key" 
-    config.session_aes_secret = config.session_aes_secret or config.secret
-
-    local err_tip = "session_aes_key and session_aes_secret should be set for session middleware"
-    if not config.session_aes_key or config.session_aes_key == "" 
-        or not config.session_aes_secret or config.session_aes_secret == "" then
+    config.session_aes_key = config.session_aes_key or "custom_session_aes_key"
+    if not config.session_aes_key then
         ngx.log(ngx.ERR, err_tip)
     end
 
     local session_key = config.session_key
     local session_aes_key = config.session_aes_key
-    local session_aes_secret = config.session_aes_secret
     local refresh_cookie = config.refresh_cookie
     local timeout = config.timeout
-    ngx.log(ngx.INFO, "session middleware initialized")
 
+    -- session_aes_secret must be 8 charactors to respect lua-resty-string v0.10+
+    local session_aes_secret = config.session_aes_secret or config.secret or "12345678"
+    if string_len(session_aes_secret) < 8 then
+        for i=1,8-string_len(session_aes_secret),1 do
+            session_aes_secret = session_aes_secret .. "0"
+        end
+    end
+    session_aes_secret = string_sub(session_aes_secret, 1, 8)
+
+    ngx.log(ngx.INFO, "session middleware initialized")
     return function(req, res, next)
-        if not session_aes_key or not session_aes_secret then
+        if not session_aes_key then
             return next(err_tip)
         end
 
