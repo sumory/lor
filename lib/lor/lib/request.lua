@@ -6,6 +6,20 @@ local utils = require("lor.lib.utils.utils")
 
 local Request = {}
 
+local function get_body()
+    ngx.req.read_body()
+    local data = ngx.req.get_body_data()
+    if nil == data then
+        local file_name = ngx.req.get_body_file()
+        if file_name then
+            local f = assert(io.open(file_name, 'r'))
+            data = f:read("*all")
+            f:close()
+        end
+    end
+    return data
+end
+
 -- new request: init args/params/body etc from http request
 function Request:new()
     local body = {} -- body params
@@ -24,7 +38,7 @@ function Request:new()
             end
         elseif sfind(header, "application/json", 1, true) then
             ngx.req.read_body()
-            local json_str = ngx.req.get_body_data()
+            local json_str = get_body()
             body = utils.json_decode(json_str)
         -- form-data request
         elseif sfind(header, "multipart", 1, true) then
@@ -32,7 +46,7 @@ function Request:new()
         -- parsed as raw by default
         else
             ngx.req.read_body()
-            body = ngx.req.get_body_data()
+            body = get_body()
         end
     -- the post request have no Content-Type header set will be parsed as x-www-form-urlencoded by default
     else
@@ -51,7 +65,7 @@ function Request:new()
         query = ngx.req.get_uri_args(),
         params = {},
         body = body,
-        body_raw = ngx.req.get_body_data(),
+        body_raw = get_body(),
         url = ngx.var.request_uri,
         origin_uri = ngx.var.request_uri,
         uri = ngx.var.request_uri,
