@@ -27,7 +27,7 @@ end
 function Directive:luaPackageCpath(lua_cpath)
     local path = package.cpath
     if lua_cpath ~= nil then path = lua_cpath .. path end
-    local res = [[lua_package_cpath "]] .. path .. [[;;";]]
+    local res = [[lua_package_cpath "]] .. path .. [[";]]
     return res
 end
 
