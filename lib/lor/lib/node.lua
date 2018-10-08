@@ -17,7 +17,7 @@ local node_count = 0
 local function gen_node_id()
     local prefix = "node-"
     local worker_part = "dw"
-    if ngx and ngx.worker then
+    if ngx and ngx.worker and ngx.worker.id() then
         worker_part = ngx.worker.id()
     end
     node_count = node_count + 1 -- simply count for lua vm level
