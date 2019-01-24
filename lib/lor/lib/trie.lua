@@ -72,7 +72,7 @@ local function get_or_new_node(parent, frag, ignore_case)
                 if index and index > 1 then
                     local regex = string_sub(name, index+1, #name-1)
                     if #regex > 0 then
-                        name = string_sub(name, 1, index-1 )
+                        name = string_sub(name, 1, index-2 )
                         node.regex = regex
                     else
                         error("invalid pattern[1]: " .. frag)
