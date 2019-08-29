@@ -35,7 +35,7 @@ function Lor.nginx_conf_content()
     return nginx_conf_template
 end
 
-function new_handler()
+local function new_handler()
     local necessary_dirs ={ -- runtime nginx conf/pid/logs dir
         tmp = 'tmp',
         logs = 'logs'
