@@ -23,7 +23,7 @@ local function gen_node_id()
     node_count = node_count + 1 -- simply count for lua vm level
     local unique_part = node_count
     local random_part = utils.random()
-    node_id = prefix .. worker_part  .. "-" .. unique_part .. "-" .. random_part
+    local node_id = prefix .. worker_part  .. "-" .. unique_part .. "-" .. random_part
     return node_id
 end
 

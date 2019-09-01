@@ -13,11 +13,9 @@ function Utils.read_file(file_path)
     return content
 end
 
-
 local function require_module(module_name)
     return require(module_name)
 end
-
 
 -- try to require
 function Utils.try_require(module_name, default)
@@ -31,7 +29,6 @@ function Utils.try_require(module_name, default)
         error(module_or_err)
     end
 end
-
 
 function Utils.dirname(str)
     if str:match(".-/.-") then

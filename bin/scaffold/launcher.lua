@@ -5,7 +5,6 @@ local ngx_handle = require 'bin.scaffold.nginx.handle'
 local ngx_config = require 'bin.scaffold.nginx.config'
 local ngx_conf_template = require 'bin.scaffold.nginx.conf_template'
 
-
 local Lor = {}
 
 function Lor.nginx_conf_content()
@@ -66,7 +65,6 @@ function Lor.start()
         print("ERROR: Could not start app on port " .. ngx_config.PORT)
     end
 end
-
 
 function Lor.stop()
     local env = ogetenv("LOR_ENV") or 'dev'

@@ -3,7 +3,6 @@
 package.path = './app/?.lua;' .. package.path
 package.cpath = './app/library/?.so;' .. package.cpath
 
-
 local Directive = {}
 
 function Directive:new(env)
@@ -52,13 +51,13 @@ function Directive:luaSharedDict( lua_lib )
 end
 
 function Directive:initByLua(lua_lib)
-	if lua_lib == nil then return '' end
+    if lua_lib == nil then return '' end
     local res = [[init_by_lua require(']] .. lua_lib .. [['):run();]]
     return res
 end
 
 function Directive:initByLuaFile(lua_file)
-	if lua_file == nil then return '' end
+    if lua_file == nil then return '' end
     local res = [[init_by_lua_file ]] .. lua_file .. [[;]]
     return res
 end
@@ -100,13 +99,13 @@ function Directive:rewriteByLuaFile(lua_file)
 end
 
 function Directive:accessByLua(lua_lib)
-	if lua_lib == nil then return '' end
+    if lua_lib == nil then return '' end
     local res = [[access_by_lua require(']] .. lua_lib .. [['):run();]]
     return res
 end
 
 function Directive:accessByLuaFile(lua_file)
-	if lua_file == nil then return '' end
+    if lua_file == nil then return '' end
     local res = [[access_by_lua_file ]] .. lua_file .. [[;]]
     return res
 end

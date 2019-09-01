@@ -72,5 +72,4 @@ function NginxHandle:reload(env)
     return reload_nginx(env, self.nginx_conf_file_path)
 end
 
-
 return NginxHandle
