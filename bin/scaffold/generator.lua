@@ -415,7 +415,6 @@ return userRouter
 ]]
 
 
-
 local middleware_tpl = [[
 
 ### 自定义插件目录(define your own middleware)
@@ -580,7 +579,6 @@ nginx -s reload -p `pwd`/ -c conf/nginx-${PROFILE}.conf
 ]]
 
 
-
 local Generator = {}
 
 Generator.files = {
@@ -622,7 +620,3 @@ function Generator.create_files(parent)
 end
 
 return Generator
-
-
-
-
