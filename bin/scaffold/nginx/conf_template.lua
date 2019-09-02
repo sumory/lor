@@ -41,7 +41,7 @@ http {
         {{CONTENT_BY_LUA_FILE}}
     }
 }
-    ]]
+]]
 end
 
 return _M
