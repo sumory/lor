@@ -20,7 +20,7 @@ local valid_segment_tip = "valid path should only contains: [A-Za-z0-9._%-~]"
 
 
 local function check_segment(segment)
-    local tmp = string_gsub(segment, "([A-Za-z0-9._%-~]+)", "")
+    local tmp = string_gsub(segment, "([A-Za-z0-9._%%-~]+)", "")
     if tmp ~= "" then
         return false
     end
