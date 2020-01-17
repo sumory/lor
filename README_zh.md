@@ -21,6 +21,7 @@
 
 - 简单示例项目[lor-example](https://github.com/lorlabs/lor-example)
 - 全站示例项目[openresty-china](https://github.com/sumory/openresty-china)
+- Redis管理项目[lua-redis-admin](https://github.com/lifeblood/lua-redis-admin)
 
 
 ### 快速开始
