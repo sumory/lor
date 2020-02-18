@@ -41,5 +41,14 @@ describe("uri should support `-`", function()
         app:handle(req, res)
         assert.is.equals(2, flag)
     end)
-    
+
+    it("test case 3", function()
+        req.path = "/a_-b-%"
+        req.method = "get"
+        app:get("/a_-b-%", function(req, res, next)
+            flag = 3
+        end)
+        app:handle(req, res)
+        assert.is.equals(3, flag)
+    end)
 end)
