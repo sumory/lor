@@ -573,7 +573,7 @@ fi
 
 mkdir -p logs & mkdir -p tmp
 echo "reload lor application with profile: "${PROFILE}
-nginx -HUP `pwd`/${PROFILE}-nginx.pid
+kill -HUP $(cat `pwd`/${PROFILE}-nginx.pid)
 ]]
 
 
