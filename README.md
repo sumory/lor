@@ -23,6 +23,7 @@ app:run()
 
 - [lor-example](https://github.com/lorlabs/lor-example)
 - [openresty-china](https://github.com/sumory/openresty-china)
+- [lua-redis-admin](https://github.com/lifeblood/lua-redis-admin)
 
 
 ## Installation
