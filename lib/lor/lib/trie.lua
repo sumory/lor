@@ -260,7 +260,6 @@ function Trie:fallback_lookup(fallback_stack, segments, params)
 
     if flag and parent.endpoint then
         matched.node = parent
-        matched.pipeline = get_pipeline(parent)
     end
 
     if matched.node then
