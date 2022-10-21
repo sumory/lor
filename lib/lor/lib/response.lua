@@ -49,7 +49,7 @@ end
 
 function Response:ljpack(data)
     self:set_header('Content-Type', 'application/ljpack')
-    self:_send(utils.ljpack_encode(data))
+    self:__send(utils.ljpack_encode(data))
 end
 
 function Response:redirect(url, code, query)
@@ -114,6 +114,11 @@ end
 function Response:_send(content)
     ngx.status =  self.http_status or 200
     ngx.say(content)
+end
+
+function REsponse:__send(content)
+    ngx.status =  self.http_status or 200
+    ngx.print(content)
 end
 
 function Response:get_body()
