@@ -22,6 +22,10 @@ function Request:new()
                     body[k] = v
                 end
             end
+        elseif sfind(header, "application/ljpack", 1, true) then
+            ngx.req.read_body()
+            local sb_str = ngx.req.get_body_data()
+            body = utils.ljpack_decode(sb_str)
         elseif sfind(header, "application/json", 1, true) then
             ngx.req.read_body()
             local json_str = ngx.req.get_body_data()

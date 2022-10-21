@@ -8,6 +8,7 @@ local sgsub = string.gsub
 local smatch = string.match
 local table_insert = table.insert
 local json = require("cjson")
+local st   = require("string.buffer")
 
 local _M = {}
 
@@ -69,7 +70,7 @@ function _M.json_encode(data, empty_table_as_object)
     local json_value
     if json.encode_empty_table_as_object then
         -- empty table encoded as array default
-        json.encode_empty_table_as_object(empty_table_as_object or false) 
+        json.encode_empty_table_as_object(empty_table_as_object or false)
     end
     if require("ffi").os ~= "Windows" then
         json.encode_sparse_array(true)
@@ -80,6 +81,19 @@ end
 
 function _M.json_decode(str)
     local ok, data = pcall(json.decode, str)
+    if ok then
+        return data
+    end
+end
+
+function _M.ljpack_encode(data)
+    local st_value
+    pcall(function(d) st_value = st.encode(d) end, data)
+    return st_value
+end
+
+function _M.ljpack_decode(str)
+    local ok, data = pcall(st.decode, str)
     if ok then
         return data
     end

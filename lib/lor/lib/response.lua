@@ -47,6 +47,11 @@ function Response:json(data, empty_table_as_object)
     self:_send(utils.json_encode(data, empty_table_as_object))
 end
 
+function Response:ljpack(data)
+    self:set_header('Content-Type', 'application/ljpack')
+    self:_send(utils.ljpack_encode(data))
+end
+
 function Response:redirect(url, code, query)
     if url and not code and not query then -- only one param
         ngx.redirect(url)
