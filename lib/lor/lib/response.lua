@@ -116,7 +116,7 @@ function Response:_send(content)
     ngx.say(content)
 end
 
-function REsponse:__send(content)
+function Response:__send(content)
     ngx.status =  self.http_status or 200
     ngx.print(content)
 end
