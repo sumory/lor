@@ -107,6 +107,7 @@ end
 --~=============================================================
 
 function Response:_send(content)
+    ngx.header['Content-Length'] = #content
     ngx.status =  self.http_status or 200
     ngx.say(content)
 end
