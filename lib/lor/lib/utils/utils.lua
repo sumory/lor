@@ -8,6 +8,7 @@ local sgsub = string.gsub
 local smatch = string.match
 local table_insert = table.insert
 local json = require("cjson")
+local dkjson = require("dkjson")
 local st   = require("string.buffer")
 
 local _M = {}
@@ -76,6 +77,12 @@ function _M.json_encode(data, empty_table_as_object)
         json.encode_sparse_array(true)
     end
     pcall(function(d) json_value = json.encode(d) end, data)
+    return json_value
+end
+
+function _M.json_stably_encode(data)
+    local json_value
+    pcall(function(d) json_value = dkjson.encode(d) end, data)
     return json_value
 end
 

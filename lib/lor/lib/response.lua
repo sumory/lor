@@ -47,6 +47,14 @@ function Response:json(data, empty_table_as_object)
     self:_send(utils.json_encode(data, empty_table_as_object))
 end
 
+
+function Response:json_stably(data)
+    self:set_header('Content-Type', 'application/json; charset=utf-8')
+    self:_send(utils.json_stably_encode(data))
+end
+
+
+
 function Response:ljpack(data)
     self:set_header('Content-Type', 'application/ljpack')
     self:__send(utils.ljpack_encode(data))
