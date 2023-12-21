@@ -47,6 +47,19 @@ function Response:json(data, empty_table_as_object)
     self:_send(utils.json_encode(data, empty_table_as_object))
 end
 
+
+function Response:json_stably(data)
+    self:set_header('Content-Type', 'application/json; charset=utf-8')
+    self:_send(utils.json_stably_encode(data))
+end
+
+
+
+function Response:ljpack(data)
+    self:set_header('Content-Type', 'application/ljpack')
+    self:__send(utils.ljpack_encode(data))
+end
+
 function Response:redirect(url, code, query)
     if url and not code and not query then -- only one param
         ngx.redirect(url)
@@ -109,6 +122,11 @@ end
 function Response:_send(content)
     ngx.status =  self.http_status or 200
     ngx.say(content)
+end
+
+function Response:__send(content)
+    ngx.status =  self.http_status or 200
+    ngx.print(content)
 end
 
 function Response:get_body()
